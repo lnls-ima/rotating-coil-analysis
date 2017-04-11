@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\Python36-32\Lib\site-packages\PyQt4\pyrcc4" -py3 resources_analysis.qrc -o resources_analysis_rc.py
