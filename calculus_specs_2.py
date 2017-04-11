@@ -5,6 +5,11 @@ Created on 30 de jun de 2016
 
 This script is made to calculate the multipoles errors of the Booster and Storage Ring Magnets
 for data analysis in rotating coil bench.
+----------
+P.S.: The FAC notation for pole orders: n=0(Dipole), n=1(Quadrupole), n=2(Sextupole)
+      The IMA notation for pole orders: n=1(Dipole), n=2(Quadrupole), n=3(Sextupole)
+----------
+Parameters located: 'https://wiki-sirius.lnls.br/mediawiki/index.php/Machine:Magnets#Booster_Quadrupoles', accessed: 11/07/2016 (MM/DD/YYYY)
 '''
 
 #Library
@@ -14,8 +19,6 @@ import random
 
 class constants(object):
     def __init__(self):
-        self.r0 = 17.5 # Reference radius [mm]
-##        self.p = 2     # Sextupoles (FAC Notation)
         self.normal_sys_monomials = np.array([])
         self.normal_sys_relative_multipoles_at_r0 = np.array([])
         self.normal_rms_monomials = np.array([])
@@ -25,81 +28,66 @@ class constants(object):
         self.skew_rms_monomials = np.array([])
         self.skew_rms_relative_multipoles_at_r0 = np.array([])
 
-        '''
-        P.S.: The FAC notation for pole orders: n=0(Dipole), n=1(Quadrupole), n=2(Sextupole)
-              The IMA notation for pole orders: n=1(Dipole), n=2(Quadrupole), n=3(Sextupole)
-        '''
-
-    def parameters(self,n):
-        '''
-        Parameters located: 'https://wiki-sirius.lnls.br/mediawiki/index.php/Machine:Magnets#Booster_Quadrupoles', accessed: 11/07/2016 (MM/DD/YYYY)
-        '''         
-        # For Sextupole
-        if n == 1:
-            self.p = 2  #(SEXTUPOLE - FAC)
-            
-            # sys spec - NORMAL
-            self.normal_sys_monomials = np.array([8,14])                            # This means allowed multipole error. In this case B8 and B14 (see Wiki) 
-            self.normal_sys_relative_multipoles_at_r0 = np.array([-2.5e-2, -1.5e-2])
-            
-            # rms spec - NORMAL
-            self.normal_rms_monomials = np.array([3,4,5,6,7,8,9,14])                # This are Integrated Multipoles B(3,4,5...14) calculated at r0 (B2)
-            self.normal_rms_relative_multipoles_at_r0 = np.array([4,4,4,4,4,4,4,4])*1e-4
-            
-            # sys spec -SKEW
-            self.skew_sys_monomials = np.array([2])                                                                 
-            self.skew_sys_relative_multipoles_at_r0 = np.array([0])
-
-            # rms spec - SKEW
-            self.skew_rms_monomials = np.array([3,4,5,6,7,8,9,14])
-            self.skew_rms_relative_multipoles_at_r0 = np.array([1,1,1,1,1,1,1,1])*1e-4
-
-            print(self.normal_sys_monomials)
-
-        # For Quadrupole QF
-        elif n == 2:
-            
-            self.p = 1  #(QUADRUPOLE - FAC)
-            # sys spec - NORMAL
-            self.normal_sys_monomials = np.array([5,9,13])
-            self.normal_sys_relative_multipoles_at_r0 = np.array([-1.0e-3, +1.1e-3, +8.0e-5])
-
-            # rms spec - NORMAL
-            self.normal_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])                
-            self.normal_rms_relative_multipoles_at_r0 = np.array([7,4,4,4,4,4,4,4,4])*1e-4
-
-            # sys spec -SKEW
-            self.skew_sys_monomials = np.array([1])                                                                   
-            self.skew_sys_relative_multipoles_at_r0 = np.array([0])
-
-            # rms spec - SKEW
-            self.skew_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])
-            self.skew_rms_relative_multipoles_at_r0 = np.array([1,5,1,1,1,1,1,1,1])*1e-4
-
-        # For Quadrupole QD
-        elif n == 3:
-            
-            self.p = 1  #(QUADRUPOLE - FAC)
-            # sys spec - NORMAL
-            self.normal_sys_monomials = np.array([5,9,13])
-            self.normal_sys_relative_multipoles_at_r0 = np.array([-4.7e-3, +1.2e-3, +1.2e-6])
-
-            # rms spec - NORMAL
-            self.normal_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])                
-            self.normal_rms_relative_multipoles_at_r0 = np.array([7,4,4,4,4,4,4,4,4])*1e-4
-
-            # sys spec -SKEW
-            self.skew_sys_monomials = np.array([1])                                                                   
-            self.skew_sys_relative_multipoles_at_r0 = np.array([0])
-
-            # rms spec - SKEW
-            self.skew_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])
-            self.skew_rms_relative_multipoles_at_r0 = np.array([1,5,1,1,1,1,1,1,1])*1e-4   
-            
+    def sextupole(self, r0, x):
+        self.p = 2  #(SEXTUPOLE - FAC)
+        self.r0 = r0/1000
+        self.x = x
+        # sys spec - NORMAL
+        self.normal_sys_monomials = np.array([8,14])                            # This means allowed multipole error. In this case B8 and B14 (see Wiki) 
+        self.normal_sys_relative_multipoles_at_r0 = np.array([-2.5e-2, -1.5e-2])
         
-        # Positions to plot residual field [m] (x axis)
-        self.x = np.linspace(-18,18,37)
+        # rms spec - NORMAL
+        self.normal_rms_monomials = np.array([3,4,5,6,7,8,9,14])                # This are Integrated Multipoles B(3,4,5...14) calculated at r0 (B2)
+        self.normal_rms_relative_multipoles_at_r0 = np.array([4,4,4,4,4,4,4,4])*1e-4
+        
+        # sys spec -SKEW
+        self.skew_sys_monomials = np.array([2])                                                                 
+        self.skew_sys_relative_multipoles_at_r0 = np.array([0])
 
+        # rms spec - SKEW
+        self.skew_rms_monomials = np.array([3,4,5,6,7,8,9,14])
+        self.skew_rms_relative_multipoles_at_r0 = np.array([1,1,1,1,1,1,1,1])*1e-4
+
+    def quadrupole_qf(self, r0, x):
+        self.p = 1  #(QUADRUPOLE - FAC)
+        self.r0 = r0/1000
+        self.x = x
+        # sys spec - NORMAL
+        self.normal_sys_monomials = np.array([5,9,13])
+        self.normal_sys_relative_multipoles_at_r0 = np.array([-1.0e-3, +1.1e-3, +8.0e-5])
+
+        # rms spec - NORMAL
+        self.normal_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])                
+        self.normal_rms_relative_multipoles_at_r0 = np.array([7,4,4,4,4,4,4,4,4])*1e-4
+
+        # sys spec -SKEW
+        self.skew_sys_monomials = np.array([1])                                                                   
+        self.skew_sys_relative_multipoles_at_r0 = np.array([0])
+
+        # rms spec - SKEW
+        self.skew_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])
+        self.skew_rms_relative_multipoles_at_r0 = np.array([1,5,1,1,1,1,1,1,1])*1e-4
+
+    def quadrupole_qd(self, r0, x):
+        self.p = 1  #(QUADRUPOLE - FAC)
+        self.r0 = r0/1000
+        self.x = x
+        # sys spec - NORMAL
+        self.normal_sys_monomials = np.array([5,9,13])
+        self.normal_sys_relative_multipoles_at_r0 = np.array([-4.7e-3, +1.2e-3, +1.2e-6])
+
+        # rms spec - NORMAL
+        self.normal_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])                
+        self.normal_rms_relative_multipoles_at_r0 = np.array([7,4,4,4,4,4,4,4,4])*1e-4
+
+        # sys spec -SKEW
+        self.skew_sys_monomials = np.array([1])                                                                   
+        self.skew_sys_relative_multipoles_at_r0 = np.array([0])
+
+        # rms spec - SKEW
+        self.skew_rms_monomials = np.array([2,3,4,5,6,7,8,9,13])
+        self.skew_rms_relative_multipoles_at_r0 = np.array([1,5,1,1,1,1,1,1,1])*1e-4   
+              
     def normal_residual(self):
         #Normal residual field
         self.plot_residual_field('NORMAL', self.p, self.r0, self.x, self.normal_sys_monomials, 
@@ -117,8 +105,6 @@ class constants(object):
 
         self.nr_samples = 5000
         self.gauss_trunc = 1
-
-        print(sys_monomials)
 
         #Systematic residual
         self.sys_residue = 0*x

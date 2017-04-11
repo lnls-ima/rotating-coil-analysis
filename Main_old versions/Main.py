@@ -4,8 +4,6 @@ Created on 16 de jun de 2016
 @author: james.citadini, lucas.balthazar
 
 Procura windows: pasta: "Medida 1" + arquivo:0130A
-
-FORMATO ANTIGO E VERSÃO INGLÊS - especicficamente para fazer relatório do S15-0002
 '''
 
 # Biblioteca
@@ -35,7 +33,7 @@ from reportlab.lib.pagesizes import A4, cm
 
 # Especificações
 ##import calculus_specs
-import calculus_specs_3
+import calculus_specs_2
 
 # Relatório
 from reportlab.lib import colors
@@ -739,94 +737,38 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
             QtGui.QMessageBox.warning(self,'Atenção.','Valor do raio de referência não numérico. Inserir valor válido.',QtGui.QMessageBox.Ok)
             return
         
-        # Load library calculus_specs_3.py
-        c_s = calculus_specs_3.constants()
+        # Load library calculus_specs_2.py
+        c_s = calculus_specs_2.constants()
 
 ##        try:
         if self.ui.cb_ima_selec.currentIndex() == 1: # Dipole selected
             pass
 
         elif self.ui.cb_ima_selec.currentIndex() == 2: # Quadrupole selected
-            self.n_ima = 2
-            if r_r0 >= (17.5):                          #BOOSTER Quadrupoles
-                if self.n_ima_str_type == 'QF': #QF
-                    c_s.quadrupole_qf(r_r0, x_pos)
-                    if self.ui.rb_norm_2.isChecked() == 1:
-                        self.normal_residual = c_s.normal_residual()
-                        self.residual_calc = c_s.sys_residual      # Storage sys residue values for later ploting canvas.ax
-                        self.maximum = c_s.maximo                  # Storage maximum specs values for later ploting canvas.ax
-                        self.minimum = c_s.minimo                  # Storage minimum specs values for later ploting canvas.ax 
+            if self.n_ima_str_type == 'QF': #QF
+                c_s.quadrupole_qf(r_r0, x_pos)
+                if self.ui.rb_norm_2.isChecked() == 1:
+                    self.normal_residual = c_s.normal_residual()
+                    self.residual_calc = c_s.sys_residual      # Storage sys residue values for later ploting canvas.ax
+                    self.maximum = c_s.maximo                  # Storage maximum specs values for later ploting canvas.ax
+                    self.minimum = c_s.minimo                  # Storage minimum specs values for later ploting canvas.ax 
 
-                    elif self.ui.rb_skew_2.isChecked() == 1:
-                        self.skew_residual = c_s.skew_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo 
+                elif self.ui.rb_skew_2.isChecked() == 1:
+                    self.skew_residual = c_s.skew_residual()
 
-                if self.n_ima_str_type == 'QD': #QD
-                    c_s.quadrupole_qd(r_r0, x_pos)
-                    if self.ui.rb_norm_2.isChecked() == 1:
-                        self.normal_residual = c_s.normal_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo                  
+            if self.n_ima_str_type == 'QD': #QD
+                c_s.quadrupole_qd(r_r0, x_pos)
+                if self.ui.rb_norm_2.isChecked() == 1:
+                    self.normal_residual = c_s.normal_residual()
+                    self.residual_calc = c_s.sys_residual      
+                    self.maximum = c_s.maximo                  
+                    self.minimum = c_s.minimo                  
 
-                    elif self.ui.rb_skew_2.isChecked() == 1:
-                        self.skew_residual = c_s.skew_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo     
-
-            elif r_r0 == 12:                             #SI Quadrupoles
-                if self.n_ima_str_type_SI == 'Q14':
-                    c_s.q14(r_r0, x_pos)
-                    if self.ui.rb_norm_2.isChecked() == 1:
-                        self.normal_residual = c_s.normal_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo                  
-
-                    elif self.ui.rb_skew_2.isChecked() == 1:
-                        self.skew_residual = c_s.skew_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo
-
-                elif self.n_ima_str_type_SI == 'Q20':
-                    c_s.q20(r_r0, x_pos)
-                    if self.ui.rb_norm_2.isChecked() == 1:
-                        self.normal_residual = c_s.normal_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo                  
-
-                    elif self.ui.rb_skew_2.isChecked() == 1:
-                        self.skew_residual = c_s.skew_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo     
-
-                elif self.n_ima_str_type_SI == 'Q30':
-                    c_s.q30(r_r0, x_pos)
-                    if self.ui.rb_norm_2.isChecked() == 1:
-                        self.normal_residual = c_s.normal_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo                  
-
-                    elif self.ui.rb_skew_2.isChecked() == 1:
-                        self.skew_residual = c_s.skew_residual()
-                        self.residual_calc = c_s.sys_residual      
-                        self.maximum = c_s.maximo                  
-                        self.minimum = c_s.minimo     
-                    
+                elif self.ui.rb_skew_2.isChecked() == 1:
+                    self.skew_residual = c_s.skew_residual()
 
         elif self.ui.cb_ima_selec.currentIndex() == 3: # Sextupole selected
-            self.n_ima = 3
-            if r_r0 < (17.5):      
-                c_s.sextupole_si(r_r0, x_pos)   # Storage ring magnet (@12 mm)
-            else:
-                c_s.sextupole(r_r0, x_pos)      # Booster magnet (@17.5 mm) 
+            c_s.sextupole(r_r0, x_pos) 
             if self.ui.rb_norm_2.isChecked() == 1:
                 self.normal_residual = c_s.normal_residual()
                 self.residual_calc = c_s.sys_residual      
@@ -846,7 +788,10 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
         
         # Creating Dataframe for ploting
         self.data_sys_residual_pd = pd.DataFrame(reshape_vetor, index=(c_s.x))#, columns=None)
-            
+
+        # Parâmetros para especificações de ângulo e deslocamento
+        self.Spec_ang = 0.5             #Booster, 0.2 mrad - Anel
+        self.Spec_desloc = 100          #Booster, 30 um - Anel
 
 ##        except:
 ##            QtGui.QMessageBox.critical(self,'Falha','Falha ao carregar os dados',QtGui.QMessageBox.Ok)
@@ -866,7 +811,7 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
                 self.Data[i].Raw = np.array(arq.read().splitlines())
 
                 #Read Magnet Name and Number and Magnet Type
-                index_mag_name = np.where(np.char.find(self.Data[i].Raw,'file') > -1)[0][0]
+                index_mag_name = np.where(np.char.find(self.Data[i].Raw,'arquivo') > -1)[0][0]
                 mag_name = self.Data[i].Raw[index_mag_name].split('\t')[1]
                 mag_name = mag_name.split('\\')[-1]
                 mag_name = mag_name.split('_')[0]
@@ -875,106 +820,71 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
                 n_ima_str=self.Data[i].Mag_name[1]
                 if n_ima_str == 'Q':
                     self.n_ima = 2 #Nomenclatura IMA
-                    self.n_ima_str_type=self.Data[i].Mag_name[1]+self.Data[i].Mag_name[2] #in case o QF or QD 
+                    self.n_ima_str_type=self.Data[i].Mag_name[1]+self.Data[i].Mag_name[2] #in case o QF or QD
                 if n_ima_str == 'S':
-                    self.n_ima = 3 #Nomenclatura IMA
-                if n_ima_str != 'Q' and n_ima_str != 'S':
-                    self.n_ima_str_type_SI=self.Data[i].Mag_name[0]+self.Data[i].Mag_name[1]+self.Data[i].Mag_name[2] # in case of SI Magnet -ADD-
-                    
+                    self.n_ima = 3 #Nomenclatura IMA               
 
                 #Date
-                index_date = np.where(np.char.find(self.Data[i].Raw,'date') > -1)[0][0]
+                index_date = np.where(np.char.find(self.Data[i].Raw,'data') > -1)[0][0]
                 date = self.Data[i].Raw[index_date].split('\t')[1]
                 self.Data[i].Date = date
 
                 #Hour
-                index_hour = np.where(np.char.find(self.Data[i].Raw,'hour') > -1)[0][0]
+                index_hour = np.where(np.char.find(self.Data[i].Raw,'hora') > -1)[0][0]
                 hour = self.Data[i].Raw[index_hour].split('\t')[1]
                 self.Data[i].Hour = hour
 
                 #Read Temperature
-                index_temp = np.where(np.char.find(self.Data[i].Raw,'temperature') > -1)[0][0]
+                index_temp = np.where(np.char.find(self.Data[i].Raw,'temperatura_ima') > -1)[0][0]
                 temp = self.Data[i].Raw[index_temp].split('\t')[1]
                 self.Data[i].Temp = temp
                 
                 #Read Measure Number
-                index_meas_numb = np.where(np.char.find(self.Data[i].Raw,'analysis_interval') > -1)[0][0]
+                index_meas_numb = np.where(np.char.find(self.Data[i].Raw,'intervalo_analise') > -1)[0][0]
                 meas_numb = self.Data[i].Raw[index_meas_numb].split('\t')[1]
                 meas_numb = meas_numb.split('-')
                 meas_numb = int(meas_numb[1]) - int(meas_numb[0])
                 self.Data[i].Meas_numb = str(meas_numb)
 
                 #Read Number of Measures Used to Calculate the Mean Value
-                index_meas_numb_mean = np.where(np.char.find(self.Data[i].Raw,'nr_turns') > -1)[0][0]
+                index_meas_numb_mean = np.where(np.char.find(self.Data[i].Raw,'nr_voltas') > -1)[0][0]
                 meas_numb_mean = self.Data[i].Raw[index_meas_numb_mean].split('\t')[1]
                 self.Data[i].Meas_numb_mean = str(meas_numb_mean)
                  
                 #Read Currents and error  - Main Current
-                index_current = np.where(np.char.find(self.Data[i].Raw,'main_coil_current_avg') > -1)[0][0]
+                index_current = np.where(np.char.find(self.Data[i].Raw,'corrente_alim_principal_avg') > -1)[0][0]
                 current = float(self.Data[i].Raw[index_current].split('\t')[1])
                 self.Data[i].Current = current
 
-                index_current_std = np.where(np.char.find(self.Data[i].Raw,'main_coil_current_std') > -1)[0][0]
+                index_current_std = np.where(np.char.find(self.Data[i].Raw,'corrente_alim_principal_std') > -1)[0][0]
                 current_std = float(self.Data[i].Raw[index_current_std].split('\t')[1])
                 self.Data[i].Current_std = current_std
 
-                if self.Data[i].Mag_name[0] != 'S':                 # Se o arquivo for qualquer um diferente do sextupolo do anel, o programa lê a corrente secundária (trim)
-                    #Read Currents and error - Trim Current         -ADD-
-                    index_current_trim = np.where(np.char.find(self.Data[i].Raw,'trim_coil_current_avg') > -1)[0][0]
-                    current_trim = float(self.Data[i].Raw[index_current_trim].split('\t')[1])
-                    self.Data[i].Current_trim = current_trim
+                #Read Currents and error - Trim Current         -ADD-
+                index_current_trim = np.where(np.char.find(self.Data[i].Raw,'corrente_alim_secundaria_avg') > -1)[0][0]
+                current_trim = float(self.Data[i].Raw[index_current_trim].split('\t')[1])
+                self.Data[i].Current_trim = current_trim
 
-                    index_current_trim_std = np.where(np.char.find(self.Data[i].Raw,'trim_coil_current_std') > -1)[0][0]
-                    current_trim_std = float(self.Data[i].Raw[index_current_trim_std].split('\t')[1])
-                    self.Data[i].Current_trim_std = current_trim_std
-                else:
-                    pass
-
-                if self.Data[i].Mag_name[0] == 'S':                 # For SI sextupole                 
-                    #Read horizontal correctors and error - ch      -ADD-
-                    index_ch = np.where(np.char.find(self.Data[i].Raw,'ch_coil_current_avg') > -1)[0][0]
-                    ch_current = float(self.Data[i].Raw[index_ch].split('\t')[1])
-                    self.Data[i].ch_current = ch_current
-
-                    index_ch_current_std = np.where(np.char.find(self.Data[i].Raw,'ch_coil_current_std') > -1)[0][0]
-                    ch_current_std = float(self.Data[i].Raw[index_ch_current_std].split('\t')[1])
-                    self.Data[i].ch_current_std = ch_current_std
-
-                    #Read vertical correctors and error - cv      -ADD-
-                    index_cv = np.where(np.char.find(self.Data[i].Raw,'cv_coil_current_avg') > -1)[0][0]
-                    cv_current = float(self.Data[i].Raw[index_cv].split('\t')[1])
-                    self.Data[i].cv_current = cv_current
-
-                    index_cv_current_std = np.where(np.char.find(self.Data[i].Raw,'cv_coil_current_std') > -1)[0][0]
-                    cv_current_std = float(self.Data[i].Raw[index_cv_current_std].split('\t')[1])
-                    self.Data[i].cv_current_std = cv_current_std
-
-                    #Read quadrupole skew and error - qs      -ADD-
-                    index_qs = np.where(np.char.find(self.Data[i].Raw,'qs_coil_current_avg') > -1)[0][0]
-                    qs_current = float(self.Data[i].Raw[index_qs].split('\t')[1])
-                    self.Data[i].qs_current = qs_current
-
-                    index_qs_current_std = np.where(np.char.find(self.Data[i].Raw,'qs_coil_current_std') > -1)[0][0]
-                    qs_current_std = float(self.Data[i].Raw[index_qs_current_std].split('\t')[1])
-                    self.Data[i].qs_current_std = qs_current_std
-                    
+                index_current_trim_std = np.where(np.char.find(self.Data[i].Raw,'corrente_alim_secundaria_std') > -1)[0][0]
+                current_trim_std = float(self.Data[i].Raw[index_current_trim_std].split('\t')[1])
+                self.Data[i].Current_trim_std = current_trim_std
                 
                 #Read Multipoles
-                index_multipoles = np.where(np.char.find(self.Data[i].Raw,'Reading Data') > -1)[0][0] + 3
+                index_multipoles = np.where(np.char.find(self.Data[i].Raw,'Dados de Leitura') > -1)[0][0] + 3
                 multipoles = self.Data[i].Raw[index_multipoles:index_multipoles+15]
                 for value in multipoles:
                     self.Data[i].Multipoles = np.append(self.Data[i].Multipoles,value.split('\t'))
                 self.Data[i].Multipoles = self.Data[i].Multipoles.reshape(15,13).astype(np.float64)
           
                 #Read Curves
-                index_curves = np.where(np.char.find(self.Data[i].Raw,'Raw Data Stored') > -1)[0][0] + 3 
+                index_curves = np.where(np.char.find(self.Data[i].Raw,'Dados Brutos') > -1)[0][0] + 3 
                 curves = self.Data[i].Raw[index_curves:]
                 for value in curves:
                     self.Data[i].Curves = np.append(self.Data[i].Curves,value[:-1].split('\t'))
                 self.Data[i].Curves = self.Data[i].Curves.reshape(int(len(curves)),int(len(self.Data[i].Curves)/len(curves))).astype(np.float64) * 1e-12
 
             #Read Columns names
-            index_multipoles = np.where(np.char.find(self.Data[0].Raw,'Reading Data') > -1)[0][0] + 2
+            index_multipoles = np.where(np.char.find(self.Data[0].Raw,'Dados de Leitura') > -1)[0][0] + 2
             self.columns_names = np.array(self.Data[0].Raw[index_multipoles].split('\t'))
             
             #List all file currents and magnets name
@@ -1060,16 +970,8 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
         self.mag_name = self.Data[-1].Mag_name
         self.main_current = self.Data[-1].Current
         self.std_main_current_err = self.Data[-1].Current_std
-        if self.Data[-1].Mag_name[0] == 'S':                # -ADD- for SI sextupole
-            self.ch_current = self.Data[-1].ch_current
-            self.ch_current_std = self.Data[-1].ch_current_std
-            self.cv_current = self.Data[-1].cv_current
-            self.cv_current_std = self.Data[-1].cv_current_std
-            self.qs_current = self.Data[-1].qs_current
-            self.qs_current_std = self.Data[-1].qs_current_std
-        else:    
-            self.trim_current = self.Data[-1].Current_trim
-            self.std_trim_current_err = self.Data[-1].Current_trim_std        
+        self.trim_current = self.Data[-1].Current_trim
+        self.std_trim_current_err = self.Data[-1].Current_trim_std        
         self.temp = self.Data[-1].Temp
         self.date = self.Data[-1].Date
         self.hour = self.Data[-1].Hour
@@ -1081,24 +983,11 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
         self.multi_skew_normalized = self.Data[-1].multipoledf.iloc[:,11]
         self.err_multi_skew_normalized = self.Data[-1].multipoledf.iloc[:,12]
         
-        
-        
         # Gradient and Angle
         Grad = self.Data[-1].multipoledf.iloc[self.n_ima-1,1]
         Grad_err = self.Data[-1].multipoledf.iloc[self.n_ima-1,2]
         Angulo = self.Data[-1].multipoledf.iloc[self.n_ima-1,7]*1000 #em mrad
         Angulo_err = self.Data[-1].multipoledf.iloc[self.n_ima-1,8]*1000 #em mrad
-
-        #Title select and Specs_ang_desloc
-        r_r0 = float(self.ui.r_ref_box.text())
-        if r_r0 >= 17.5:
-            self.Spec_ang = 0.5 #mrad  - Booster
-            self.Spec_desloc = 100 #um - Booster
-            title = 'BOOSTER MAGNET REPORT'
-        else:
-            self.Spec_ang = 0.2 #mrad - Anel
-            self.Spec_desloc = 30 #um - Anel
-            title = 'STORAGE RING MAGNET REPORT'
 
         # Images for report
 ##        I = Image(sys.path[0]+"\\imagens\\LNLS_sal.jpeg")
@@ -1111,13 +1000,13 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
                                 '', '', '', '', '', ''])
         self.data_table.append([Paragraph('<para align =center><font size="9" face="Helvetica">'+''+'</font></para>', styleSheet), \
                                 Paragraph('<para align =center><font size="9" face="Helvetica">'+''+'</font></para>', styleSheet), \
-                                Paragraph('<para align =center><font size="12" face="Helvetica"><b>'+title+'</b></font></para>', styleSheet),\
+                                Paragraph('<para align =center><font size="12" face="Helvetica"><b>BOOSTER MAGNET REPORT</b></font></para>', styleSheet),\
                                 Paragraph('<para align =center><font size="9" face="Helvetica">'+''+'</font></para>', styleSheet), \
                                 Paragraph('<para align =center><font size="9" face="Helvetica">'+''+'</font></para>', styleSheet), \
                                 Paragraph('<para align =center><font size="9" face="Helvetica">'+''+'</font></para>', styleSheet), \
                                 Paragraph('<para align =center><font size="9" face="Helvetica">'+''+'</font></para>', styleSheet), \
                                 Paragraph('<para align =center><font size="9" face="Helvetica">'+''+'</font></para>', styleSheet)])
-        self.data_table.append(['', '', '', '', '', '', '', ''])  #Dá o espaço para as células permanecerem na ordem
+        self.data_table.append(['', '', '', '', '', '', '', ''])
         
         #Plot Normal Image in report
         self.save_images(self.flag_pdf)
@@ -1177,94 +1066,26 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
                                 Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
                                 Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet)])# Main Current [A]
 
-        if self.Data[-1].Mag_name[0] == 'S':                #-ADD- FOR SI SEXTUPOLE
-            
-            # Applying scientific notation in ch current value
-            self.exp_ch_coil=int('{:e}'. format(self.ch_current).split('e')[-1])
-            exp_str = ' x E'+str(self.exp_ch_coil)
+        # Applying scientific notation in trim current value
+        self.exp_corr_trim=int('{:e}'. format(self.trim_current).split('e')[-1])
+        exp_str = ' x E'+str(self.exp_corr_trim)
 
-            if self.exp_ch_coil > 0:
-                self.exp_ch_coil = 0
-            if self.exp_ch_coil == 0:
-                exp_str =''
+        if self.exp_corr_trim > 0:
+            self.exp_corr_trim = 0
+        if self.exp_corr_trim == 0:
+            exp_str =''
 
-            self.exp_err_ch_coil=int('{:e}'. format(self.ch_current_std/10**self.exp_ch_coil).split('e')[-1])
-            self.data_table.append([Paragraph('<para align =center><font size="7" face="Helvetica"><b>CH Current [A]</b></font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="7" face="Helvetica"><b>''</b></font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">'+\
-                                                    ('({:.'+str(abs(self.exp_err_ch_coil))+'f} ').format(self.ch_current/10**self.exp_ch_coil)+chr(177)+\
-                                                    (' {:.'+str(abs(self.exp_err_ch_coil))+'f}').format(self.ch_current_std/10**self.exp_ch_coil)+')'+exp_str+'</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet)])# ch current [A]
-
-            # Applying scientific notation in cv current value
-            self.exp_cv_coil=int('{:e}'. format(self.cv_current).split('e')[-1])
-            exp_str = ' x E'+str(self.exp_cv_coil)
-
-            if self.exp_cv_coil > 0:
-                self.exp_cv_coil = 0
-            if self.exp_cv_coil == 0:
-                exp_str =''
-
-            self.exp_err_cv_coil=int('{:e}'. format(self.cv_current_std/10**self.exp_cv_coil).split('e')[-1])
-            self.data_table.append([Paragraph('<para align =center><font size="7" face="Helvetica"><b>CV Current [A]</b></font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="7" face="Helvetica"><b>''</b></font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">'+\
-                                                    ('({:.'+str(abs(self.exp_err_cv_coil))+'f} ').format(self.cv_current/10**self.exp_cv_coil)+chr(177)+\
-                                                    (' {:.'+str(abs(self.exp_err_cv_coil))+'f}').format(self.cv_current_std/10**self.exp_cv_coil)+')'+exp_str+'</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet)])# cv current [A]
-
-            # Applying scientific notation in qs current value
-            self.exp_qs_coil=int('{:e}'. format(self.qs_current).split('e')[-1])
-            exp_str = ' x E'+str(self.exp_qs_coil)
-
-            if self.exp_qs_coil > 0:
-                self.exp_qs_coil = 0
-            if self.exp_qs_coil == 0:
-                exp_str =''
-
-            self.exp_err_qs_coil=int('{:e}'. format(self.qs_current_std/10**self.exp_qs_coil).split('e')[-1])
-            self.data_table.append([Paragraph('<para align =center><font size="7" face="Helvetica"><b>QS Current [A]</b></font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="7" face="Helvetica"><b>''</b></font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">'+\
-                                                    ('({:.'+str(abs(self.exp_err_qs_coil))+'f} ').format(self.qs_current/10**self.exp_qs_coil)+chr(177)+\
-                                                    (' {:.'+str(abs(self.exp_err_qs_coil))+'f}').format(self.qs_current_std/10**self.exp_qs_coil)+')'+exp_str+'</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet)])# cv current [A]
-
-            
-        else:
-            
-            # Applying scientific notation in trim current value
-            self.exp_corr_trim=int('{:e}'. format(self.trim_current).split('e')[-1])
-            exp_str = ' x E'+str(self.exp_corr_trim)
-
-            if self.exp_corr_trim > 0:
-                self.exp_corr_trim = 0
-            if self.exp_corr_trim == 0:
-                exp_str =''
-
-            self.exp_err_corr_trim=int('{:e}'. format(self.std_trim_current_err/10**self.exp_corr_trim).split('e')[-1])
-            self.data_table.append([Paragraph('<para align =center><font size="7" face="Helvetica"><b>Trim Current [A]</b></font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="7" face="Helvetica"><b>''</b></font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">'+\
-                                                    ('({:.'+str(abs(self.exp_err_corr_trim))+'f} ').format(self.trim_current/10**self.exp_corr_trim)+chr(177)+\
-                                                    (' {:.'+str(abs(self.exp_err_corr_trim))+'f}').format(self.std_trim_current_err/10**self.exp_corr_trim)+')'+exp_str+'</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet),\
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
-                                    Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet)])# Trim Current [A]
+        self.exp_err_corr_trim=int('{:e}'. format(self.trim_current/10**self.exp_corr_trim).split('e')[-1])
+        self.data_table.append([Paragraph('<para align =center><font size="7" face="Helvetica"><b>Trim Current [A]</b></font></para>', styleSheet), \
+                                Paragraph('<para align =center><font size="7" face="Helvetica"><b>''</b></font></para>', styleSheet),\
+                                Paragraph('<para align =center><font size="6" face="Helvetica">'+\
+                                                ('({:.'+str(abs(self.exp_err_corr_trim))+'f} ').format(self.trim_current/10**self.exp_corr_trim)+chr(177)+\
+                                                (' {:.'+str(abs(self.exp_err_corr_trim))+'f}').format(self.std_trim_current_err/10**self.exp_corr_trim)+')'+exp_str+'</font></para>', styleSheet),\
+                                Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
+                                Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
+                                Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet),\
+                                Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet), \
+                                Paragraph('<para align =center><font size="6" face="Helvetica">''</font></para>', styleSheet)])# Trim Current [A]
 
         # Applying scientific notation in gradient value
         self.exp_grad=int('{:e}'. format(Grad).split('e')[-1])
@@ -1398,32 +1219,30 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
 
         obs = str(self.ui.observacao.toPlainText())
 
-####        CAMPO DESTINADO AO COMENTÁRIO FOI RETIRADO POR FALTA DE ESPAÇO NA FOLHA DEVIDO A INSERÇÃO DE NOVAS LINHAS
+        # creating a table inside a table to keep always the same line height even when the observation is short.
+        if obs != '':
+           P=Paragraph('<para align =justify><font size="7.6" face="Helvetica">Obs: '+obs+'</font></para>', styleSheet)
+        elif obs == '':
+           P=''
+        self.data_.append([P])
 
-##        # creating a table inside a table to keep always the same line height even when the observation is short.
-##        if obs != '':
-##           P=Paragraph('<para align =justify><font size="7.6" face="Helvetica">Obs: '+obs+'</font></para>', styleSheet)
-##        elif obs == '':
-##           P=''
-##        self.data_.append([P])
-##
-##        style_ = TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),
-##                       ])
-##        
-##        self.story = []
-##        t_=Table(self.data_, rowHeights=(2.5*cm))
-##        t_.setStyle(style_)
-##        self.story.append(t_)
-##               
-##        self.data_table.append([self.story, '','','','','','',''])
+        style_ = TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),
+                       ])
+        
+        self.story = []
+        t_=Table(self.data_, rowHeights=(2.5*cm))
+        t_.setStyle(style_)
+        self.story.append(t_)
+               
+        self.data_table.append([self.story, '','','','','','',''])
 
         ##
         
         self.data_table.append(['', '', '', Paragraph('<para align =center><font size="6" face="Helvetica"><img src="Skew.png" valign="middle" width="'+str(1200*ratio_img)+'" height="'+str(816*ratio_img*1.5)+'" /></font></para>', styleSheet), '', '', '', ''])
 
         colunas = [Paragraph('<para align =center><font size="7" face="Helvetica"><b>n</b></font></para>', styleSheet), \
-                   Paragraph('<para align =center><font size="7" face="Helvetica"><b>Multipolos<br/>Normais<br/>Normalizados em<br/>x=12.0 mm<br/>[T.m<sup>(2-n)</sup>]</b></font></para>', styleSheet), \
-                   Paragraph('<para align =center><font size="7" face="Helvetica"><b>Multipolos<br/>Skew<br/>Normalizados em<br/>x=12.0 mm<br/>[T.m<sup>(2-n)</sup>]</b></font></para>', styleSheet), \
+                   Paragraph('<para align =center><font size="7" face="Helvetica"><b>Multipolos<br/>Normais<br/>Normalizados em<br/>x=17.5 mm<br/>[T.m<sup>(2-n)</sup>]</b></font></para>', styleSheet), \
+                   Paragraph('<para align =center><font size="7" face="Helvetica"><b>Multipolos<br/>Skew<br/>Normalizados em<br/>x=17.5 mm<br/>[T.m<sup>(2-n)</sup>]</b></font></para>', styleSheet), \
                    '', '', '', '', '']
         self.data_table.append(colunas)
 
@@ -1472,7 +1291,7 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
                                 Paragraph('<para align =center><font size="6" face="Helvetica">'+''+'</font></para>', styleSheet), \
                                 Paragraph('<para align =center><font size="6" face="Helvetica">'+''+'</font></para>', styleSheet)])
 
-##      gráficos 1278px x 816px                                 ORIGINAL
+##      gráficos 1278px x 816px
         #(coluna, linha), começando do (0,0)
 ##        style = TableStyle([('ALIGN',(0,0),(-1,-1),'CENTER'),
 ##                       ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
@@ -1506,77 +1325,39 @@ class Main_Window(QtGui.QMainWindow):     #Interface Gráfica
 ##                       ('SPAN', (0, 20), (2, 20)), #branco
 ##                       ('SPAN', (3, 20), (-1, -1)), #gráfico skew
 ##                       ])
-        if self.Data[-1].Mag_name[0] != 'S':                                #FOR Q14, Q20, Q30
-            style = TableStyle([('ALIGN',(0,0),(-1,-1),'CENTER'),
-                           ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
-                           ('INNERGRID', (0,0), (1,2), 0.25, colors.black),
-                           ('INNERGRID', (0,2), (-1,-1), 0.25, colors.black),
-                           ('LINEBEFORE', (2,0), (2,2), 0.25, colors.black),
-                           ('BOX', (0,0), (-1,-1), 0.25, colors.black),
-                           ('SPAN', (0, 0), (0, 2)), #logo
-                           ('SPAN', (1, 0), (1, 2)), #ima
-                           ('SPAN', (2, 0), (-1, 0)), #branco
-                           ('SPAN', (2, 1), (-1, 1)), #magnetos do booster
-                           ('SPAN', (2, 2), (-1, 2)), #branco
-                           ('SPAN', (0, 3), (2, 3)), #branco
-                           ('SPAN', (0, 4), (2, 4)), #resultados label
-                           ('SPAN', (0, 5), (1, 5)), #data label
-                           ('SPAN', (0, 6), (1, 6)), #hora label
-                           ('SPAN', (0, 7), (1, 7)), #temperatura label
-                           ('SPAN', (0, 8), (1, 8)), #main corrente label
-                           ('SPAN', (0, 9), (1, 9)), #trim corrente label
-                           ('SPAN', (0, 10), (1, 10)), #coletas label
-                           ('SPAN', (0, 11), (1, 11)), #gradiente label
-                           ('SPAN', (0, 12), (1, 12)), #deslocamento x label
-                           ('SPAN', (0, 13), (1, 13)), #deslocamento y label
-                           ('SPAN', (0, 14), (1, 14)), #ângulo label
-                           ('SPAN', (0, 15), (2, 15)), #ensaios elétricos label
-                           ('SPAN', (0, 16), (1, 16)), #indutância label
-                           ('SPAN', (0, 17), (1, 17)), #tensão label
-                           ('SPAN', (0, 18), (1, 18)), #corrente máxima label
-                           ('SPAN', (0, 19), (1, 19)), #número de espiras label
-                           ('SPAN', (0, 20), (2, 20)), #observação
-                           ('SPAN', (3, 3), (-1, 19)), #gráfico normal
-                           ('SPAN', (0, 20), (2, 20)), #branco
-                           ('SPAN', (3, 20), (-1, -1)), #gráfico skew
-                           ])
-        elif self.Data[-1].Mag_name[0] == 'S':                              #FOR S15
-            style = TableStyle([('ALIGN',(0,0),(-1,-1),'CENTER'),
-                           ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
-                           ('INNERGRID', (0,0), (1,2), 0.25, colors.black),
-                           ('INNERGRID', (0,2), (-1,-1), 0.25, colors.black),
-                           ('LINEBEFORE', (2,0), (2,2), 0.25, colors.black),
-                           ('BOX', (0,0), (-1,-1), 0.25, colors.black),
-                           ('SPAN', (0, 0), (0, 2)), #logo
-                           ('SPAN', (1, 0), (1, 2)), #ima
-                           ('SPAN', (2, 0), (-1, 0)), #branco
-                           ('SPAN', (2, 1), (-1, 1)), #magnetos do SI
-                           ('SPAN', (2, 2), (-1, 2)), #branco
-                           ('SPAN', (0, 3), (2, 3)), #branco antes do label 'Resultados'
-                           ('SPAN', (0, 4), (2, 4)), #resultados label
-                           ('SPAN', (0, 5), (1, 5)), #data label
-                           ('SPAN', (0, 6), (1, 6)), #hora label
-                           ('SPAN', (0, 7), (1, 7)), #temperatura label
-                           ('SPAN', (0, 8), (1, 8)), #main corrente label
-                           ('SPAN', (0, 9), (1, 9)), #ch corrente label
-                           ('SPAN', (0, 10), (1, 10)), #cv corrente label
-                           ('SPAN', (0, 11), (1, 11)), #qs corrente label
-                           ('SPAN', (0, 12), (1, 12)), #coletas label
-                           ('SPAN', (0, 13), (1, 13)), #gradiente label
-                           ('SPAN', (0, 14), (1, 14)), #deslocamento x label
-                           ('SPAN', (0, 15), (1, 15)), #deslocamento y label
-                           ('SPAN', (0, 16), (1, 16)), #ângulo label
-                           ('SPAN', (0, 17), (2, 17)), #ensaios elétricos label
-                           ('SPAN', (0, 18), (1, 18)), #indutância label
-                           ('SPAN', (0, 19), (1, 19)), #tensão label
-                           ('SPAN', (0, 20), (1, 20)), #corrente máxima label
-                           ('SPAN', (0, 21), (1, 21)), #número de espiras label
-                           ('SPAN', (0, 22), (2, 22)), #observação
-                           ('SPAN', (3, 3), (-1, 21)), #gráfico normal
-                           ('SPAN', (0, 22), (2, 22)), #branco
-                           ('SPAN', (3, 22), (-1, -1)), #gráfico skew
-                           ])
-            
+        style = TableStyle([('ALIGN',(0,0),(-1,-1),'CENTER'),
+                       ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+                       ('INNERGRID', (0,0), (1,2), 0.25, colors.black),
+                       ('INNERGRID', (0,2), (-1,-1), 0.25, colors.black),
+                       ('LINEBEFORE', (2,0), (2,2), 0.25, colors.black),
+                       ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+                       ('SPAN', (0, 0), (0, 2)), #logo
+                       ('SPAN', (1, 0), (1, 2)), #ima
+                       ('SPAN', (2, 0), (-1, 0)), #branco
+                       ('SPAN', (2, 1), (-1, 1)), #magnetos do booster
+                       ('SPAN', (2, 2), (-1, 2)), #branco
+                       ('SPAN', (0, 3), (2, 3)), #branco
+                       ('SPAN', (0, 4), (2, 4)), #resultados label
+                       ('SPAN', (0, 5), (1, 5)), #data label
+                       ('SPAN', (0, 6), (1, 6)), #hora label
+                       ('SPAN', (0, 7), (1, 7)), #temperatura label
+                       ('SPAN', (0, 8), (1, 8)), #main corrente label
+                       ('SPAN', (0, 9), (1, 9)), #trim corrente label
+                       ('SPAN', (0, 10), (1, 10)), #coletas label
+                       ('SPAN', (0, 11), (1, 11)), #gradiente label
+                       ('SPAN', (0, 12), (1, 12)), #deslocamento x label
+                       ('SPAN', (0, 13), (1, 13)), #deslocamento y label
+                       ('SPAN', (0, 14), (1, 14)), #ângulo label
+                       ('SPAN', (0, 15), (2, 15)), #ensaios elétricos label
+                       ('SPAN', (0, 16), (1, 16)), #indutância label
+                       ('SPAN', (0, 17), (1, 17)), #tensão label
+                       ('SPAN', (0, 18), (1, 18)), #corrente máxima label
+                       ('SPAN', (0, 19), (1, 19)), #número de espiras label
+                       ('SPAN', (0, 20), (2, 20)), #observação
+                       ('SPAN', (3, 3), (-1, 19)), #gráfico normal
+                       ('SPAN', (0, 20), (2, 20)), #branco
+                       ('SPAN', (3, 20), (-1, -1)), #gráfico skew
+                       ])
 
         # container for the 'Flowable' objects
         self.elements = []

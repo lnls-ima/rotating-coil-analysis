@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\Python35-32\Lib\site-packages\PyQt4\pyuic4" -o graph_dialog.py graph_dialog.ui

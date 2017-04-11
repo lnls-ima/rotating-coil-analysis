@@ -1,0 +1,1 @@
+C:\Python34\Lib\site-packages\PyQt4\pyuic4 -o Interface_rc_analysis.py Interface_rc_analysis.ui
