@@ -34,14 +34,14 @@ class Ui_FormTable(object):
         self.tb_general.setColumnCount(0)
         self.tb_general.setRowCount(0)
         self.gridLayout.addWidget(self.tb_general, 1, 0, 1, 1)
-        self.pb_copy_to_clipboard = QtGui.QPushButton(FormTable)
-        self.pb_copy_to_clipboard.setObjectName(_fromUtf8("pb_copy_to_clipboard"))
-        self.gridLayout.addWidget(self.pb_copy_to_clipboard, 0, 0, 1, 1)
+        self.bt_copy_to_clipboard = QtGui.QPushButton(FormTable)
+        self.bt_copy_to_clipboard.setObjectName(_fromUtf8("bt_copy_to_clipboard"))
+        self.gridLayout.addWidget(self.bt_copy_to_clipboard, 0, 0, 1, 1)
 
         self.retranslateUi(FormTable)
         QtCore.QMetaObject.connectSlotsByName(FormTable)
 
     def retranslateUi(self, FormTable):
         FormTable.setWindowTitle(_translate("FormTable", "Table", None))
-        self.pb_copy_to_clipboard.setText(_translate("FormTable", "Copiar para área de transferência", None))
+        self.bt_copy_to_clipboard.setText(_translate("FormTable", "Copiar para área de transferência", None))
 
