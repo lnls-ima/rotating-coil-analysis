@@ -146,41 +146,43 @@ class MainWindow(QtGui.QMainWindow):
         """
         Carrega os arquivos de entrada e ordena por data e hora da coleta.
         """
-        try:
-            # Carrega lista e ordena
-            default_dir = os.path.expanduser('~')
-            filepath = QtGui.QFileDialog.getOpenFileNames(directory=default_dir)
-            if len(filepath) == 0: return
+        default_dir = os.path.expanduser('~')
+        filepath = QtGui.QFileDialog.getOpenFileNames(directory=default_dir)
+        if len(filepath) == 0: return
 
+        if any([x == -1 for x in [f.find('.dat') for f in filepath]]):
+            QtGui.QMessageBox.warning(self,'Warning','Cannot open files. Select valid files.',QtGui.QMessageBox.Ok)
+            return
+
+        try:
             index = np.array([])
             for i in range(len(filepath)):
                 timestamp = filepath[i][filepath[i].find('.dat')-13:filepath[i].find('.dat')]
-                index = np.append(index, time.mktime(datetime.datetime.strptime(timestamp, '%y%m%d_%H%M%S').timetuple()))
+                time_sec = time.mktime(datetime.datetime.strptime(timestamp, '%y%m%d_%H%M%S').timetuple())
+                index = np.append(index, time_sec)
             index = index.argsort()
 
-            # Gera lista global ordenada
             filelist = np.array([])
             for i in range(len(filepath)):
                 filelist = np.append(filelist,filepath[index[i]])
-            self.files = filelist
-
-            self.directory = os.path.split(self.files[0])[0]
-
-            self.ui.directory.setText(self.directory)
-
-            self.ui.input_list.setRowCount(len(self.files))
-
-            # Atualiza lista de entradas de dados entrada da interface
-            self.ui.input_list.clear()
-            for i in range(len(self.files)):
-                item = QtGui.QTableWidgetItem()
-                self.ui.input_list.setItem(i, 0, item)
-                item.setText(os.path.split(self.files[i])[1])
-
-            self.ui.input_count.setText(str(len(self.files)))
-
         except:
-            QtGui.QMessageBox.warning(self,'Warning','Cannot open files. Select valid files.',QtGui.QMessageBox.Ok)
+            filelist = np.array(filepath)
+
+        self.files = filelist
+
+        self.directory = os.path.split(self.files[0])[0]
+
+        self.ui.directory.setText(self.directory)
+
+        self.ui.input_list.setRowCount(len(self.files))
+
+        self.ui.input_list.clear()
+        for i in range(len(self.files)):
+            item = QtGui.QTableWidgetItem()
+            self.ui.input_list.setItem(i, 0, item)
+            item.setText(os.path.split(self.files[i])[1])
+
+        self.ui.input_count.setText(str(len(self.files)))
 
 
     def clear_input_list(self):
@@ -256,7 +258,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         Carrega dados dos arquivos selecionados para analise - formato bobina girante
         """
-        self.data = np.array([])
+        data = np.array([])
 
         if len(self.files_uploaded) == 0:
             QtGui.QMessageBox.critical(self,'Failure','No file selected.',QtGui.QMessageBox.Ok)
@@ -266,11 +268,31 @@ class MainWindow(QtGui.QMainWindow):
             for filename in self.files_uploaded:
                 try:
                     datafile = DataFile(os.path.join(self.directory, filename))
-                    self.data = np.append(self.data, datafile)
+                    data = np.append(data, datafile)
                 except DataFileError as e:
                     QtGui.QMessageBox.warning(self,'Warning', e.message, QtGui.QMessageBox.Ignore)
 
-            if len(self.data) > 0:
+            if len(data) > 0:
+
+                index = np.array([])
+                for d in data:
+                    timestamp = d.date + "_" + d.hour
+                    time_sec = time.mktime(datetime.datetime.strptime(timestamp, "%d/%m/%Y_%H:%M:%S").timetuple())
+                    index = np.append(index, time_sec)
+                index = index.argsort()
+
+                sort_data = np.array([])
+                for i in index:
+                    sort_data = np.append(sort_data, data[i])
+
+                self.data = sort_data
+                self.files_uploaded = [os.path.split(d.filename)[-1] for d in self.data]
+                self.ui.output_list.clear()
+                for i in range(len(self.files_uploaded)):
+                    item = QtGui.QTableWidgetItem()
+                    self.ui.output_list.setItem(i, 0, item)
+                    item.setText(self.files_uploaded[i])
+
                 self.columns_names = self.data[0].columns_names
                 self.reference_radius = self.data[0].reference_radius
                 self.default_harmonic = self.data[0].magnet_type
