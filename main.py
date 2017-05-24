@@ -524,15 +524,15 @@ class MainWindow(QtGui.QMainWindow):
                                                  yerr = yerr_bar,
                                                  ax = self.ui.wt_multipoles.canvas.ax)
 
-            self.ui.wt_multipoles.canvas.ax.set_title('Average Mutipoles for All Analized Files')
+            self.ui.wt_multipoles.canvas.ax.set_title('Average Multipoles for All Analized Files')
 
         else:
             multipoles_harm_df.plot(kind='bar', legend=False, ax = self.ui.wt_multipoles.canvas.ax)
 
             if len(index_list) > 1:
-                self.ui.wt_multipoles.canvas.ax.set_title('Mutipoles for All Analized Files')
+                self.ui.wt_multipoles.canvas.ax.set_title('Multipoles for All Analized Files')
             else:
-                self.ui.wt_multipoles.canvas.ax.set_title('Mutipoles')
+                self.ui.wt_multipoles.canvas.ax.set_title('Multipoles')
 
         self.ui.wt_multipoles.canvas.ax.set_xlabel('Harmonics (n)')
         self.ui.wt_multipoles.canvas.ax.set_ylabel(self.columns_names[multipole_idx])
@@ -568,10 +568,12 @@ class MainWindow(QtGui.QMainWindow):
                 idx_label = idx_hyst
                 index = [float(current) for current in self.file_id.iloc[:,idx_hyst]]
                 xlim = (min(index), max(index))
+                tl = 'Hysteresis Graph'
             else:
                 idx_label = self.ui.cb_hyst_axis_label.currentIndex()
                 index = self.file_id.iloc[:,idx_label]
                 xlim = (0, len(index)-1)
+                tl = 'Excitation Curve'
 
             harmonic_multipoles_array_df = pd.DataFrame(harmonic_multipoles_array.T, index=index, columns=['hyst'])
             harmonic_multipoles_array_df.plot(use_index = True,
@@ -583,10 +585,10 @@ class MainWindow(QtGui.QMainWindow):
                                             ax = self.ui.wt_multipoles.canvas.ax)
 
             if self.ui.rb_norm.isChecked():
-                title = 'Hysteresis Graph for Normal Component (Harmonic {0:1d})'.format(idx_harm+1)
+                title = tl + ' for Normal Component (Harmonic {0:1d})'.format(idx_harm+1)
                 self.ui.wt_multipoles.canvas.ax.set_ylabel(self.columns_names[1])
             else:
-                title = 'Hysteresis Graph for Skew Component (Harmonic {0:1d})'.format(idx_harm+1)
+                title = tl + ' for Skew Component (Harmonic {0:1d})'.format(idx_harm+1)
                 self.ui.wt_multipoles.canvas.ax.set_ylabel(self.columns_names[3])
 
             self.ui.wt_multipoles.canvas.ax.set_title(title)
@@ -727,8 +729,10 @@ class MainWindow(QtGui.QMainWindow):
             legend = False
             residual_field_df.plot(legend = legend, marker='o', ax = self.ui.wt_residual.canvas.ax)
             title = 'Residual Normalized %s Integrated Field for All Analized Files'%field_comp
+            style = ['-*m', '--k', '--k']
         else:
             legend = True
+            style = ['-*m', '--k', '--g']
             if len(index_list) > 1:
                 residual_field_df.mean(axis=1).plot(legend = legend,
                     label="Average",
@@ -757,7 +761,7 @@ class MainWindow(QtGui.QMainWindow):
                 residue['Systematic'] = pd.Series(sys_residue, index=index)
                 residue['Upper limit'] = pd.Series(max_residue, index=index)
                 residue['Lower limit'] = pd.Series(min_residue, index=index)
-                residue.plot(legend=legend, ax = self.ui.wt_residual.canvas.ax, style=['-*m', '--k', '--k'])
+                residue.plot(legend=legend, ax = self.ui.wt_residual.canvas.ax, style=style)
 
         self.ui.wt_residual.canvas.ax.set_title(title, fontsize=fontsize)
         self.ui.wt_residual.canvas.ax.set_xlabel('Transversal Position X [m]', fontsize=fontsize)
