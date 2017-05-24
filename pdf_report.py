@@ -342,11 +342,11 @@ class MagnetReport(object):
         harm = self.get_formatted_text('n', fontsize=7, bold=True)
 
         lb_split = self.norm_mult_label.split(' ')
-        norm_text = '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]'%(lb_split[0], lb_split[1], lb_split[2], self.data.reference_radius)
+        norm_text = '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]'%(lb_split[0], lb_split[1], lb_split[2], self.data.reference_radius*1000)
         norm_mult = self.get_formatted_text(norm_text, fontsize=7, bold=True)
 
         lb_split = self.skew_mult_label.split(' ')
-        skew_text = '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]'%(lb_split[0], lb_split[1], lb_split[2], self.data.reference_radius)
+        skew_text = '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]'%(lb_split[0], lb_split[1], lb_split[2], self.data.reference_radius*1000)
         skew_mult = self.get_formatted_text(skew_text, fontsize=7, bold=True)
 
         self.add_to_table([harm, norm_mult, skew_mult])
