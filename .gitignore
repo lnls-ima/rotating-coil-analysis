@@ -1,5 +1,9 @@
 *~
 
+interface.py
+resources_rc.py
+table_dialog.py
+
 # Tests and temporary files
 **/tests
 *_ignore.*
@@ -48,6 +52,10 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *,cover
+
+# Doxygen documentation
+doc/html/
+doc/documentation.html
 
 # Translations
 *.mo
