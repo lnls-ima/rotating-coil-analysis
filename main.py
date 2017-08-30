@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+import importlib
 import threading
 import sys
 import time
@@ -10,8 +11,6 @@ import os
 import matplotlib.ticker as mtick
 import matplotlib.gridspec as gridspec
 from PyQt4 import QtCore, QtGui
-import popplerqt4
-
 from interface import Ui_MainWindow
 from table_dialog import Ui_FormTable
 from rotcoil import data_file
@@ -19,6 +18,12 @@ from rotcoil import pdf_report
 from rotcoil import utils
 from rotcoil import multipole_errors_spec
 
+
+if importlib.util.find_spec('popplerqt4') is not None:
+    popplerqt4 = importlib.import_module('popplerqt4')
+    _preview_enabled = True
+else:
+    _preview_enabled = False
 
 if os.name == 'nt':
     _fontsize = 14
@@ -70,10 +75,20 @@ class MainWindow(QtGui.QMainWindow):
         self.skew_color = 'red'
 
         self._connect_widgets()
-
         self._clear_data()
         self._enable_buttons(False)
         self._enable_tables(False)
+
+    def _clear_data(self):
+        self.data = np.array([])
+        self.columns_names = None
+        self.reference_radius = None
+        self.default_harmonic = None
+        self.file_id = None
+        self.default_file_id = None
+        self.default_file_id_name = None
+        self.table_df = None
+        self.magnet_report = None
 
     def _connect_widgets(self):
         """Make the connections between signals and slots."""
@@ -118,17 +133,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.bt_table_4.clicked.connect(self.screen_table)
         self.ui.bt_table_5.clicked.connect(self.screen_table)
 
-    def _clear_data(self):
-        self.data = np.array([])
-        self.columns_names = None
-        self.reference_radius = None
-        self.default_harmonic = None
-        self.file_id = None
-        self.default_file_id = None
-        self.default_file_id_name = None
-        self.table_df = None
-        self.magnet_report = None
-
     def _enable_buttons(self, enable):
         if len(self.data) > 1:
             self.ui.bt_plot_multipoles_all.setEnabled(enable)
@@ -167,6 +171,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.bt_plot_raw_data.setEnabled(enable)
         self.ui.bt_plot_residual_field.setEnabled(enable)
         self.ui.bt_save_report.setEnabled(enable)
+        if _preview_enabled:
+            self.ui.bt_preview.setEnabled(enable)
+        else:
+            self.ui.bt_preview.setEnabled(False)
 
     def _enable_tables(self, enable):
         self.ui.bt_table_1.setEnabled(enable)
@@ -840,7 +848,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.wt_residual.canvas.ax.set_xlabel(
             'Transversal Position X [m]', fontsize=_fontsize)
         self.ui.wt_residual.canvas.ax.set_ylabel(
-            'Residual Normalized %s Component' % field_comp, fontsize=_fontsize)
+            'Residual Normalized %s Component' % field_comp,
+            fontsize=_fontsize)
         self.ui.wt_residual.canvas.ax.grid('on')
         self.ui.wt_residual.canvas.fig.tight_layout()
         self.ui.wt_residual.canvas.draw()
