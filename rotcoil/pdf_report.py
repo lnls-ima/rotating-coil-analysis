@@ -13,6 +13,18 @@ from rotcoil import data_file as _df
 from rotcoil.utils import scientific_notation as _sci
 
 
+if _os.name == 'nt':
+    _default_fontsize = 5
+    _magnet_name_fontsize = 16
+    _title_fontsize = 11
+    _label_fontsize = 6
+else:
+    _default_fontsize = 6
+    _magnet_name_fontsize = 17
+    _title_fontsize = 12
+    _label_fontsize = 7
+
+
 class MagnetReport(object):
     """Magnet report."""
 
@@ -213,7 +225,7 @@ class MagnetReport(object):
             (image_path, width, height))
         return _Paragraph(img_text, self.style_sheet)
 
-    def _get_fmt_text(self, text, fontsize=6, bold=False):
+    def _get_fmt_text(self, text, fontsize=_default_fontsize, bold=False):
         if bold:
             text = '<b>' + text + '</b>'
         fmt_text = ('<para align=center><font size="%i">%s</font></para>' %
@@ -262,11 +274,11 @@ class MagnetReport(object):
         height = 51.48
         img = self._get_image_text(lnls_image_path, width, height)
         text = self._get_fmt_text(
-            self.data.magnet_name, fontsize=17, bold=True)
+            self.data.magnet_name, fontsize=_magnet_name_fontsize, bold=True)
         self._add_to_table([img, text])
 
         text = self._get_fmt_text(
-            self.title.upper(), fontsize=12, bold=True)
+            self.title.upper(), fontsize=_title_fontsize, bold=True)
         self._add_to_table(['', '', text])
         self._add_to_table([])
 
@@ -289,76 +301,76 @@ class MagnetReport(object):
         angle_err = self.data.multipoles_df.iloc[n, 8]
 
         text = self._get_fmt_text(
-            self.results_label, fontsize=7, bold=True)
+            self.results_label, fontsize=_label_fontsize, bold=True)
         self._add_to_table([text])
 
-        label = self._get_fmt_text(self.date_label, fontsize=7, bold=True)
+        label = self._get_fmt_text(self.date_label, fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.data.date)
         self._add_to_table([label, '', value])
 
-        label = self._get_fmt_text(self.hour_label, fontsize=7, bold=True)
+        label = self._get_fmt_text(self.hour_label, fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.data.hour)
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.temperature_label + ' [°C]', fontsize=7, bold=True)
+            self.temperature_label + ' [°C]', fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.data.temperature)
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.measure_number_label, fontsize=7, bold=True)
+            self.measure_number_label, fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.data.measure_number)
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.main_current_label + ' [A]', fontsize=7, bold=True)
+            self.main_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(
             _sci(self.data.main_current, self.data.main_current_std))
         self._add_to_table([label, '', value])
 
         if self.data.trim_current is not None:
             label = self._get_fmt_text(
-                self.trim_current_label + ' [A]', fontsize=7, bold=True)
+                self.trim_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.trim_current, self.data.trim_current_std))
             self._add_to_table([label, '', value])
 
         if self.data.ch_current is not None:
             label = self._get_fmt_text(
-                self.ch_current_label + ' [A]', fontsize=7, bold=True)
+                self.ch_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.ch_current, self.data.ch_current_std))
             self._add_to_table([label, '', value])
 
         if self.data.cv_current is not None:
             label = self._get_fmt_text(
-                self.cv_current_label + ' [A]', fontsize=7, bold=True)
+                self.cv_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.cv_current, self.data.cv_current_std))
             self._add_to_table([label, '', value])
 
         if self.data.qs_current is not None:
             label = self._get_fmt_text(
-                self.qs_current_label + ' [A]', fontsize=7, bold=True)
+                self.qs_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.qs_current, self.data.qs_current_std))
             self._add_to_table([label, '', value])
 
         if n == 1:
             label = self._get_fmt_text(
-                self.int_gradient_label + ' [T]', fontsize=7, bold=True)
+                self.int_gradient_label + ' [T]', fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(_sci(grad, grad_err))
             self._add_to_table([label, '', value])
         elif n == 2:
             label = self._get_fmt_text(
-                self.int_gradient_label + ' [T.m]', fontsize=7, bold=True)
+                self.int_gradient_label + ' [T.m]', fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(_sci(grad, grad_err))
             self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
             self.offset_x_label +
             ' ['+chr(956)+'m] - (< '+chr(177) + str(spec_disp*1e6)+')',
-            fontsize=7, bold=True)
+            fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(
             _sci(self.data.offset_x*1e6, self.data.offset_x_err*1e6))
         self._add_to_table([label, '', value])
@@ -366,38 +378,38 @@ class MagnetReport(object):
         label = self._get_fmt_text(
             self.offset_y_label +
             ' ['+chr(956)+'m] - (< '+chr(177) + str(spec_disp*1e6)+')',
-            fontsize=7, bold=True)
+            fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(
             _sci(self.data.offset_y*1e6, self.data.offset_y_err*1e6))
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
             self.angle_label + ' [mrad] - (< '+chr(177)+str(spec_ang*1e3)+')',
-            fontsize=7, bold=True)
+            fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(_sci(angle*1e3, angle_err*1e3))
         self._add_to_table([label, '', value])
 
         text = self._get_fmt_text(
-            self.electric_param_label, fontsize=7, bold=True)
+            self.electric_param_label, fontsize=_label_fontsize, bold=True)
         self._add_to_table([text])
 
         label = self._get_fmt_text(
-            self.indutance_label + ' [mH]', fontsize=7, bold=True)
+            self.indutance_label + ' [mH]', fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.indutance)
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.voltage_label + ' [V]', fontsize=7, bold=True)
+            self.voltage_label + ' [V]', fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.voltage)
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.max_current_label + ' [A]', fontsize=7, bold=True)
+            self.max_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.max_current)
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.nr_turns_label, fontsize=7, bold=True)
+            self.nr_turns_label, fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.nr_turns)
         self._add_to_table([label, '', value])
 
@@ -408,19 +420,19 @@ class MagnetReport(object):
         mult_skew_normalized = self.data.multipoles_df.iloc[:, 11]
         mult_skew_normalized_err = self.data.multipoles_df.iloc[:, 12]
 
-        harm = self._get_fmt_text('n', fontsize=7, bold=True)
+        harm = self._get_fmt_text('n', fontsize=_label_fontsize, bold=True)
 
         ls = self.norm_mult_label.split(' ')
         norm_text = (
             '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]' %
             (ls[0], ls[1], ls[2], self.data.reference_radius*1000))
-        norm_mult = self._get_fmt_text(norm_text, fontsize=7, bold=True)
+        norm_mult = self._get_fmt_text(norm_text, fontsize=_label_fontsize, bold=True)
 
         ls = self.skew_mult_label.split(' ')
         skew_text = (
             '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]' %
             (ls[0], ls[1], ls[2], self.data.reference_radius*1000))
-        skew_mult = self._get_fmt_text(skew_text, fontsize=7, bold=True)
+        skew_mult = self._get_fmt_text(skew_text, fontsize=_label_fontsize, bold=True)
 
         self._add_to_table([harm, norm_mult, skew_mult])
 

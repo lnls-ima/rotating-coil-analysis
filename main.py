@@ -20,6 +20,24 @@ from rotcoil import utils
 from rotcoil import multipole_errors_spec
 
 
+if os.name == 'nt':
+    _fontsize = 14
+    _title_fontsize = 12
+    _label_fontsize = 12
+    _annotation_fontsize = 12
+    _legend_fontsize = 12
+    _ticky_fontsize = 10
+    _tickx_fontsize = 8
+else:
+    _fontsize = 18
+    _title_fontsize = 16
+    __label_fontsize = 16
+    _annotation_fontsize = 16
+    _legend_fontsize = 16
+    _ticky_fontsize = 14
+    _tickx_fontsize = 12
+
+
 class MainWindow(QtGui.QMainWindow):
     """Rotating Coil Analysis Graphical User Interface."""
 
@@ -739,8 +757,6 @@ class MainWindow(QtGui.QMainWindow):
 
         rref = self.ui.ds_reference_radius.value()/1000
 
-        fontsize = 18
-
         if all_files:
             index_list = list(range(len(self.data)))
             columns = self.default_file_id
@@ -820,11 +836,11 @@ class MainWindow(QtGui.QMainWindow):
                 residue.plot(legend=legend, ax=self.ui.wt_residual.canvas.ax,
                              style=style)
 
-        self.ui.wt_residual.canvas.ax.set_title(title, fontsize=fontsize)
+        self.ui.wt_residual.canvas.ax.set_title(title, fontsize=_fontsize)
         self.ui.wt_residual.canvas.ax.set_xlabel(
-            'Transversal Position X [m]', fontsize=fontsize)
+            'Transversal Position X [m]', fontsize=_fontsize)
         self.ui.wt_residual.canvas.ax.set_ylabel(
-            'Residual Normalized %s Component' % field_comp, fontsize=fontsize)
+            'Residual Normalized %s Component' % field_comp, fontsize=_fontsize)
         self.ui.wt_residual.canvas.ax.grid('on')
         self.ui.wt_residual.canvas.fig.tight_layout()
         self.ui.wt_residual.canvas.draw()
@@ -1072,12 +1088,6 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.wt_sextupole.canvas, self.ui.wt_sextupole.canvas.ax, 2)
 
     def _set_wiki_graph_variables(self):
-        self.title_fontsize = 16
-        self.label_fontsize = 16
-        self.annotation_fontsize = 16
-        self.legend_fontsize = 16
-        self.ticky_fontsize = 14
-        self.tickx_fontsize = 12
         self.markersize = 14
         self.linewidth = 2
         self.green = '#268B26'
@@ -1102,16 +1112,16 @@ class MainWindow(QtGui.QMainWindow):
         ax.set_xticks([])
         ax.set_xticklabels([], visible=False)
         ax.tick_params(axis='x', labelbottom='off')
-        ax.tick_params(axis='y', labelsize=self.ticky_fontsize)
+        ax.tick_params(axis='y', labelsize=_ticky_fontsize)
         ax.yaxis.grid(1, which='major', linestyle="-", color='0.85')
         ax.set_axisbelow(True)
 
         if len(self.title) != 0:
             ax.set_title(
-                self.title, fontsize=self.title_fontsize, weight='bold')
+                self.title, fontsize=_title_fontsize, weight='bold')
 
         ax.set_xticklabels([], visible=False)
-        ax.set_ylabel("Roll [mrad]", fontsize=self.label_fontsize)
+        ax.set_ylabel("Roll [mrad]", fontsize=_label_fontsize)
         ax.plot(xtick, np.zeros(len(xtick)), "-", color="black")
 
         ax.plot(xtick, roll, "-d", color=self.green,
@@ -1132,7 +1142,7 @@ class MainWindow(QtGui.QMainWindow):
         utils.DraggableText(
             canvas, ax, (xmax + xmin)/2, (ymax + ymin)/2, roll_str,
             color=self.green,
-            fontsize=self.annotation_fontsize,
+            fontsize=_annotation_fontsize,
             bbox=self.bbox,
             tol=100)
 
@@ -1148,14 +1158,14 @@ class MainWindow(QtGui.QMainWindow):
         ax.clear()
         ax.set_xticks(xtick)
         ax.set_xticklabels(
-            self.xticklabels, rotation=90, fontsize=self.tickx_fontsize)
-        ax.set_xlabel(self.xlabel, fontsize=self.label_fontsize)
-        ax.tick_params(axis='y', labelsize=self.ticky_fontsize)
+            self.xticklabels, rotation=90, fontsize=_tickx_fontsize)
+        ax.set_xlabel(self.xlabel, fontsize=_label_fontsize)
+        ax.tick_params(axis='y', labelsize=_ticky_fontsize)
         ax.yaxis.grid(1, which='major', linestyle="-", color='0.85')
         ax.set_axisbelow(True)
 
         ax.set_ylabel("Magnetic center offset [$\mu$m]",
-                      fontsize=self.label_fontsize)
+                      fontsize=_label_fontsize)
 
         ax.plot(xtick, offset_x, "-o",
                 label="Horizontal",
@@ -1171,7 +1181,7 @@ class MainWindow(QtGui.QMainWindow):
                 markersize=self.markersize,
                 linewidth=self.linewidth)
 
-        leg = utils.DraggableLegend(canvas, ax, fontsize=self.legend_fontsize)
+        leg = utils.DraggableLegend(canvas, ax, fontsize=_legend_fontsize)
         leg.legend.get_frame().set_edgecolor('white')
 
         ax.plot(xtick, np.zeros(len(xtick)), "-", color="black")
@@ -1190,7 +1200,7 @@ class MainWindow(QtGui.QMainWindow):
         utils.DraggableText(
             canvas, ax, (xmax + xmin)/2, offset_x_posy, offset_x_str,
             color=self.blue,
-            fontsize=self.annotation_fontsize,
+            fontsize=_annotation_fontsize,
             bbox=self.bbox)
 
         mean = np.mean(offset_y)
@@ -1203,7 +1213,7 @@ class MainWindow(QtGui.QMainWindow):
         utils.DraggableText(
             canvas, ax, (xmax + xmin)/2, offset_y_posy, offset_y_str,
             color=self.red,
-            fontsize=self.annotation_fontsize,
+            fontsize=_annotation_fontsize,
             bbox=self.bbox)
 
         canvas.fig.tight_layout()
@@ -1233,17 +1243,17 @@ class MainWindow(QtGui.QMainWindow):
         ax.clear()
         ax.set_xticks(xtick)
         ax.set_xticklabels(
-            self.xticklabels, rotation=90, fontsize=self.tickx_fontsize)
-        ax.set_xlabel(self.xlabel, fontsize=self.label_fontsize)
-        ax.tick_params(axis='y', labelsize=self.ticky_fontsize)
+            self.xticklabels, rotation=90, fontsize=_tickx_fontsize)
+        ax.set_xlabel(self.xlabel, fontsize=_label_fontsize)
+        ax.tick_params(axis='y', labelsize=_ticky_fontsize)
         ax.yaxis.grid(1, which='major', linestyle="-", color='0.85')
         ax.set_axisbelow(True)
 
         if len(self.title) != 0:
             ax.set_title(
-                self.title, fontsize=self.title_fontsize, weight='bold')
+                self.title, fontsize=_title_fontsize, weight='bold')
 
-        ax.set_ylabel("%s [%s]" % (label, unit), fontsize=self.label_fontsize)
+        ax.set_ylabel("%s [%s]" % (label, unit), fontsize=_label_fontsize)
 
         ax.plot(xtick, multipole, "-o",
                 color=self.purple,
@@ -1274,7 +1284,7 @@ class MainWindow(QtGui.QMainWindow):
         utils.DraggableText(
             canvas, ax, (xmax + xmin)/2, (ymax + ymin)/2, mult_str,
             color=self.purple,
-            fontsize=self.annotation_fontsize,
+            fontsize=_annotation_fontsize,
             bbox=self.bbox,
             tol=200)
 
