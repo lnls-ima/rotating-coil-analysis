@@ -6,36 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1234</width>
-    <height>949</height>
+    <width>1233</width>
+    <height>977</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_4">
-    <item row="1" column="0">
-     <widget class="QGroupBox" name="group_box_6">
-      <property name="title">
-       <string>Files Directory:</string>
-      </property>
-      <widget class="QLineEdit" name="directory">
-       <property name="geometry">
-        <rect>
-         <x>120</x>
-         <y>0</y>
-         <width>1091</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </widget>
-    </item>
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
      <widget class="QTabWidget" name="main_tab">
       <property name="enabled">
        <bool>true</bool>
@@ -74,18 +54,15 @@
         <string>Configuration</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="group_box_1">
-          <property name="title">
-           <string/>
-          </property>
+        <item row="1" column="0">
+         <widget class="QFrame" name="group_box_1">
           <widget class="QLabel" name="lnls_logo">
            <property name="geometry">
             <rect>
-             <x>1110</x>
+             <x>1129</x>
              <y>10</y>
-             <width>70</width>
-             <height>80</height>
+             <width>51</width>
+             <height>61</height>
             </rect>
            </property>
            <property name="text">
@@ -133,7 +110,7 @@
              <x>10</x>
              <y>70</y>
              <width>540</width>
-             <height>740</height>
+             <height>731</height>
             </rect>
            </property>
            <property name="font">
@@ -364,7 +341,7 @@
              <x>650</x>
              <y>70</y>
              <width>530</width>
-             <height>761</height>
+             <height>731</height>
             </rect>
            </property>
            <property name="font">
@@ -1571,7 +1548,7 @@
            <x>30</x>
            <y>10</y>
            <width>441</width>
-           <height>141</height>
+           <height>131</height>
           </rect>
          </property>
          <property name="font">
@@ -2034,7 +2011,7 @@
          <rect>
           <x>10</x>
           <y>20</y>
-          <width>441</width>
+          <width>411</width>
           <height>80</height>
          </rect>
         </property>
@@ -2114,8 +2091,8 @@
          <rect>
           <x>10</x>
           <y>140</y>
-          <width>441</width>
-          <height>41</height>
+          <width>411</width>
+          <height>61</height>
          </rect>
         </property>
         <property name="title">
@@ -2125,7 +2102,7 @@
          <property name="geometry">
           <rect>
            <x>150</x>
-           <y>0</y>
+           <y>20</y>
            <width>251</width>
            <height>27</height>
           </rect>
@@ -2164,7 +2141,7 @@
           <x>10</x>
           <y>100</y>
           <width>1181</width>
-          <height>701</height>
+          <height>721</height>
          </rect>
         </property>
         <property name="font">
@@ -2347,6 +2324,28 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="QGroupBox" name="group_box_6">
+      <property name="title">
+       <string>Files Directory:</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLineEdit" name="directory">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -2354,8 +2353,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1234</width>
-     <height>25</height>
+     <width>1233</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
