@@ -3,6 +3,9 @@
 interface.py
 resources_rc.py
 table_dialog.py
+normal.png
+skew.png
+magnet_report.pdf
 
 # Tests and temporary files
 **/tests

@@ -233,7 +233,7 @@ class MagnetReport(object):
         self._add_logo_and_title_to_report_table()
 
         # Normal Multipoles Image
-        normal_image_path = 'Normal.png'
+        normal_image_path = 'normal.png'
         width = 1300*ratio_img
         height = 816*ratio_img
         img = self._get_image_text(normal_image_path, width, height)
@@ -243,7 +243,7 @@ class MagnetReport(object):
         self._add_results_to_report_table()
 
         # Skew Multipoles Image
-        skew_image_path = 'Skew.png'
+        skew_image_path = 'skew.png'
         width = 1300*ratio_img
         height = 816*ratio_img
         img = self._get_image_text(skew_image_path, width, height)

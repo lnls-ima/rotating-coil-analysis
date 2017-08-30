@@ -1960,13 +1960,13 @@
          </item>
         </layout>
        </widget>
-       <widget class="QGroupBox" name="group_box_19">
+       <widget class="QGroupBox" name="gb_preview">
         <property name="geometry">
          <rect>
-          <x>550</x>
-          <y>30</y>
-          <width>611</width>
-          <height>761</height>
+          <x>530</x>
+          <y>10</y>
+          <width>621</width>
+          <height>781</height>
          </rect>
         </property>
         <property name="font">
@@ -1977,16 +1977,15 @@
         <property name="title">
          <string>Preview</string>
         </property>
-        <widget class="QGraphicsView" name="graphicsView">
-         <property name="geometry">
-          <rect>
-           <x>30</x>
-           <y>40</y>
-           <width>501</width>
-           <height>691</height>
-          </rect>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="preview">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QPushButton" name="bt_save_report">
         <property name="geometry">
@@ -2080,7 +2079,7 @@
        </widget>
        <widget class="QPushButton" name="bt_preview">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="geometry">
          <rect>

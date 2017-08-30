@@ -10,6 +10,7 @@ import os
 import matplotlib.ticker as mtick
 import matplotlib.gridspec as gridspec
 from PyQt4 import QtCore, QtGui
+import popplerqt4
 
 from interface import Ui_MainWindow
 from table_dialog import Ui_FormTable
@@ -88,7 +89,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.cb_wiki_graphs_label.currentIndexChanged.connect(
             self.change_wiki_graphs_label)
 
+        self.ui.cb_files_4.currentIndexChanged.connect(
+            self.clear_magnet_report)
         self.ui.bt_save_report.clicked.connect(self.save_magnet_report)
+        self.ui.bt_preview.clicked.connect(self.preview_magnet_report)
 
         self.ui.bt_table_1.clicked.connect(self.screen_table)
         self.ui.bt_table_2.clicked.connect(self.screen_table)
@@ -105,6 +109,7 @@ class MainWindow(QtGui.QMainWindow):
         self.default_file_id = None
         self.default_file_id_name = None
         self.table_df = None
+        self.magnet_report = None
 
     def _enable_buttons(self, enable):
         if len(self.data) > 1:
@@ -1318,18 +1323,51 @@ class MainWindow(QtGui.QMainWindow):
         if len(filename) == 0:
             return
 
+        if self.magnet_report is None:
+            self._create_magnet_report()
+
+        self.magnet_report.save(filename)
+
+        msg = 'Magnet report successfully saved in file: \n\n"%s"' % filename
+        QtGui.QMessageBox.information(
+            self, 'Information', msg, QtGui.QMessageBox.Ok)
+
+    def preview_magnet_report(self):
+        """Show magnet report preview."""
+        if self.magnet_report is None:
+            self._create_magnet_report()
+
+        filename = 'magnet_report.pdf'
+        self.magnet_report.save(filename)
+
+        doc = popplerqt4.Poppler.Document.load(filename)
+        page = doc.page(0)
+        image = page.renderToImage(150, 150)
+        pixmap = QtGui.QPixmap.fromImage(image)
+        self.ui.preview.setPixmap(pixmap)
+        self.ui.preview.setScaledContents(True)
+
+    def clear_magnet_report(self):
+        """Clear magnet report."""
+        self.magnet_report = None
+        self.ui.preview.clear()
+
+    def _create_magnet_report(self):
+        idx = self.ui.cb_files_4.currentIndex()
+        data = self.data[idx]
+
         prev_idx = self.ui.cb_files_3.currentIndex()
         self.ui.cb_files_3.setCurrentIndex(idx)
 
         self.ui.rb_norm_2.setChecked(True)
         self._plot_residual_field(all_files=False)
         self.ui.wt_residual.canvas.fig.tight_layout()
-        self.ui.wt_residual.canvas.fig.savefig('Normal.png')
+        self.ui.wt_residual.canvas.fig.savefig('normal.png')
 
         self.ui.rb_skew_2.setChecked(True)
         self._plot_residual_field(all_files=False)
         self.ui.wt_residual.canvas.fig.tight_layout()
-        self.ui.wt_residual.canvas.fig.savefig('Skew.png')
+        self.ui.wt_residual.canvas.fig.savefig('skew.png')
 
         self.ui.cb_files_3.setCurrentIndex(prev_idx)
 
@@ -1343,21 +1381,13 @@ class MainWindow(QtGui.QMainWindow):
         else:
             english = False
 
-        magnet_report = pdf_report.MagnetReport(
+        self.magnet_report = pdf_report.MagnetReport(
             data,
             english=english,
             indutance=indutance,
             voltage=voltage,
             max_current=max_current,
             nr_turns=nr_turns)
-
-        magnet_report.save(filename)
-        os.remove('Normal.png')
-        os.remove('Skew.png')
-
-        msg = 'Magnet report successfully saved in file: \n\n"%s"' % filename
-        QtGui.QMessageBox.information(
-            self, 'Information', msg, QtGui.QMessageBox.Ok)
 
 
 class GUIThread(threading.Thread):
