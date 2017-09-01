@@ -239,15 +239,13 @@ class MagnetReport(object):
         self.row_count = self.row_count + 1
 
     def _create_report_table(self):
-        ratio_img = (11.4*20)/1000
-
         # Logo and title
         self._add_logo_and_title_to_report_table()
 
         # Normal Multipoles Image
         normal_image_path = 'normal.png'
-        width = 1300*ratio_img
-        height = 816*ratio_img
+        width = 320
+        height = 200
         img = self._get_image_text(normal_image_path, width, height)
         self._add_to_table(['', '', '', img])
 
@@ -256,8 +254,8 @@ class MagnetReport(object):
 
         # Skew Multipoles Image
         skew_image_path = 'skew.png'
-        width = 1300*ratio_img
-        height = 816*ratio_img
+        width = 320
+        height = 200
         img = self._get_image_text(skew_image_path, width, height)
         self._add_to_table(['', '', '', img])
 
@@ -304,16 +302,19 @@ class MagnetReport(object):
             self.results_label, fontsize=_label_fontsize, bold=True)
         self._add_to_table([text])
 
-        label = self._get_fmt_text(self.date_label, fontsize=_label_fontsize, bold=True)
+        label = self._get_fmt_text(
+            self.date_label, fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.data.date)
         self._add_to_table([label, '', value])
 
-        label = self._get_fmt_text(self.hour_label, fontsize=_label_fontsize, bold=True)
+        label = self._get_fmt_text(
+            self.hour_label, fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.data.hour)
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.temperature_label + ' [°C]', fontsize=_label_fontsize, bold=True)
+            self.temperature_label + ' [°C]',
+            fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.data.temperature)
         self._add_to_table([label, '', value])
 
@@ -323,47 +324,54 @@ class MagnetReport(object):
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.main_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
+            self.main_current_label + ' [A]',
+            fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(
             _sci(self.data.main_current, self.data.main_current_std))
         self._add_to_table([label, '', value])
 
         if self.data.trim_current is not None:
             label = self._get_fmt_text(
-                self.trim_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
+                self.trim_current_label + ' [A]',
+                fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.trim_current, self.data.trim_current_std))
             self._add_to_table([label, '', value])
 
         if self.data.ch_current is not None:
             label = self._get_fmt_text(
-                self.ch_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
+                self.ch_current_label + ' [A]',
+                fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.ch_current, self.data.ch_current_std))
             self._add_to_table([label, '', value])
 
         if self.data.cv_current is not None:
             label = self._get_fmt_text(
-                self.cv_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
+                self.cv_current_label + ' [A]',
+                fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.cv_current, self.data.cv_current_std))
             self._add_to_table([label, '', value])
 
         if self.data.qs_current is not None:
             label = self._get_fmt_text(
-                self.qs_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
+                self.qs_current_label + ' [A]',
+                fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(
                 _sci(self.data.qs_current, self.data.qs_current_std))
             self._add_to_table([label, '', value])
 
         if n == 1:
             label = self._get_fmt_text(
-                self.int_gradient_label + ' [T]', fontsize=_label_fontsize, bold=True)
+                self.int_gradient_label + ' [T]',
+                fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(_sci(grad, grad_err))
             self._add_to_table([label, '', value])
         elif n == 2:
             label = self._get_fmt_text(
-                self.int_gradient_label + ' [T.m]', fontsize=_label_fontsize, bold=True)
+                self.int_gradient_label + ' [T.m]',
+                fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(_sci(grad, grad_err))
             self._add_to_table([label, '', value])
 
@@ -394,7 +402,8 @@ class MagnetReport(object):
         self._add_to_table([text])
 
         label = self._get_fmt_text(
-            self.indutance_label + ' [mH]', fontsize=_label_fontsize, bold=True)
+            self.indutance_label + ' [mH]',
+            fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.indutance)
         self._add_to_table([label, '', value])
 
@@ -404,7 +413,8 @@ class MagnetReport(object):
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.max_current_label + ' [A]', fontsize=_label_fontsize, bold=True)
+            self.max_current_label + ' [A]',
+            fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(self.max_current)
         self._add_to_table([label, '', value])
 
@@ -426,13 +436,15 @@ class MagnetReport(object):
         norm_text = (
             '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]' %
             (ls[0], ls[1], ls[2], self.data.reference_radius*1000))
-        norm_mult = self._get_fmt_text(norm_text, fontsize=_label_fontsize, bold=True)
+        norm_mult = self._get_fmt_text(
+            norm_text, fontsize=_label_fontsize, bold=True)
 
         ls = self.skew_mult_label.split(' ')
         skew_text = (
             '%s<br/>%s<br/>%s<br/>x=%.1f mm<br/>[T.m<sup>(2-n)</sup>]' %
             (ls[0], ls[1], ls[2], self.data.reference_radius*1000))
-        skew_mult = self._get_fmt_text(skew_text, fontsize=_label_fontsize, bold=True)
+        skew_mult = self._get_fmt_text(
+            skew_text, fontsize=_label_fontsize, bold=True)
 
         self._add_to_table([harm, norm_mult, skew_mult])
 
