@@ -18,11 +18,15 @@ if _os.name == 'nt':
     _magnet_name_fontsize = 16
     _title_fontsize = 11
     _label_fontsize = 6
+    _figure_width = 320
+    _figure_height = 200
 else:
     _default_fontsize = 6
     _magnet_name_fontsize = 17
     _title_fontsize = 12
     _label_fontsize = 7
+    _figure_width = 300
+    _figure_height = 180
 
 
 class MagnetReport(object):
@@ -244,9 +248,8 @@ class MagnetReport(object):
 
         # Normal Multipoles Image
         normal_image_path = 'normal.png'
-        width = 320
-        height = 200
-        img = self._get_image_text(normal_image_path, width, height)
+        img = self._get_image_text(
+            normal_image_path, _figure_width, _figure_height)
         self._add_to_table(['', '', '', img])
 
         # Results
@@ -254,9 +257,9 @@ class MagnetReport(object):
 
         # Skew Multipoles Image
         skew_image_path = 'skew.png'
-        width = 320
-        height = 200
-        img = self._get_image_text(skew_image_path, width, height)
+
+        img = self._get_image_text(
+            skew_image_path, _figure_width, _figure_height)
         self._add_to_table(['', '', '', img])
 
         # Multipoles
