@@ -34,6 +34,9 @@ class DataFile(object):
         self.start_pulse = None
         self.main_current = None
         self.main_current_std = None
+        self.main_voltage = None
+        self.main_voltage_std = None
+        self.resistance = None
         self.trim_current = None
         self.trim_current_std = None
         self.qs_current = None
@@ -85,54 +88,44 @@ class DataFile(object):
             _os.path.split(self.filename)[1].split('.')[0].split('_'))
 
         # Read Magnet Name
-        index = _search_in_file_lines(self.raw, 'file', 'arquivo')
-        if index is not None:
-            self.magnet_name = (
-                self.raw[index].split('\t')[1].split('\\')[-1].split('_')[0])
+        magnet_name = _find_value(self.raw, 'file', 'arquivo')
+        if magnet_name is not None:
+            self.magnet_name = magnet_name.split('\\')[-1].split('_')[0]
         else:
             self.magnet_name = filename_split[0]
 
         # Read Date
-        index = _search_in_file_lines(self.raw, 'date', 'data')
-        if index is not None:
-            self.date = self.raw[index].split('\t')[1]
-        else:
-            if len(filename_split) > 1:
-                self.date = filename_split[-2]
+        self.date = _find_value(self.raw, 'date', 'data')
+        if self.date is None and len(filename_split) > 1:
+            self.date = filename_split[-2]
 
         # Read Hour
-        index = _search_in_file_lines(self.raw, 'hour', 'hora')
-        if index is not None:
-            self.hour = self.raw[index].split('\t')[1]
-        else:
-            if len(filename_split) > 2:
-                self.hour = filename_split[-1]
+        self.hour = _find_value(self.raw, 'hour', 'hora')
+        if self.hour is None and len(filename_split) > 2:
+            self.hour = filename_split[-1]
 
         # Read Measure Number
-        index = _search_in_file_lines(
+        interval = _find_value(
             self.raw, 'analysis_interval', 'intervalo_analise')
-        if index is not None:
-            mn = self.raw[index].split('\t')[1].split('-')
+        if interval is not None:
+            mn = interval.split('-')
             self.measure_number = int(mn[1]) - int(mn[0])
 
         # Read Number of Measures Used to Calculate the Mean Value
-        index = _search_in_file_lines(self.raw, 'nr_turns', 'nr_voltas')
-        if index is not None:
-            self.measure_number_mean = self.raw[index].split('\t')[1]
+        self.measure_number_mean = _find_value(
+            self.raw, 'nr_turns', 'nr_voltas')
 
         # Read Temperature
-        index = _search_in_file_lines(
+        self.temperature = _find_value(
             self.raw, 'temperature', 'temperatura_ima')
-        if index is not None:
-            self.temperature = self.raw[index].split('\t')[1]
 
         # Read encoder start pulse
-        index = _search_in_file_lines(
+        self.start_pulse = _find_value(
             self.raw, 'pulse_start_collect', 'pulso_start_coleta')
-        if index is not None:
-            self.start_pulse = self.raw[index].split('\t')[1]
 
         self._get_currents_from_file_data()
+
+        self._get_electric_parameters_from_file_data()
 
         self._get_multipoles_from_file_data()
 
@@ -142,59 +135,59 @@ class DataFile(object):
         # Read Main Current
         self._get_main_current_from_file_data()
 
-        index = _search_in_file_lines(
-            self.raw, 'main_coil_current_std', 'corrente_alim_principal_std')
-        if index is not None:
-            self.main_current_std = float(self.raw[index].split('\t')[1])
+        self.main_current_std = _find_value(
+            self.raw, 'main_coil_current_std', 'corrente_alim_principal_std',
+            vtype=float)
 
         # Read Trim Current
-        index = _search_in_file_lines(
-            self.raw, 'trim_coil_current_avg', 'corrente_alim_secundaria_avg')
-        if index is not None:
-            self.trim_current = float(self.raw[index].split('\t')[1])
+        self.trim_current = _find_value(
+            self.raw, 'trim_coil_current_avg', 'corrente_alim_secundaria_avg',
+            vtype=float)
 
-        index = _search_in_file_lines(
-            self.raw, 'trim_coil_current_std', 'corrente_alim_secundaria_std')
-        if index is not None:
-            self.trim_current_std = float(self.raw[index].split('\t')[1])
+        self.trim_current_std = _find_value(
+            self.raw, 'trim_coil_current_std', 'corrente_alim_secundaria_std',
+            vtype=float)
 
         # Read CH Current
-        index = _search_in_file_lines(self.raw, 'ch_coil_current_avg')
-        if index is not None:
-            self.ch_current = float(self.raw[index].split('\t')[1])
+        self.ch_current = _find_value(
+            self.raw, 'ch_coil_current_avg', vtype=float)
 
-        index = _search_in_file_lines(self.raw, 'ch_coil_current_std')
-        if index is not None:
-            self.ch_current_std = float(self.raw[index].split('\t')[1])
+        self.ch_current_std = _find_value(
+            self.raw, 'ch_coil_current_std', vtype=float)
 
         # Read CV Current
-        index = _search_in_file_lines(self.raw, 'cv_coil_current_avg')
-        if index is not None:
-            self.cv_current = float(self.raw[index].split('\t')[1])
+        self.cv_current = _find_value(
+            self.raw, 'cv_coil_current_avg', vtype=float)
 
-        index = _search_in_file_lines(self.raw, 'cv_coil_current_std')
-        if index is not None:
-            self.cv_current_std = float(self.raw[index].split('\t')[1])
+        self.cv_current_std = _find_value(
+            self.raw, 'cv_coil_current_std', vtype=float)
 
         # Read QS Current
-        index = _search_in_file_lines(self.raw, 'qs_coil_current_avg')
-        if index is not None:
-            self.qs_current = float(self.raw[index].split('\t')[1])
+        self.qs_current = _find_value(
+            self.raw, 'qs_coil_current_avg', vtype=float)
 
-        index = _search_in_file_lines(self.raw, 'qs_coil_current_std')
-        if index is not None:
-            self.qs_current_std = float(self.raw[index].split('\t')[1])
+        self.qs_current_std = _find_value(
+            self.raw, 'qs_coil_current_std', vtype=float)
 
     def _get_main_current_from_file_data(self):
-        index = _search_in_file_lines(
-            self.raw, 'main_coil_current_avg', 'corrente_alim_principal_avg')
-        if index is not None:
-            self.main_current = float(self.raw[index].split('\t')[1])
-        else:
+        self.main_current = _find_value(
+            self.raw, 'main_coil_current_avg', 'corrente_alim_principal_avg',
+            vtype=float)
+        if self.main_current is None:
             message = (
                 'Failed to read main current value from file: \n\n"%s"' %
                 self.filename)
             raise DataFileError(message)
+
+    def _get_electric_parameters_from_file_data(self):
+        self.main_voltage = _find_value(
+            self.raw, 'main_coil_volt_avg', vtype=float)
+
+        self.main_voltage_std = _find_value(
+            self.raw, 'main_coil_volt_std', vtype=float)
+
+        self.resistance = _find_value(
+            self.raw, 'magnet_resistance', vtype=float)
 
     def _get_multipoles_from_file_data(self):
         index = _search_in_file_lines(
@@ -341,6 +334,19 @@ class DataFile(object):
                     skew[m]/normal[n])*(pos[i]**(m - n))
 
         return residual_mult_normal, residual_mult_skew
+
+
+def _find_value(lines, search_str, alt_search_str=None, vtype=str):
+    index = _search_in_file_lines(lines, search_str, alt_search_str)
+    if index is not None:
+        try:
+            value = lines[index].split('\t')[1]
+            value = vtype(value)
+            return value
+        except Exception:
+            return None
+    else:
+        return None
 
 
 def _search_in_file_lines(lines, search_str, alt_search_str=None):

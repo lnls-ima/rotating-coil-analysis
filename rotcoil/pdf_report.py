@@ -10,6 +10,7 @@ from reportlab.platypus import TableStyle as _TableStyle
 from reportlab.platypus import Paragraph as _Paragraph
 
 from rotcoil import data_file as _df
+from rotcoil import magnet_coil as _mag_coil
 from rotcoil.utils import scientific_notation as _sci
 
 
@@ -106,6 +107,7 @@ class MagnetReport(object):
             self.electric_param_label = 'Electric Parameters'
             self.indutance_label = 'Indutance'
             self.voltage_label = 'Voltage'
+            self.resistance_label = 'Resistance'
             self.max_current_label = 'Main Coil Maximum Current'
             self.nr_turns_label = 'Main Coil Number of Turns'
             self.norm_mult_label = 'Normalized Normal Multipoles'
@@ -139,6 +141,7 @@ class MagnetReport(object):
             self.electric_param_label = 'Ensaios Elétricos'
             self.indutance_label = 'Indutância'
             self.voltage_label = 'Tensão'
+            self.resistance_label = 'Resistência'
             self.max_current_label = 'Corrente Máxima'
             self.nr_turns_label = 'Número de Espiras'
             self.norm_mult_label = 'Multipolos Normais Normalizados'
@@ -230,6 +233,8 @@ class MagnetReport(object):
         return _Paragraph(img_text, self.style_sheet)
 
     def _get_fmt_text(self, text, fontsize=_default_fontsize, bold=False):
+        if text is None:
+            text = ''
         if bold:
             text = '<b>' + text + '</b>'
         fmt_text = ('<para align=center><font size="%i">%s</font></para>' %
@@ -294,13 +299,6 @@ class MagnetReport(object):
             spec_ang = 0
             spec_disp = 0
 
-        # Gradient and Angle
-        n = self.data.magnet_type
-        grad = self.data.multipoles_df.iloc[n, 1]
-        grad_err = self.data.multipoles_df.iloc[n, 2]
-        angle = self.data.multipoles_df.iloc[n, 7]
-        angle_err = self.data.multipoles_df.iloc[n, 8]
-
         text = self._get_fmt_text(
             self.results_label, fontsize=_label_fontsize, bold=True)
         self._add_to_table([text])
@@ -326,6 +324,7 @@ class MagnetReport(object):
         value = self._get_fmt_text(self.data.measure_number)
         self._add_to_table([label, '', value])
 
+        # Current info
         label = self._get_fmt_text(
             self.main_current_label + ' [A]',
             fontsize=_label_fontsize, bold=True)
@@ -365,6 +364,13 @@ class MagnetReport(object):
                 _sci(self.data.qs_current, self.data.qs_current_std))
             self._add_to_table([label, '', value])
 
+        # Gradients, roll and center offset
+        n = self.data.magnet_type
+        grad = self.data.multipoles_df.iloc[n, 1]
+        grad_err = self.data.multipoles_df.iloc[n, 2]
+        angle = self.data.multipoles_df.iloc[n, 7]
+        angle_err = self.data.multipoles_df.iloc[n, 8]
+
         if n == 1:
             label = self._get_fmt_text(
                 self.int_gradient_label + ' [T]',
@@ -400,6 +406,7 @@ class MagnetReport(object):
         value = self._get_fmt_text(_sci(angle*1e3, angle_err*1e3))
         self._add_to_table([label, '', value])
 
+        # Electric parameters
         text = self._get_fmt_text(
             self.electric_param_label, fontsize=_label_fontsize, bold=True)
         self._add_to_table([text])
@@ -411,19 +418,28 @@ class MagnetReport(object):
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.voltage_label + ' [V]', fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(self.voltage)
+            self.voltage_label + ' [V]',
+            fontsize=_label_fontsize, bold=True)
+        value = self._get_fmt_text(
+            _sci(self.data.main_voltage, self.data.main_voltage_std))
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.max_current_label + ' [A]',
+            self.resistance_label + ' [' + chr(937) + ']',
             fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(self.max_current)
+        value = self._get_fmt_text(self.data.resistance)
         self._add_to_table([label, '', value])
+
+        # label = self._get_fmt_text(
+        #     self.max_current_label + ' [A]',
+        #     fontsize=_label_fontsize, bold=True)
+        # value = self._get_fmt_text(self.max_current)
+        # self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
             self.nr_turns_label, fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(self.nr_turns)
+        value = self._get_fmt_text(
+            _mag_coil.get_number_of_turns(self.data.magnet_name))
         self._add_to_table([label, '', value])
 
     def _add_residual_multipoles_to_report_table(self):

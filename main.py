@@ -36,7 +36,7 @@ if os.name == 'nt':
 else:
     _fontsize = 18
     _title_fontsize = 16
-    __label_fontsize = 16
+    _label_fontsize = 16
     _annotation_fontsize = 16
     _legend_fontsize = 16
     _ticky_fontsize = 14
@@ -123,6 +123,8 @@ class MainWindow(QtGui.QMainWindow):
             self.change_wiki_graphs_label)
 
         self.ui.cb_files_4.currentIndexChanged.connect(
+            self.clear_magnet_report)
+        self.ui.cb_language.currentIndexChanged.connect(
             self.clear_magnet_report)
         self.ui.bt_save_report.clicked.connect(self.save_magnet_report)
         self.ui.bt_preview.clicked.connect(self.preview_magnet_report)
@@ -286,6 +288,7 @@ class MainWindow(QtGui.QMainWindow):
         self._clear_data()
         self._load_data()
         self._update_multipoles_screen()
+        self._set_default_report_file()
 
     def _load_data(self):
         data = np.array([])
@@ -1328,6 +1331,15 @@ class MainWindow(QtGui.QMainWindow):
             column_name = self.file_id.columns[idx_label]
             self.ui.wiki_graphs_xlabel.setText(column_name)
 
+    def _set_default_report_file(self):
+        if len(self.default_file_id) > 1:
+            try:
+                file_id = [float(i) for i in self.default_file_id]
+                max_index = np.argmax(file_id)
+                self.ui.cb_files_4.setCurrentIndex(max_index)
+            except Exception:
+                pass
+
     def save_magnet_report(self):
         """Save magnet report."""
         idx = self.ui.cb_files_4.currentIndex()
@@ -1353,8 +1365,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def preview_magnet_report(self):
         """Show magnet report preview."""
-        if self.magnet_report is None:
-            self._create_magnet_report()
+        self._create_magnet_report()
 
         filename = 'magnet_report.pdf'
         self.magnet_report.save(filename)
@@ -1365,6 +1376,11 @@ class MainWindow(QtGui.QMainWindow):
         pixmap = QtGui.QPixmap.fromImage(image)
         self.ui.preview.setPixmap(pixmap)
         self.ui.preview.setScaledContents(True)
+        try:
+            os.remove("normal.png")
+            os.remove("skew.png")
+        except Exception:
+            pass
 
     def clear_magnet_report(self):
         """Clear magnet report."""

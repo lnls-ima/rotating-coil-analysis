@@ -111,6 +111,9 @@ class DraggableLegend(object):
 
 def scientific_notation(value, error):
     """Return a string with value and error in scientific notation."""
+    if value is None or error is None:
+        return ''
+
     exponent = int('{:e}'.format(value).split('e')[-1])
     exponent_str = ' x E'+str(exponent)
 

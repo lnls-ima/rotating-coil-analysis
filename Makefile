@@ -6,4 +6,4 @@ all:
 	pyrcc4 -py3 resources.qrc -o resources_rc.py
 
 clean:
-	-rm -rf interface.py resource_file_rc.py table_dialog.py
+	-rm -rf interface.py resources_rc.py table_dialog.py
