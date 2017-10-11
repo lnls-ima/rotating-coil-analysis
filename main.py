@@ -1407,9 +1407,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.cb_files_3.setCurrentIndex(prev_idx)
 
         indutance = self.ui.indutance_value.text()
-        voltage = self.ui.voltage_value.text()
-        max_current = self.ui.max_current_value.text()
-        nr_turns = self.ui.nr_turns_value.text()
 
         if self.ui.cb_language.currentIndex() == 0:
             english = True
@@ -1417,12 +1414,7 @@ class MainWindow(QtGui.QMainWindow):
             english = False
 
         self.magnet_report = pdf_report.MagnetReport(
-            data,
-            english=english,
-            indutance=indutance,
-            voltage=voltage,
-            max_current=max_current,
-            nr_turns=nr_turns)
+            data, english=english, indutance=indutance)
 
 
 class GUIThread(threading.Thread):

@@ -33,8 +33,8 @@ else:
 class MagnetReport(object):
     """Magnet report."""
 
-    def __init__(self, datafile, accelerator=None, english=False, indutance='',
-                 voltage='', max_current='', nr_turns=''):
+    def __init__(self, datafile, accelerator=None,
+                 english=False, indutance=''):
         """Create magnet report.
 
         Args:
@@ -59,9 +59,6 @@ class MagnetReport(object):
         self.accelerator = accelerator
 
         self.indutance = indutance
-        self.voltage = voltage
-        self.max_current = max_current
-        self.nr_turns = nr_turns
 
         self.table = []
         self.row_count = 0
@@ -425,16 +422,18 @@ class MagnetReport(object):
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.resistance_label + ' [' + chr(937) + ']',
+            self.resistance_label + ' [m' + chr(937) + ']',
             fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(self.data.resistance)
+        if self.data.resistance is not None:
+            resistance = self.data.resistance*1000
+        else:
+            resistance = None
+        if self.data.resistance_std is not None:
+            resistance_std = self.data.resistance_std*1000
+        else:
+            resistance_std = None
+        value = self._get_fmt_text(_sci(resistance, resistance_std))
         self._add_to_table([label, '', value])
-
-        # label = self._get_fmt_text(
-        #     self.max_current_label + ' [A]',
-        #     fontsize=_label_fontsize, bold=True)
-        # value = self._get_fmt_text(self.max_current)
-        # self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
             self.nr_turns_label, fontsize=_label_fontsize, bold=True)

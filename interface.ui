@@ -1876,14 +1876,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_8">
          <item row="2" column="1">
-          <widget class="QLineEdit" name="max_current_value">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="nr_turns_value">
+          <widget class="QLineEdit" name="resistance_value">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -1927,7 +1920,7 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="max_current_label">
+          <widget class="QLabel" name="resistance_label">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -1937,7 +1930,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Main Coil Maximum Current [A]:   </string>
+            <string>Resistance [mOhm]:   </string>
            </property>
           </widget>
          </item>
@@ -1953,6 +1946,13 @@
            </property>
            <property name="text">
             <string>Main Coil Number of Turns:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="nr_turns_value">
+           <property name="enabled">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -2404,6 +2404,67 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>main_tab</tabstop>
+  <tabstop>bt_open_file</tabstop>
+  <tabstop>bt_clear_input_list</tabstop>
+  <tabstop>input_list</tabstop>
+  <tabstop>bt_upload_files</tabstop>
+  <tabstop>bt_remove_files</tabstop>
+  <tabstop>bt_data_analysis</tabstop>
+  <tabstop>bt_clear_output_list</tabstop>
+  <tabstop>output_list</tabstop>
+  <tabstop>cb_files_1</tabstop>
+  <tabstop>cb_multipoles_1</tabstop>
+  <tabstop>bt_plot_multipoles</tabstop>
+  <tabstop>bt_table_1</tabstop>
+  <tabstop>cb_multipoles_2</tabstop>
+  <tabstop>cb_avg_1</tabstop>
+  <tabstop>bt_table_2</tabstop>
+  <tabstop>bt_plot_multipoles_all</tabstop>
+  <tabstop>cb_hyst_axis</tabstop>
+  <tabstop>cb_hyst_axis_label</tabstop>
+  <tabstop>cb_harmonic</tabstop>
+  <tabstop>rb_norm</tabstop>
+  <tabstop>rb_skew</tabstop>
+  <tabstop>bt_table_3</tabstop>
+  <tabstop>bt_plot_hysteresis</tabstop>
+  <tabstop>cb_files_2</tabstop>
+  <tabstop>bt_table_4</tabstop>
+  <tabstop>bt_plot_raw_data</tabstop>
+  <tabstop>cb_avg_2</tabstop>
+  <tabstop>bt_plot_raw_data_all</tabstop>
+  <tabstop>cb_files_3</tabstop>
+  <tabstop>rb_norm_2</tabstop>
+  <tabstop>rb_skew_2</tabstop>
+  <tabstop>ds_range_min</tabstop>
+  <tabstop>ds_range_max</tabstop>
+  <tabstop>ds_range_step</tabstop>
+  <tabstop>bt_plot_residual_field</tabstop>
+  <tabstop>cb_avg_3</tabstop>
+  <tabstop>bt_table_5</tabstop>
+  <tabstop>bt_plot_residual_field_all</tabstop>
+  <tabstop>cb_spec_on</tabstop>
+  <tabstop>ds_reference_radius</tabstop>
+  <tabstop>tab_residual</tabstop>
+  <tabstop>cb_files_4</tabstop>
+  <tabstop>cb_language</tabstop>
+  <tabstop>indutance_value</tabstop>
+  <tabstop>voltage_value</tabstop>
+  <tabstop>resistance_value</tabstop>
+  <tabstop>nr_turns_value</tabstop>
+  <tabstop>bt_preview</tabstop>
+  <tabstop>bt_save_report</tabstop>
+  <tabstop>wiki_graphs_title</tabstop>
+  <tabstop>cb_wiki_graphs_label</tabstop>
+  <tabstop>wiki_graphs_xlabel</tabstop>
+  <tabstop>bt_plot_wiki_graphs</tabstop>
+  <tabstop>tab_wiki_graphs</tabstop>
+  <tabstop>directory</tabstop>
+  <tabstop>table_all_files</tabstop>
+  <tabstop>table_one_file</tabstop>
+  <tabstop>table_avg</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>
