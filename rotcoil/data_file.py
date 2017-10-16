@@ -188,10 +188,15 @@ class DataFile(object):
             self.raw, 'main_coil_volt_std', vtype=float)
 
         self.resistance = _find_value(
-            self.raw, 'magnet_resistance_avg', vtype=float)
+            self.raw, 'magnet_resistance', vtype=float)
 
         self.resistance_std = _find_value(
             self.raw, 'magnet_resistance_std', vtype=float)
+
+        if self.resistance_std is None and self.resistance is not None:
+            self.resistance_std = _np.abs(self.resistance)*_np.sqrt(
+                (self.main_current_std/self.main_current)**2 +
+                (self.main_voltage_std/self.main_voltage)**2)
 
     def _get_multipoles_from_file_data(self):
         index = _search_in_file_lines(

@@ -90,6 +90,28 @@ class MainWindow(QtGui.QMainWindow):
         self.table_df = None
         self.magnet_report = None
 
+    def _clear_graphs(self):
+        self.ui.wt_multipoles.canvas.ax.clear()
+        self.ui.wt_multipoles.canvas.draw()
+        self.ui.wt_residual.canvas.ax.clear()
+        self.ui.wt_residual.canvas.draw()
+        self.ui.wt_residual_comp.canvas.ax.clear()
+        self.ui.wt_residual_comp.canvas.fig.clf()
+        self.ui.wt_residual_comp.canvas.draw()
+        self.ui.table_one_file.setColumnCount(0)
+        self.ui.table_avg.setColumnCount(0)
+        self.ui.table_all_files.setColumnCount(0)
+        self.ui.wt_roll_offset.canvas.ax.clear()
+        self.ui.wt_roll_offset.canvas.fig.clf()
+        self.ui.wt_roll_offset.canvas.draw()
+        self.ui.wt_dipole.canvas.ax.clear()
+        self.ui.wt_dipole.canvas.draw()
+        self.ui.wt_quadrupole.canvas.ax.clear()
+        self.ui.wt_quadrupole.canvas.draw()
+        self.ui.wt_sextupole.canvas.ax.clear()
+        self.ui.wt_sextupole.canvas.draw()
+        self.clear_magnet_report()
+
     def _connect_widgets(self):
         """Make the connections between signals and slots."""
         self.ui.menu_open.triggered.connect(self.load_files)
@@ -286,6 +308,7 @@ class MainWindow(QtGui.QMainWindow):
     def data_analysis(self):
         """Analyse data from upload file list."""
         self._clear_data()
+        self._clear_graphs()
         self._load_data()
         self._update_multipoles_screen()
         self._set_default_report_file()
@@ -977,6 +1000,7 @@ class MainWindow(QtGui.QMainWindow):
         columns = self.default_file_id
 
         self.ui.table_one_file.setColumnCount(1)
+        self.ui.table_one_file.setRowCount(3)
         offset_x_str = utils.scientific_notation(
             self.data[idx].offset_x*1e6, self.data[idx].offset_x_err*1e6)
         item = QtGui.QTableWidgetItem(offset_x_str)
@@ -1013,6 +1037,7 @@ class MainWindow(QtGui.QMainWindow):
             roll = [d.roll for d in self.data]
 
             self.ui.table_avg.setColumnCount(1)
+            self.ui.table_avg.setRowCount(3)
             offset_x_str = utils.scientific_notation(
                 np.mean(offset_x)*1e6, np.std(offset_x)*1e6)
             item = QtGui.QTableWidgetItem(offset_x_str)
@@ -1044,6 +1069,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.table_avg.horizontalHeader().setStretchLastSection(True)
 
             self.ui.table_all_files.setColumnCount(len(self.data))
+            self.ui.table_all_files.setRowCount(3)
             self.ui.table_all_files.horizontalHeader().setDefaultSectionSize(
                 100)
             header = self.ui.table_all_files.horizontalHeader()
@@ -1332,7 +1358,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.wiki_graphs_xlabel.setText(column_name)
 
     def _set_default_report_file(self):
-        if len(self.default_file_id) > 1:
+        if self.default_file_id is not None and len(self.default_file_id) > 1:
             try:
                 file_id = [float(i) for i in self.default_file_id]
                 max_index = np.argmax(file_id)
