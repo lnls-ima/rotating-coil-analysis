@@ -382,10 +382,17 @@ class MainWindow(QtGui.QMainWindow):
         qs = [d.qs_current for d in self.data]
         magnet_name = [d.magnet_name for d in self.data]
         start_pulse = [d.start_pulse for d in self.data]
+        integrator_gain = [d.integrator_gain for d in self.data]
+        nr_integration_points = [d.nr_integration_points for d in self.data]
+        velocity = [d.velocity for d in self.data]
         timestamp = [d.hour for d in self.data]
 
-        df_array = np.array(
-            [main, trim, ch, cv, qs, magnet_name, start_pulse, timestamp])
+        tol_main = 2
+        tol = 1
+
+        df_array = np.array([
+            main, trim, ch, cv, qs, magnet_name, start_pulse,
+            integrator_gain, nr_integration_points, velocity, timestamp])
 
         df_columns = [
             'Main Current (A)',
@@ -395,6 +402,9 @@ class MainWindow(QtGui.QMainWindow):
             'QS Current (A)',
             'Magnet Name',
             'Encoder Pulse',
+            'Integrator Gain',
+            'Number Integration Points',
+            'Frequency',
             'Timestamp']
 
         iddf = pd.DataFrame(df_array.T, columns=df_columns)
@@ -413,10 +423,10 @@ class MainWindow(QtGui.QMainWindow):
         self.default_file_id_name = None
 
         if iddf.shape[1] > 1:
-            if abs(max(iddf.iloc[:, 0]) - min(iddf.iloc[:, 0])) < 2:
+            if abs(max(iddf.iloc[:, 0]) - min(iddf.iloc[:, 0])) < tol_main:
                 for column_name in iddf.columns[1:]:
                     different_values = self._check_column_values(
-                        iddf[column_name])
+                        iddf[column_name], tol)
 
                     if different_values:
                         question = (
@@ -435,7 +445,7 @@ class MainWindow(QtGui.QMainWindow):
             self.default_file_id = self.file_id.iloc[:, 0].tolist()
             self.default_file_id_name = self.file_id.columns[0]
 
-    def _check_column_values(self, column):
+    def _check_column_values(self, column, tol):
         different_values = False
         vmax = max(column)
         vmin = min(column)
@@ -444,7 +454,7 @@ class MainWindow(QtGui.QMainWindow):
             if vmax != vmin:
                 different_values = True
         else:
-            if abs(vmax - vmin) > 1:
+            if abs(vmax - vmin) > tol:
                 different_values = True
         return different_values
 

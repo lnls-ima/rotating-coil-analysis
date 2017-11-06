@@ -91,7 +91,7 @@ class MagnetReport(object):
             self.date_label = 'Date'
             self.hour_label = 'Hour'
             self.temperature_label = 'Temperature'
-            self.measure_number_label = 'Number of Measurements'
+            self.number_of_measurements_label = 'Number of Measurements'
             self.main_current_label = 'Main Coil Current'
             self.trim_current_label = 'Trim Coil Current'
             self.ch_current_label = 'CH Coil Current'
@@ -125,7 +125,7 @@ class MagnetReport(object):
             self.date_label = 'Data'
             self.hour_label = 'Hora'
             self.temperature_label = 'Temperatura'
-            self.measure_number_label = 'Número de Coletas'
+            self.number_of_measurements_label = 'Número de Coletas'
             self.main_current_label = 'Corrente'
             self.trim_current_label = 'Corrente Trim'
             self.ch_current_label = 'Corrente CH'
@@ -313,12 +313,13 @@ class MagnetReport(object):
         label = self._get_fmt_text(
             self.temperature_label + ' [°C]',
             fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(self.data.temperature)
+        value = self._get_fmt_text(str(self.data.temperature))
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
-            self.measure_number_label, fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(self.data.measure_number)
+            self.number_of_measurements_label,
+            fontsize=_label_fontsize, bold=True)
+        value = self._get_fmt_text(str(self.data.number_of_measurements))
         self._add_to_table([label, '', value])
 
         # Current info
@@ -411,7 +412,7 @@ class MagnetReport(object):
         label = self._get_fmt_text(
             self.indutance_label + ' [mH]',
             fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(self.indutance)
+        value = self._get_fmt_text(str(self.indutance))
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(

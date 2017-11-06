@@ -25,13 +25,17 @@ class DataFile(object):
         self.filename = filename
         self.raw = None
         self.magnet_name = None
-        self.magnet_type = None
         self.date = None
         self.hour = None
         self.temperature = None
-        self.measure_number = None
-        self.measure_number_mean = None
-        self.start_pulse = None
+        self.integrator_gain = None
+        self.nr_integration_points = None
+        self.velocity = None
+        self.acceleration = None
+        self.nr_collections = None
+        self.nr_turns = None
+        self.number_of_measurements = None
+        self.rotation = None
         self.main_current = None
         self.main_current_std = None
         self.main_voltage = None
@@ -46,23 +50,115 @@ class DataFile(object):
         self.ch_current_std = None
         self.cv_current = None
         self.cv_current_std = None
-        self.multipoles = None
-        self.curves = None
-        self.reference_radius = None
-        self.columns_names = None
-        self.multipoles_df = None
-        self.curves_df = None
-        self.offset_x = None
-        self.offset_x_err = None
-        self.offset_y = None
-        self.offset_y_err = None
-        self.roll = None
-        self.roll_err = None
+        self.rotating_coil_name = None
+        self.rotating_coil_type = None
+        self.measurement_type = None
+        self.start_pulse = None
+        self.nr_turns_rotating_coil = None
+        self.rotating_coil_internal_radius = None
+        self.rotating_coil_external_radius = None
+        self.nr_turns_bucked_coil = None
+        self.bucked_coil_internal_radius = None
+        self.bucked_coil_external_radius = None
+        self._magnet_type = None
+        self._multipoles = None
+        self._curves = None
+        self._reference_radius = None
+        self._columns_names = None
+        self._multipoles_df = None
+        self._curves_df = None
+        self._offset_x = None
+        self._offset_x_err = None
+        self._offset_y = None
+        self._offset_y_err = None
+        self._roll = None
+        self._roll_err = None
 
         self._read_file()
         self._create_data_frames()
         self._calc_offsets()
         self._set_roll()
+
+    @property
+    def magnet_type(self):
+        """Magnet type [0 for dipole, 1 for quadrupole, ...]."""
+        return self._magnet_type
+
+    @property
+    def multipoles(self):
+        """Multipoles."""
+        return self._multipoles
+
+    @property
+    def curves(self):
+        """Curves."""
+        return self._curves
+
+    @property
+    def reference_radius(self):
+        """Reference radius [m]."""
+        return self._reference_radius
+
+    @property
+    def columns_names(self):
+        """Column names."""
+        return self._columns_names
+
+    @property
+    def multipoles_df(self):
+        """Multipole DataFrame."""
+        return self._multipoles_df
+
+    @property
+    def curves_df(self):
+        """Curve DataFrame."""
+        return self._curves_df
+
+    @property
+    def offset_x(self):
+        """Offset X [m]."""
+        return self._offset_x
+
+    @property
+    def offset_x_err(self):
+        """Offset X error [m]."""
+        return self._offset_x_err
+
+    @property
+    def offset_y(self):
+        """Offset Y [m]."""
+        return self._offset_y
+
+    @property
+    def offset_y_err(self):
+        """Offset Y error [m]."""
+        return self._offset_y_err
+
+    @property
+    def roll(self):
+        """Roll [rad]."""
+        return self._roll
+
+    @property
+    def roll_err(self):
+        """Roll error [rad]."""
+        return self._roll_err
+
+    @property
+    def normal_multipoles(self):
+        """Normal multipole components of the magnetic field."""
+        if self._multipoles is not None:
+            return self._multipoles[:, 1]
+        else:
+            return None
+
+    @property
+    def skew_multipoles(self):
+        """Skew multipole components of the magnetic field."""
+        if self._multipoles is not None:
+            return self._multipoles[:, 3]
+        else:
+            return None
 
     def _read_file(self):
         if not _os.path.isfile(self.filename):
@@ -105,32 +201,87 @@ class DataFile(object):
         if self.hour is None and len(filename_split) > 2:
             self.hour = filename_split[-1]
 
+        # Read Temperature
+        self.temperature = _find_value(
+            self.raw, 'temperature', 'temperatura_ima', vtype=float)
+
+        # Read integrator parameters
+        self.integrator_gain = _find_value(
+            self.raw, 'integrator_gain', 'ganho_integrador', vtype=float)
+
+        self.nr_integration_points = _find_value(
+            self.raw, 'nr_integration_points',
+            'nr_pontos_integracao', vtype=int)
+
+        self.velocity = _find_value(
+            self.raw, 'velocity', 'velocidade', vtype=float)
+
+        self.acceleration = _find_value(
+            self.raw, 'acceleration', 'aceleracao', vtype=float)
+
+        self.nr_collections = _find_value(
+            self.raw, 'nr_collections', 'nr_coletas', vtype=int)
+
+        # Read Number of Measures Used to Calculate the Mean Value
+        self.nr_turns = _find_value(
+            self.raw, 'nr_turns', 'nr_voltas', vtype=int)
+
         # Read Measure Number
         interval = _find_value(
             self.raw, 'analysis_interval', 'intervalo_analise')
         if interval is not None:
             mn = interval.split('-')
-            self.measure_number = int(mn[1]) - int(mn[0])
+            self.number_of_measurements = int(mn[1]) - int(mn[0])
 
-        # Read Number of Measures Used to Calculate the Mean Value
-        self.measure_number_mean = _find_value(
-            self.raw, 'nr_turns', 'nr_voltas')
-
-        # Read Temperature
-        self.temperature = _find_value(
-            self.raw, 'temperature', 'temperatura_ima')
-
-        # Read encoder start pulse
-        self.start_pulse = _find_value(
-            self.raw, 'pulse_start_collect', 'pulso_start_coleta')
+        self.rotation = _find_value(
+            self.raw, 'rotation', 'sentido_de_rotacao')
 
         self._get_currents_from_file_data()
 
         self._get_electric_parameters_from_file_data()
 
+        self._get_rotating_coil_data()
+
         self._get_multipoles_from_file_data()
 
         self._get_raw_data_from_file_data()
+
+    def _get_rotating_coil_data(self):
+        self.rotating_coil_name = _find_value(
+            self.raw, 'rotating_coil_name', 'nome_bobina_girante')
+
+        self.rotating_coil_type = _find_value(
+            self.raw, 'rotating_coil_type', 'tipo_bobina_girante')
+
+        self.measurement_type = _find_value(
+            self.raw, 'measurement_type', 'tipo_medicao')
+
+        self.start_pulse = _find_value(
+            self.raw, 'pulse_start_collect', 'pulso_start_coleta', vtype=int)
+
+        self.nr_turns_rotating_coil = _find_value(
+            self.raw, 'n_turns_main_coil',
+            'n_espiras_bobina_principal', vtype=int)
+
+        self.rotating_coil_internal_radius = _find_value(
+            self.raw, 'main_coil_internal_radius',
+            'raio_interno_bobina_princip', vtype=float)
+
+        self.rotating_coil_external_radius = _find_value(
+            self.raw, 'main_coil_external_radius',
+            'raio_externo_bobina_princip', vtype=float)
+
+        self.nr_turns_bucked_coil = _find_value(
+            self.raw, 'n_turns_bucked_coil',
+            'n_espiras_bobina_bucked', vtype=int)
+
+        self.bucked_coil_internal_radius = _find_value(
+            self.raw, 'bucked_coil_internal_radius',
+            'raio_interno_bobina_bucked', vtype=float)
+
+        self.bucked_coil_external_radius = _find_value(
+            self.raw, 'bucked_coil_external_radius',
+            'raio_externo_bobina_bucked', vtype=float)
 
     def _get_currents_from_file_data(self):
         # Read Main Current
@@ -207,10 +358,10 @@ class DataFile(object):
             multipoles = _np.array([])
             for value in multipoles_str:
                 multipoles = _np.append(multipoles, value.split('\t'))
-            self.multipoles = multipoles.reshape(15, 13).astype(_np.float64)
-            self.magnet_type = _np.nonzero(self.multipoles[:, 7])[0][0]
-            self.columns_names = _np.array(self.raw[index + 2].split('\t'))
-            self.reference_radius = float(
+            self._multipoles = multipoles.reshape(15, 13).astype(_np.float64)
+            self._magnet_type = _np.nonzero(self._multipoles[:, 7])[0][0]
+            self._columns_names = _np.array(self.raw[index + 2].split('\t'))
+            self._reference_radius = float(
                 self.raw[index + 2].split("@")[1].split("mm")[0])/1000
         else:
             message = (
@@ -226,7 +377,7 @@ class DataFile(object):
             curves = _np.array([])
             for value in curves_str:
                 curves = _np.append(curves, value[:-1].split('\t'))
-            self.curves = curves.reshape(
+            self._curves = curves.reshape(
                 int(len(curves_str)),
                 int(len(curves)/len(curves_str))).astype(_np.float64)*1e-12
         else:
@@ -235,52 +386,52 @@ class DataFile(object):
             raise DataFileError(message)
 
     def _create_data_frames(self):
-        if (self.multipoles is None or self.curves is None or
-           self.columns_names is None):
+        if (self._multipoles is None or self._curves is None or
+           self._columns_names is None):
             return
 
         index = _np.char.mod('%d', _np.linspace(1, 15, 15))
-        self.multipoles_df = _pd.DataFrame(
-            self.multipoles, columns=self.columns_names, index=index)
+        self._multipoles_df = _pd.DataFrame(
+            self._multipoles, columns=self._columns_names, index=index)
 
-        __npoints = self.curves.shape[0]
-        _ncurves = self.curves.shape[1]
+        __npoints = self._curves.shape[0]
+        _ncurves = self._curves.shape[1]
         index = _np.char.mod('%d', _np.linspace(1, __npoints, __npoints))
         columns = _np.char.mod('%d', _np.linspace(1, _ncurves, _ncurves))
-        self.curves_df = _pd.DataFrame(
-            self.curves, index=index, columns=columns)
+        self._curves_df = _pd.DataFrame(
+            self._curves, index=index, columns=columns)
 
     def _calc_offsets(self):
-        if self.multipoles is None or self.magnet_type is None:
+        if self._multipoles is None or self._magnet_type is None:
             return
 
-        if self.magnet_type != 0:
-            n = self.magnet_type
-            normal = self.multipoles[:, 1]
-            normal_err = self.multipoles[:, 2]
-            skew = self.multipoles[:, 3]
-            skew_err = self.multipoles[:, 4]
+        if self._magnet_type != 0:
+            n = self._magnet_type
+            normal = self._multipoles[:, 1]
+            normal_err = self._multipoles[:, 2]
+            skew = self._multipoles[:, 3]
+            skew_err = self._multipoles[:, 4]
 
-            self.offset_x = normal[n-1]/(n*normal[n])
-            self.offset_x_err = (
+            self._offset_x = normal[n-1]/(n*normal[n])
+            self._offset_x_err = (
                 ((normal_err[n-1]/(n*normal[n]))**2 -
                  (normal[n-1]*normal_err[n]/(n*(normal[n]**2)))**2)**(1/2))
 
-            self.offset_y = skew[n-1]/(n*normal[n])
-            self.offset_y_err = (
+            self._offset_y = skew[n-1]/(n*normal[n])
+            self._offset_y_err = (
                 ((skew_err[n-1]/(n*normal[n]))**2 -
                  (skew[n-1]*normal_err[n]/(n*(normal[n]**2)))**2)**(1/2))
         else:
-            self.offset_x = 0
-            self.offset_x_err = 0
-            self.offset_y = 0
-            self.offset_y_err = 0
+            self._offset_x = 0
+            self._offset_x_err = 0
+            self._offset_y = 0
+            self._offset_y_err = 0
 
     def _set_roll(self):
-        if self.multipoles is None or self.magnet_type is None:
+        if self._multipoles is None or self._magnet_type is None:
             return
-        self.roll = self.multipoles[self.magnet_type, 7]
-        self.roll_err = self.multipoles[self.magnet_type, 8]
+        self._roll = self._multipoles[self._magnet_type, 7]
+        self._roll_err = self._multipoles[self._magnet_type, 8]
 
     def calc_residual_field(self, pos):
         """Calculate residual field.
@@ -292,18 +443,18 @@ class DataFile(object):
             residual_normal (array): normal residual field [T].
             residual_skew (array): skew residual field [T].
         """
-        if self.multipoles is None or self.magnet_type is None:
+        if self._multipoles is None or self._magnet_type is None:
             return None, None
 
-        n = self.magnet_type
-        nr_harmonics = self.multipoles.shape[0]
+        n = self._magnet_type
+        nr_harmonics = self._multipoles.shape[0]
 
         nrpts = len(pos)
         residual_normal = _np.zeros(nrpts)
         residual_skew = _np.zeros(nrpts)
 
-        normal = self.multipoles[:, 1]
-        skew = self.multipoles[:, 3]
+        normal = self._multipoles[:, 1]
+        skew = self._multipoles[:, 3]
 
         for i in range(nrpts):
             for m in range(n+1, nr_harmonics):
@@ -322,18 +473,18 @@ class DataFile(object):
             residual_mult_normal (array): normal residual multipoles table.
             residual_mult_skew (array): skew residual multipoles table.
         """
-        if self.multipoles is None or self.magnet_type is None:
+        if self._multipoles is None or self._magnet_type is None:
             return None, None
 
-        n = self.magnet_type
-        nr_harmonics = self.multipoles.shape[0]
+        n = self._magnet_type
+        nr_harmonics = self._multipoles.shape[0]
 
         nrpts = len(pos)
         residual_mult_normal = _np.zeros([nr_harmonics, nrpts])
         residual_mult_skew = _np.zeros([nr_harmonics, nrpts])
 
-        normal = self.multipoles[:, 1]
-        skew = self.multipoles[:, 3]
+        normal = self._multipoles[:, 1]
+        skew = self._multipoles[:, 3]
 
         for i in range(nrpts):
             for m in range(n+1, nr_harmonics):
