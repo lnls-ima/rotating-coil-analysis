@@ -42,6 +42,11 @@ else:
     _ticky_fontsize = 14
     _tickx_fontsize = 12
 
+_addlimx = 0.02
+_addlimy = 0.25
+
+_default_dir = os.path.expanduser('~')
+
 
 class MainWindow(QtGui.QMainWindow):
     """Rotating Coil Analysis Graphical User Interface."""
@@ -209,8 +214,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def load_files(self):
         """Load input files and sorts by date and time."""
-        default_dir = os.path.expanduser('~')
-        filepath = QtGui.QFileDialog.getOpenFileNames(directory=default_dir)
+        filepath = QtGui.QFileDialog.getOpenFileNames(directory=_default_dir)
         if len(filepath) == 0:
             return
 
@@ -1136,15 +1140,15 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.wt_sextupole.canvas, self.ui.wt_sextupole.canvas.ax, 2)
 
     def _set_wiki_graph_variables(self):
-        self.markersize = 14
+        self.markersize = 12
         self.linewidth = 2
         self.green = '#268B26'
         self.red = '#FA4842'
         self.blue = '#018AC2'
         self.purple = '#B86DF7'
-        self.bbox = dict(facecolor='white', edgecolor='white', alpha=1)
-        self.addlimx = 0.01
-        self.addlimy = 0.05
+        self.bbox = dict(facecolor='white', edgecolor='white', alpha=0.5)
+        self.addlimx = _addlimx
+        self.addlimy = _addlimy
 
         idx_label = self.ui.cb_wiki_graphs_label.currentIndex()
         column_name = self.file_id.columns[idx_label]
@@ -1319,8 +1323,17 @@ class MainWindow(QtGui.QMainWindow):
         pv_variation = (100*abs(max(multipole) - min(multipole)) /
                         abs(np.mean(multipole)))
 
-        line1 = ("%s = (%4.3f ± %4.3f) %s" %
-                 (label, np.mean(multipole), np.std(multipole), unit))
+        std = np.std(multipole)
+        exponent = int('{:e}'.format(std).split('e')[-1])
+        if exponent > 0:
+            mean_str = '{:4.0f}'.format(np.mean(multipole))
+            std_str = '{:4.0f}'.format(std)
+        else:
+            ps = str(abs(exponent))
+            mean_str = ('{:4.' + ps + 'f}').format(np.mean(multipole))
+            std_str = ('{:4.' + ps + 'f}').format(std)
+
+        line1 = '%s = (%s ± %s) %s' % (label, mean_str, std_str, unit)
         line2 = "rms excitation error = %3.2f %%" % (rms_error)
         line3 = "peak-valey variation = %2.1f %%" % (pv_variation)
         mult_str = "\n".join([line1, line2, line3])
@@ -1381,12 +1394,12 @@ class MainWindow(QtGui.QMainWindow):
         idx = self.ui.cb_files_4.currentIndex()
         data = self.data[idx]
 
-        home_dir = os.path.expanduser('~')
-        default_filename = (data.magnet_name + ' - ' +
-                            '{:.3f}'.format(data.main_current) + ' A.pdf')
-        default_dir = os.path.join(home_dir, default_filename)
+        default_filename = (data.magnet_name + '_Imc=' +
+                            '{:+04.0f}'.format(data.main_current) + 'A.pdf')
+        default_filepath = os.path.join(_default_dir, default_filename)
+
         filename = QtGui.QFileDialog.getSaveFileName(
-            caption='Save file', directory=default_dir)
+            caption='Save file', directory=default_filepath)
         if len(filename) == 0:
             return
 
@@ -1420,8 +1433,28 @@ class MainWindow(QtGui.QMainWindow):
 
     def clear_magnet_report(self):
         """Clear magnet report."""
+        self.ui.indutance_value.setText('')
+        self.ui.voltage_value.setText('')
+        self.ui.resistance_value.setText('')
         self.magnet_report = None
         self.ui.preview.clear()
+
+        idx = self.ui.cb_files_4.currentIndex()
+        if idx != -1 and len(self.data) != 0:
+            data = self.data[idx]
+            if data.main_voltage is None:
+                self.ui.voltage_label.setEnabled(True)
+                self.ui.voltage_value.setEnabled(True)
+            else:
+                self.ui.voltage_label.setEnabled(False)
+                self.ui.voltage_value.setEnabled(False)
+
+            if data.resistance is None:
+                self.ui.resistance_label.setEnabled(True)
+                self.ui.resistance_value.setEnabled(True)
+            else:
+                self.ui.resistance_label.setEnabled(False)
+                self.ui.resistance_value.setEnabled(False)
 
     def _create_magnet_report(self):
         idx = self.ui.cb_files_4.currentIndex()
@@ -1442,15 +1475,22 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.cb_files_3.setCurrentIndex(prev_idx)
 
-        indutance = self.ui.indutance_value.text()
-
         if self.ui.cb_language.currentIndex() == 0:
             english = True
         else:
             english = False
 
-        self.magnet_report = pdf_report.MagnetReport(
-            data, english=english, indutance=indutance)
+        args = dict()
+        args['english'] = english
+        args['indutance'] = self.ui.indutance_value.text()
+
+        if data.main_voltage is None:
+            args['voltage'] = self.ui.voltage_value.text()
+
+        if data.resistance is None:
+            args['resistance'] = self.ui.resistance_value.text()
+
+        self.magnet_report = pdf_report.MagnetReport(data, **args)
 
 
 class GUIThread(threading.Thread):

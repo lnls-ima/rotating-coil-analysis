@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1276</width>
-    <height>864</height>
+    <width>1300</width>
+    <height>900</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -644,6 +644,9 @@
                  <font>
                   <pointsize>11</pointsize>
                  </font>
+                </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::DefaultContextMenu</enum>
                 </property>
                 <property name="toolTip">
                  <string/>
@@ -2179,6 +2182,9 @@
                  <string>Electric Parameters</string>
                 </property>
                 <layout class="QFormLayout" name="formLayout_3">
+                 <property name="fieldGrowthPolicy">
+                  <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+                 </property>
                  <item row="0" column="0">
                   <widget class="QLabel" name="indutance_label">
                    <property name="font">
@@ -2233,28 +2239,6 @@
                  </item>
                  <item row="2" column="1">
                   <widget class="QLineEdit" name="resistance_value">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="nr_turns_label">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Main Coil Number of Turns:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="nr_turns_value">
                    <property name="enabled">
                     <bool>false</bool>
                    </property>
@@ -2460,61 +2444,6 @@
         <string>Wiki Graphics</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_23">
-        <item row="1" column="0" colspan="3">
-         <widget class="QTabWidget" name="tab_wiki_graphs">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <widget class="QWidget" name="roll_offset">
-           <attribute name="title">
-            <string>Roll and Center Offset</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_24">
-            <item row="0" column="0">
-             <widget class="matplotlibWidget" name="wt_roll_offset" native="true"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="dipole">
-           <attribute name="title">
-            <string>Integrated Dipole</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_25">
-            <item row="0" column="0">
-             <widget class="matplotlibWidget" name="wt_dipole" native="true"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="quadrupole">
-           <attribute name="title">
-            <string>Integrated Quadrupole</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_26">
-            <item row="0" column="0">
-             <widget class="matplotlibWidget" name="wt_quadrupole" native="true"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="sextupole">
-           <attribute name="title">
-            <string>Integrated Sextupole</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_27">
-            <item row="0" column="0">
-             <widget class="matplotlibWidget" name="wt_sextupole" native="true"/>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QFrame" name="frame_7">
           <property name="frameShape">
@@ -2640,6 +2569,89 @@
           </property>
          </spacer>
         </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QTabWidget" name="tab_wiki_graphs">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="roll_offset">
+           <attribute name="title">
+            <string>Roll and Center Offset</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_24">
+            <item row="0" column="0">
+             <widget class="matplotlibWidget" name="wt_roll_offset" native="true">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="dipole">
+           <attribute name="title">
+            <string>Integrated Dipole</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_25">
+            <item row="0" column="0">
+             <widget class="matplotlibWidget" name="wt_dipole" native="true">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="quadrupole">
+           <attribute name="title">
+            <string>Integrated Quadrupole</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_26">
+            <item row="0" column="0">
+             <widget class="matplotlibWidget" name="wt_quadrupole" native="true">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="sextupole">
+           <attribute name="title">
+            <string>Integrated Sextupole</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_27">
+            <item row="0" column="0">
+             <widget class="matplotlibWidget" name="wt_sextupole" native="true">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -2673,7 +2685,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1276</width>
+     <width>1300</width>
      <height>25</height>
     </rect>
    </property>
@@ -2751,7 +2763,6 @@
   <tabstop>indutance_value</tabstop>
   <tabstop>voltage_value</tabstop>
   <tabstop>resistance_value</tabstop>
-  <tabstop>nr_turns_value</tabstop>
   <tabstop>bt_preview</tabstop>
   <tabstop>bt_save_report</tabstop>
   <tabstop>wiki_graphs_title</tabstop>

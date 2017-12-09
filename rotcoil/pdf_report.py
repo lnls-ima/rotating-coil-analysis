@@ -3,6 +3,7 @@
 import os as _os
 from reportlab.lib.pagesizes import A4 as _A4
 from reportlab.lib import colors as _colors
+from reportlab.lib import utils as _utils
 from reportlab.lib.styles import getSampleStyleSheet as _getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate as _SimpleDocTemplate
 from reportlab.platypus import Table as _Table
@@ -11,6 +12,7 @@ from reportlab.platypus import Paragraph as _Paragraph
 
 from rotcoil import data_file as _df
 from rotcoil import magnet_coil as _mag_coil
+from rotcoil import multipole_errors_spec as _mespec
 from rotcoil.utils import scientific_notation as _sci
 
 
@@ -34,7 +36,7 @@ class MagnetReport(object):
     """Magnet report."""
 
     def __init__(self, datafile, accelerator=None,
-                 english=False, indutance=''):
+                 english=False, indutance='', voltage='', resistance=''):
         """Create magnet report.
 
         Args:
@@ -43,8 +45,7 @@ class MagnetReport(object):
             english (bool): whether or not to use english.
             indutance (str): indutance value [mH].
             voltage (str): voltage value [V].
-            max_current (str): main coil maximum current [A].
-            nr_turns (str): main coil number of turns.
+            resistance (str): magnet resistance [Ohm].
         """
         if isinstance(datafile, str):
             self.data = _df.DataFile(datafile)
@@ -59,6 +60,8 @@ class MagnetReport(object):
         self.accelerator = accelerator
 
         self.indutance = indutance
+        self.voltage = voltage
+        self.resistance = resistance
 
         self.table = []
         self.row_count = 0
@@ -98,6 +101,7 @@ class MagnetReport(object):
             self.cv_current_label = 'CV Coil Current'
             self.qs_current_label = 'QS Coil Current'
             self.int_gradient_label = 'Integrated Gradient'
+            self.int_field_label = 'Integrated Field'
             self.offset_x_label = 'Magnet Center Offset X'
             self.offset_y_label = 'Magnet Center Offset Y'
             self.angle_label = 'Roll'
@@ -132,6 +136,7 @@ class MagnetReport(object):
             self.cv_current_label = 'Corrente CV'
             self.qs_current_label = 'Corrente QS'
             self.int_gradient_label = 'Gradiente Integrado'
+            self.int_field_label = 'Campo Integrado'
             self.offset_x_label = 'Deslocamento X'
             self.offset_y_label = 'Deslocamento Y'
             self.angle_label = 'Ângulo'
@@ -223,6 +228,10 @@ class MagnetReport(object):
         return table_style
 
     def _get_image_text(self, image_path, width, height):
+        img = _utils.ImageReader(image_path)
+        iw, ih = img.getSize()
+        aspect = ih / float(iw)
+        height = width*aspect
         img_text = (
             '<para align=center>' +
             '<img src="%s" valign="middle" width="%f" height="%f"/></para>' %
@@ -286,15 +295,8 @@ class MagnetReport(object):
         self._add_to_table([])
 
     def _add_results_to_report_table(self):
-        if self.accelerator.lower() == 'bo':
-            spec_ang = 5e-4
-            spec_disp = 100e-6
-        elif self.accelerator.lower() == 'si':
-            spec_ang = 2e-4
-            spec_disp = 30e-6
-        else:
-            spec_ang = 0
-            spec_disp = 0
+        ofx, ofy, roll = _mespec.get_offset_and_roll_error_spec(
+            self.data.magnet_name)
 
         text = self._get_fmt_text(
             self.results_label, fontsize=_label_fontsize, bold=True)
@@ -314,7 +316,10 @@ class MagnetReport(object):
             self.temperature_label + ' [°C]',
             fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(str(self.data.temperature))
-        self._add_to_table([label, '', value])
+        if self.data.temperature == 0:
+            self._add_to_table([label, '', '--'])
+        else:
+            self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
             self.number_of_measurements_label,
@@ -369,7 +374,13 @@ class MagnetReport(object):
         angle = self.data.multipoles_df.iloc[n, 7]
         angle_err = self.data.multipoles_df.iloc[n, 8]
 
-        if n == 1:
+        if n == 0:
+            label = self._get_fmt_text(
+                self.int_field_label + ' [T.m]',
+                fontsize=_label_fontsize, bold=True)
+            value = self._get_fmt_text(_sci(grad, grad_err))
+            self._add_to_table([label, '', value])
+        elif n == 1:
             label = self._get_fmt_text(
                 self.int_gradient_label + ' [T]',
                 fontsize=_label_fontsize, bold=True)
@@ -377,30 +388,51 @@ class MagnetReport(object):
             self._add_to_table([label, '', value])
         elif n == 2:
             label = self._get_fmt_text(
-                self.int_gradient_label + ' [T.m]',
+                self.int_gradient_label + ' [T/m]',
                 fontsize=_label_fontsize, bold=True)
             value = self._get_fmt_text(_sci(grad, grad_err))
             self._add_to_table([label, '', value])
 
-        label = self._get_fmt_text(
-            self.offset_x_label +
-            ' ['+chr(956)+'m] - (< '+chr(177) + str(spec_disp*1e6)+')',
-            fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(
-            _sci(self.data.offset_x*1e6, self.data.offset_x_err*1e6))
-        self._add_to_table([label, '', value])
+        if ofx is None:
+            label = self._get_fmt_text(
+                self.offset_x_label +
+                ' ['+chr(956)+'m]', fontsize=_label_fontsize, bold=True)
+        else:
+            label = self._get_fmt_text(
+                self.offset_x_label +
+                ' ['+chr(956)+'m] - (< '+chr(177) + str(ofx*1e6)+')',
+                fontsize=_label_fontsize, bold=True)
+        if n != 0:
+            value = self._get_fmt_text(
+                _sci(self.data.offset_x*1e6, self.data.offset_x_err*1e6))
+            self._add_to_table([label, '', value])
+        else:
+            self._add_to_table([label, '', '--'])
 
-        label = self._get_fmt_text(
-            self.offset_y_label +
-            ' ['+chr(956)+'m] - (< '+chr(177) + str(spec_disp*1e6)+')',
-            fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(
-            _sci(self.data.offset_y*1e6, self.data.offset_y_err*1e6))
-        self._add_to_table([label, '', value])
+        if ofy is None:
+            label = self._get_fmt_text(
+                self.offset_y_label +
+                ' ['+chr(956)+'m]', fontsize=_label_fontsize, bold=True)
+        else:
+            label = self._get_fmt_text(
+                self.offset_y_label +
+                ' ['+chr(956)+'m] - (< '+chr(177) + str(ofy*1e6)+')',
+                fontsize=_label_fontsize, bold=True)
+        if n != 0:
+            value = self._get_fmt_text(
+                _sci(self.data.offset_y*1e6, self.data.offset_y_err*1e6))
+            self._add_to_table([label, '', value])
+        else:
+            self._add_to_table([label, '', '--'])
 
-        label = self._get_fmt_text(
-            self.angle_label + ' [mrad] - (< '+chr(177)+str(spec_ang*1e3)+')',
-            fontsize=_label_fontsize, bold=True)
+        if roll is None:
+            label = self._get_fmt_text(
+                self.angle_label + ' [mrad]',
+                fontsize=_label_fontsize, bold=True)
+        else:
+            label = self._get_fmt_text(
+                self.angle_label + ' [mrad] - (< '+chr(177)+str(roll*1e3)+')',
+                fontsize=_label_fontsize, bold=True)
         value = self._get_fmt_text(_sci(angle*1e3, angle_err*1e3))
         self._add_to_table([label, '', value])
 
@@ -418,22 +450,28 @@ class MagnetReport(object):
         label = self._get_fmt_text(
             self.voltage_label + ' [V]',
             fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(
-            _sci(self.data.main_voltage, self.data.main_voltage_std))
+        if len(self.voltage) == 0 and self.data.main_voltage is not None:
+            value = self._get_fmt_text(
+                _sci(self.data.main_voltage, self.data.main_voltage_std))
+        else:
+            value = self._get_fmt_text(str(self.voltage))
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(
             self.resistance_label + ' [m' + chr(937) + ']',
             fontsize=_label_fontsize, bold=True)
-        if self.data.resistance is not None:
-            resistance = self.data.resistance*1000
+        if len(self.resistance) == 0:
+            if self.data.resistance is not None:
+                resistance = self.data.resistance*1000
+            else:
+                resistance = None
+            if self.data.resistance_std is not None:
+                resistance_std = self.data.resistance_std*1000
+            else:
+                resistance_std = None
+            value = self._get_fmt_text(_sci(resistance, resistance_std))
         else:
-            resistance = None
-        if self.data.resistance_std is not None:
-            resistance_std = self.data.resistance_std*1000
-        else:
-            resistance_std = None
-        value = self._get_fmt_text(_sci(resistance, resistance_std))
+            value = self._get_fmt_text(str(self.resistance))
         self._add_to_table([label, '', value])
 
         label = self._get_fmt_text(

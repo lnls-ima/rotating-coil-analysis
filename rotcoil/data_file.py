@@ -3,6 +3,7 @@
 import numpy as _np
 import pandas as _pd
 import os as _os
+import re as _re
 
 
 class DataFileError(Exception):
@@ -189,7 +190,14 @@ class DataFile(object):
         if magnet_name is not None:
             self.magnet_name = magnet_name.split('\\')[-1].split('_')[0]
         else:
-            self.magnet_name = filename_split[0]
+            if filename_split[0].replace('-', '').isdigit():
+                self.magnet_name = filename_split[2]
+            else:
+                self.magnet_name = filename_split[0]
+
+        if '-' not in self.magnet_name:
+            self.magnet_name = '-'.join(_re.findall(
+                '\d+|\D+', self.magnet_name))
 
         # Read Date
         self.date = _find_value(self.raw, 'date', 'data')
@@ -361,8 +369,11 @@ class DataFile(object):
             self._multipoles = multipoles.reshape(15, 13).astype(_np.float64)
             self._magnet_type = _np.nonzero(self._multipoles[:, 7])[0][0]
             self._columns_names = _np.array(self.raw[index + 2].split('\t'))
-            self._reference_radius = float(
-                self.raw[index + 2].split("@")[1].split("mm")[0])/1000
+            try:
+                self._reference_radius = float(
+                    self.raw[index + 2].split("@")[1].split("mm")[0])/1000
+            except Exception:
+                self._reference_radius = None
         else:
             message = (
                 'Failed to read multipoles from file: \n\n"%s"' %
