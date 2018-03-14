@@ -1,0 +1,1 @@
+"""Rotating coil analysis package."""

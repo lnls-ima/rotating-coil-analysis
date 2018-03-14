@@ -1,22 +1,23 @@
-#!/usr/bin/env python3
 
 from setuptools import setup
 
-with open('VERSION', 'r') as _f:
-    __version__ = _f.read().strip()
-
 setup(
-    name='rotcoil',
-    version=__version__,
-    author='lnls-ima',
+    name='rotcoilanalysis',
+    version='0.1.1',
     description='Rotating Coil Package',
+    url='https://github.com/lnls-ima/rotating-coil-analysis',
+    author='lnls-ima',
     license='MIT License',
-    classifiers=[
-        'Intended Audience :: Science/Research',
-        'Programming Language :: Python',
-        'Topic :: Scientific/Engineering'
+    packages=['rotcoilanalysis'],
+    install_requires=[
+        'numpy',
+        'pandas',
+        'matplotlib',
+        'reportlab',
     ],
-    packages=['rotcoil'],
-    package_data={'rotcoil': ['VERSION']},
-    zip_safe=False
-)
+    entry_points={
+        'console_scripts': [
+            'rotating-coil-analysis=rotcoilanalysis.rotcoilapp:run'
+        ],
+     },
+    zip_safe=False)
