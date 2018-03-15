@@ -28,8 +28,9 @@ from . import utils as _utils
 from . import multipole_errors_spec as _multipole_errors_spec
 from . import plot_widget as _plot_widget
 
-if _importlib.util.find_spec('popplerqt4') is not None:
-    popplerqt4 = _importlib.import_module('popplerqt4')
+
+if _importlib.util.find_spec('popplerqt5') is not None:
+    poppler = _importlib.import_module('popplerqt5')
     _preview_enabled = True
 else:
     _preview_enabled = False
@@ -699,13 +700,14 @@ class MainWindow(_QMainWindow):
                             "Use %s as label?" %
                             column_name.replace("(A)", "").strip().lower())
                         reply = _QMessageBox.question(
-                            self, 'Question', question, 'Yes',
-                            button1Text='No')
-                        if reply == 0:
+                            self, 'Question', question,
+                            _QMessageBox.Yes | _QMessageBox.No,
+                            _QMessageBox.Yes)
+                        if reply == _QMessageBox.Yes:
                             self.default_file_id = (
                                 self.file_id[column_name].tolist())
                             self.default_file_id_name = column_name
-                            break
+                            return
 
         if self.default_file_id is None:
             self.default_file_id = self.file_id.iloc[:, 0].tolist()
@@ -725,6 +727,9 @@ class MainWindow(_QMainWindow):
         return different_values
 
     def _update_multipoles_screen(self):
+        if self.default_file_id is None:
+            return
+
         # Limpar campos
         self.ui.cb_files_1.clear()
         self.ui.cb_files_2.clear()
@@ -1706,7 +1711,7 @@ class MainWindow(_QMainWindow):
                 self, 'Failed', msg, _QMessageBox.Ok)
             return
 
-        self.preview_doc = popplerqt4.Poppler.Document.load(filepath)
+        self.preview_doc = poppler.Poppler.Document.load(filepath)
         page_count = 0
         while self.preview_doc.page(page_count) is not None:
             page_count = page_count + 1
