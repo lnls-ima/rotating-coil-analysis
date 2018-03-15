@@ -814,8 +814,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1272</width>
-             <height>651</height>
+             <width>534</width>
+             <height>238</height>
             </rect>
            </property>
            <attribute name="label">
@@ -2737,7 +2737,7 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Height [pixels]: </string>
+                    <string>Width [pixels]: </string>
                    </property>
                   </widget>
                  </item>
@@ -2750,12 +2750,12 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Width [pixels]:</string>
+                    <string>Height [pixels]:</string>
                    </property>
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="fig_height_sb">
+                  <widget class="QDoubleSpinBox" name="fig_width_sb">
                    <property name="font">
                     <font>
                      <weight>50</weight>
@@ -2774,7 +2774,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="fig_width_sb">
+                  <widget class="QDoubleSpinBox" name="fig_height_sb">
                    <property name="font">
                     <font>
                      <weight>50</weight>

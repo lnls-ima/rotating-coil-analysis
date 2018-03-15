@@ -504,10 +504,10 @@ class MeasurementData(object):
         self._radius2_bucked = meas[43]
         self._comments = meas[45]
         self._normalization_radius = meas[46]
-        self._magnetic_center_x = meas[47]
-        self._magnetic_center_y = meas[48]
-        self._read_data = [l for l in meas[49].split('\n') if len(l) != 0]
-        self._raw_curve = [l for l in meas[50].split('\n') if len(l) != 0]
+        self._magnetic_center_x = meas[48]
+        self._magnetic_center_y = meas[49]
+        self._read_data = [l for l in meas[50].split('\n') if len(l) != 0]
+        self._raw_curve = [l for l in meas[51].split('\n') if len(l) != 0]
 
         columns_names_str = self._read_data[0]
         self._columns_names = columns_names_str.split()

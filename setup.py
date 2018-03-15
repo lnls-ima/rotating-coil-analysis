@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='rotcoilanalysis',
-    version='0.1.1',
+    version='0.1.2',
     description='Rotating Coil Package',
     url='https://github.com/lnls-ima/rotating-coil-analysis',
     author='lnls-ima',

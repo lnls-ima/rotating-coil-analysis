@@ -42,6 +42,7 @@ if _os.name == 'nt':
     _legend_fontsize = 12
     _ticky_fontsize = 10
     _tickx_fontsize = 8
+    _figure_width = 500
 else:
     _fontsize = 18
     _title_fontsize = 16
@@ -50,10 +51,11 @@ else:
     _legend_fontsize = 16
     _ticky_fontsize = 14
     _tickx_fontsize = 12
+    _figure_width = 320
 
 _addlimx = 0.02
 _addlimy = 0.25
-_hwfactor = 0.625
+_whfactor = 0.625
 
 _default_dir = _os.path.expanduser('~')
 _basepath = _os.path.dirname(_os.path.abspath(__file__))
@@ -141,10 +143,6 @@ class MainWindow(_QMainWindow):
             _QDesktopWidget().availableGeometry().center().y() -
             self.geometry().height()/2)
 
-        self.ui.main_tab.setTabEnabled(4, False)
-        self.ui.table_avg.setEnabled(False)
-        self.ui.table_all_files.setEnabled(False)
-
         self.directory = None
         self.preview_doc = None
         self.files = _np.array([])
@@ -159,6 +157,11 @@ class MainWindow(_QMainWindow):
         self._clear_data()
         self._enable_buttons(False)
         self._enable_tables(False)
+
+        self.ui.main_tab.setTabEnabled(4, False)
+        self.ui.table_avg.setEnabled(False)
+        self.ui.table_all_files.setEnabled(False)
+        self.ui.fig_width_sb.setValue(_figure_width)
 
     def _add_plot_widgets(self):
         self.ui.wt_multipoles = _plot_widget.MatplotlibWidget()
@@ -282,7 +285,7 @@ class MainWindow(_QMainWindow):
             self.clear_magnet_report)
         self.ui.bt_save_report.clicked.connect(self.save_magnet_report)
         self.ui.bt_preview.clicked.connect(self.preview_magnet_report)
-        self.ui.fig_height_sb.valueChanged.connect(self.update_figure_width)
+        self.ui.fig_width_sb.valueChanged.connect(self.update_figure_height)
         self.ui.page_sb.valueChanged.connect(self.update_preview_page)
 
         self.ui.bt_table_1.clicked.connect(self.screen_table)
@@ -360,6 +363,10 @@ class MainWindow(_QMainWindow):
             directory=_default_dir, filter="Database files (*.db)")
         if len(filepath) == 0:
             return
+
+        if isinstance(filepath, tuple):
+            filepath = filepath[0]
+
         self.database = filepath
         self.ui.le_database_filename.setText(filepath)
 
@@ -383,6 +390,9 @@ class MainWindow(_QMainWindow):
         filepath = _QFileDialog.getOpenFileNames(directory=_default_dir)
         if len(filepath) == 0:
             return
+
+        if isinstance(filepath, tuple):
+            filepath = filepath[0]
 
         if any([x == -1 for x in [f.find('.dat') for f in filepath]]):
             _QMessageBox.warning(
@@ -1289,8 +1299,12 @@ class MainWindow(_QMainWindow):
             self.ui.table_all_files.setRowCount(3)
             self.ui.table_all_files.horizontalHeader().setDefaultSectionSize(
                 100)
+
             header = self.ui.table_all_files.horizontalHeader()
-            header.setResizeMode(_QHeaderView.Stretch)
+            try:
+                header.setResizeMode(_QHeaderView.Stretch)
+            except AttributeError:
+                header.setSectionResizeMode(_QHeaderView.Stretch)
 
             for i in range(len(self.data)):
                 item = _QTableWidgetItem(
@@ -1633,11 +1647,11 @@ class MainWindow(_QMainWindow):
             else:
                 self.ui.qs_chb.setChecked(True)
 
-    def update_figure_width(self):
-        """Update figure width."""
-        height = self.ui.fig_height_sb.value()
-        width = height*_hwfactor
-        self.ui.fig_width_sb.setValue(width)
+    def update_figure_height(self):
+        """Update figure height."""
+        width = self.ui.fig_width_sb.value()
+        height = width*_whfactor
+        self.ui.fig_height_sb.setValue(height)
         self.clear_magnet_report()
 
     def save_magnet_report(self):
@@ -1654,6 +1668,8 @@ class MainWindow(_QMainWindow):
             caption='Save file', directory=default_filepath)
         if len(filename) == 0:
             return
+        if isinstance(filename, tuple):
+            filename = filename[0]
 
         if self.magnet_report is None:
             self._create_magnet_report()
