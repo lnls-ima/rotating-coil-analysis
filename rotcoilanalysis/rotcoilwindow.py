@@ -43,7 +43,6 @@ if _os.name == 'nt':
     _legend_fontsize = 12
     _ticky_fontsize = 10
     _tickx_fontsize = 8
-    _figure_width = 500
 else:
     _fontsize = 18
     _title_fontsize = 16
@@ -52,11 +51,11 @@ else:
     _legend_fontsize = 16
     _ticky_fontsize = 14
     _tickx_fontsize = 12
-    _figure_width = 320
 
 _addlimx = 0.02
 _addlimy = 0.25
 _whfactor = 0.625
+_figure_width = 320
 
 _default_dir = _os.path.expanduser('~')
 _basepath = _os.path.dirname(_os.path.abspath(__file__))
