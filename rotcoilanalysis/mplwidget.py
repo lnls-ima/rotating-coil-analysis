@@ -3,7 +3,7 @@
 from PyQt5.QtWidgets import (
     QWidget as _QWidget,
     QVBoxLayout as _QVBoxLayout,
-    QSizePolicy as _QSizePolicy)  # PyQt4.QtGui
+    QSizePolicy as _QSizePolicy)
 from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as _FigCanvas,
     NavigationToolbar2QT as _Toolbar)
@@ -27,12 +27,12 @@ class MplCanvas(_FigCanvas):
         self.fig.canvas.draw()
 
 
-class MatplotlibWidget(_QWidget):
+class MplWidget(_QWidget):
     """Matplotlib Widget."""
 
     def __init__(self, parent=None):
         """Initialize widget and add figure canvas."""
-        super(MatplotlibWidget, self).__init__(parent)
+        super(MplWidget, self).__init__(parent)
         self.canvas = MplCanvas()
         self.vbl = _QVBoxLayout()
         self.vbl.addWidget(self.canvas)

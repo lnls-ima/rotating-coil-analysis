@@ -4,7 +4,7 @@
 
 import sys as _sys
 import threading as _threading
-from PyQt5.QtWidgets import QApplication as _QApplication  # PyQt4.QtGui
+from PyQt5.QtWidgets import QApplication as _QApplication
 
 _style = 'windows'
 

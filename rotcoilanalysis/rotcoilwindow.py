@@ -8,6 +8,7 @@ import datetime as _datetime
 import os as _os
 import matplotlib.ticker as _mtick
 import matplotlib.gridspec as _gridspec
+import sqlite3 as _sqlite3
 
 from PyQt5.QtWidgets import (
     QMainWindow as _QMainWindow,
@@ -15,9 +16,7 @@ from PyQt5.QtWidgets import (
     QFileDialog as _QFileDialog,
     QMessageBox as _QMessageBox,
     QTableWidgetItem as _QTableWidgetItem,
-    QDialog as _QDialog,
-    QApplication as _QApplication,
-    QHeaderView as _QHeaderView)  # PyQt4.QtGui
+    QHeaderView as _QHeaderView)
 from PyQt5.QtGui import QPixmap as _QPixmap
 from PyQt5.QtCore import Qt as _Qt
 from PyQt5 import uic as _uic
@@ -26,7 +25,9 @@ from . import measurement_data as _measurement_data
 from . import pdf_report as _pdf_report
 from . import utils as _utils
 from . import multipole_errors_spec as _multipole_errors_spec
-from . import plot_widget as _plot_widget
+from . import mplwidget as _mplwidget
+from . import databasewidgets as _databasewidgets
+from . import tabledialog as _tabledialog
 
 
 if _importlib.util.find_spec('popplerqt5') is not None:
@@ -62,72 +63,6 @@ _default_dir = _os.path.expanduser('~')
 _basepath = _os.path.dirname(_os.path.abspath(__file__))
 
 
-class TableDialog(_QDialog):
-    """Table dialog."""
-
-    def __init__(self, parent=None, table_df=None):
-        """Initialize the dialog."""
-        super(TableDialog, self).__init__(parent)
-
-        self.table_df = table_df
-
-        uifile = _os.path.join(_basepath, _os.path.join('ui', 'dialog.ui'))
-        self.ui = _uic.loadUi(uifile, self)
-
-        self.setAttribute(_Qt.WA_DeleteOnClose)
-
-        self.move(
-            _QDesktopWidget().availableGeometry().center().x() -
-            self.geometry().width()/2,
-            _QDesktopWidget().availableGeometry().center().y() -
-            self.geometry().height()/2)
-
-        self.ui.bt_copy_to_clipboard.clicked.connect(
-            self.copy_to_clipboard)
-        self.create_table()
-
-    def create_table(self):
-        """Create table."""
-        if self.table_df is None:
-            return
-
-        df = self.table_df
-
-        _n_columns = len(df.columns)
-        _n_rows = len(df.index)
-
-        if _n_columns != 0:
-            self.ui.tb_general.setColumnCount(_n_columns)
-            self.ui.tb_general.setHorizontalHeaderLabels(
-                df.columns)
-
-        if _n_rows != 0:
-            self.ui.tb_general.setRowCount(_n_rows)
-            self.ui.tb_general.setVerticalHeaderLabels(df.index)
-
-        for idx in range(_n_rows):
-            for _jdx in range(_n_columns):
-                if _jdx == 0:
-                    self.ui.tb_general.setItem(
-                     idx, _jdx,
-                     _QTableWidgetItem(
-                        '{0:1g}'.format(df.iat[idx, _jdx])))
-                else:
-                    self.ui.tb_general.setItem(
-                        idx, _jdx,
-                        _QTableWidgetItem(
-                            '{0:0.8e}'.format(df.iat[idx, _jdx])))
-
-        _QApplication.processEvents()
-
-        self.ui.tb_general.resizeColumnsToContents()
-
-    def copy_to_clipboard(self):
-        """Copy table to clipboard."""
-        if self.table_df is not None:
-            self.table_df.to_clipboard(excel=True)
-
-
 class MainWindow(_QMainWindow):
     """Rotating Coil Analysis Graphical User Interface."""
 
@@ -146,10 +81,11 @@ class MainWindow(_QMainWindow):
 
         self.directory = None
         self.preview_doc = None
-        self.files = _np.array([])
-        self.files_uploaded = _np.array([])
-        self.idns = []
         self.database = None
+        self.files = []
+        self.idns = []
+        self.files_uploaded = []
+        self.database_uploaded = []
         self.normal_color = 'blue'
         self.skew_color = 'red'
 
@@ -164,14 +100,17 @@ class MainWindow(_QMainWindow):
         self.ui.table_all_files.setEnabled(False)
         self.ui.fig_width_sb.setValue(_figure_width)
 
+        self.database_tab = _databasewidgets.DatabaseTab()
+        self.ui.database_input_lt.addWidget(self.database_tab)
+
     def _add_plot_widgets(self):
-        self.ui.wt_multipoles = _plot_widget.MatplotlibWidget()
+        self.ui.wt_multipoles = _mplwidget.MplWidget()
         self.ui.lt_multipoles.addWidget(self.ui.wt_multipoles)
 
-        self.ui.wt_residual = _plot_widget.MatplotlibWidget()
+        self.ui.wt_residual = _mplwidget.MplWidget()
         self.ui.lt_residual.addWidget(self.ui.wt_residual)
 
-        self.ui.wt_residual_comp = _plot_widget.MatplotlibWidget()
+        self.ui.wt_residual_comp = _mplwidget.MplWidget()
         self.ui.lt_residual_comp.addWidget(self.ui.wt_residual_comp)
         self.ui.wt_residual_comp.canvas.ax.spines['right'].set_visible(False)
         self.ui.wt_residual_comp.canvas.ax.spines['top'].set_visible(False)
@@ -180,16 +119,16 @@ class MainWindow(_QMainWindow):
         self.ui.wt_residual_comp.canvas.ax.get_xaxis().set_visible(False)
         self.ui.wt_residual_comp.canvas.ax.get_yaxis().set_visible(False)
 
-        self.ui.wt_roll_offset = _plot_widget.MatplotlibWidget()
+        self.ui.wt_roll_offset = _mplwidget.MplWidget()
         self.ui.lt_roll_offset.addWidget(self.ui.wt_roll_offset)
 
-        self.ui.wt_dipole = _plot_widget.MatplotlibWidget()
+        self.ui.wt_dipole = _mplwidget.MplWidget()
         self.ui.lt_dipole.addWidget(self.ui.wt_dipole)
 
-        self.ui.wt_quadrupole = _plot_widget.MatplotlibWidget()
+        self.ui.wt_quadrupole = _mplwidget.MplWidget()
         self.ui.lt_quadrupole.addWidget(self.ui.wt_quadrupole)
 
-        self.ui.wt_sextupole = _plot_widget.MatplotlibWidget()
+        self.ui.wt_sextupole = _mplwidget.MplWidget()
         self.ui.lt_sextupole.addWidget(self.ui.wt_sextupole)
 
     def _clear_data(self):
@@ -229,23 +168,21 @@ class MainWindow(_QMainWindow):
 
     def _connect_widgets(self):
         """Make the connections between signals and slots."""
-        self.ui.menu_open.triggered.connect(self.load_files)
-        self.ui.bt_open_file.clicked.connect(self.load_files)
-
-        self.ui.bt_clear_input_list.clicked.connect(self.clear_input_list)
+        self.ui.bt_load_files.clicked.connect(self.load_files)
         self.ui.bt_upload_files.clicked.connect(self.upload_files)
-        self.ui.bt_clear_output_list.clicked.connect(self.clear_output_list)
-        self.ui.bt_remove_files.clicked.connect(self.remove_files)
-        self.ui.bt_analysis_files.clicked.connect(
-            self.data_analysis_files)
+        self.ui.bt_clear_files_input.clicked.connect(self.clear_files_input)
+        self.ui.bt_clear_files_output.clicked.connect(self.clear_files_output)
+        self.ui.bt_remove_files_output.clicked.connect(
+            self.remove_files_output)
+        self.ui.bt_analysis_files.clicked.connect(self.analysis_files)
 
-        self.ui.table_ids.cellChanged.connect(self.check_idn_input)
         self.ui.bt_load_database.clicked.connect(self.load_database)
-        self.ui.bt_add_id.clicked.connect(self.add_table_line)
-        self.ui.bt_remove_id.clicked.connect(self.remove_table_line)
-        self.ui.bt_clear_ids.clicked.connect(self.remove_all_table_lines)
-        self.ui.bt_analysis_database.clicked.connect(
-            self.data_analysis_database)
+        self.ui.bt_upload_database.clicked.connect(self.upload_database)
+        self.bt_clear_database_output.clicked.connect(
+            self.clear_database_output)
+        self.ui.bt_remove_database_output.clicked.connect(
+            self.remove_database_output)
+        self.ui.bt_analysis_database.clicked.connect(self.analysis_database)
 
         self.ui.bt_plot_multipoles.clicked.connect(
             self.plot_multipoles_one_file)
@@ -338,53 +275,12 @@ class MainWindow(_QMainWindow):
         else:
             self.ui.bt_preview.setEnabled(False)
 
-    def check_idn_input(self, row):
-        """Check ID input."""
-        text_list = self.ui.table_ids.item(row, 0).text().split('~')
-        if len(text_list) > 3:
-            self.ui.table_ids.item(row, 0).setText('')
-
-        for text in text_list:
-            try:
-                int(text)
-            except Exception:
-                self.ui.table_ids.item(row, 0).setText('')
-                break
-
     def _enable_tables(self, enable):
         self.ui.bt_table_1.setEnabled(enable)
         self.ui.bt_table_2.setEnabled(enable)
         self.ui.bt_table_3.setEnabled(enable)
         self.ui.bt_table_4.setEnabled(enable)
         self.ui.bt_table_5.setEnabled(enable)
-
-    def load_database(self):
-        """Load database."""
-        filepath = _QFileDialog.getOpenFileName(
-            directory=_default_dir, filter="Database files (*.db)")
-        if len(filepath) == 0:
-            return
-
-        if isinstance(filepath, tuple):
-            filepath = filepath[0]
-
-        self.database = filepath
-        self.ui.le_database_filename.setText(filepath)
-
-    def add_table_line(self):
-        """Add table line."""
-        self.ui.table_ids.setRowCount(self.ui.table_ids.rowCount() + 1)
-
-    def remove_table_line(self):
-        """Remove table line."""
-        items_to_remove = self.ui.table_ids.selectedItems()
-
-        for idx in items_to_remove:
-            self.ui.table_ids.removeRow(idx.row())
-
-    def remove_all_table_lines(self):
-        """Remove all table lines."""
-        self.ui.table_ids.setRowCount(0)
 
     def load_files(self):
         """Load input files and sorts by date and time."""
@@ -417,91 +313,161 @@ class MainWindow(_QMainWindow):
         except Exception:
             filelist = _np.array(filepath)
 
-        self.files = filelist
+        self.files = [f for f in filelist]
         self.directory = _os.path.split(self.files[0])[0]
         self.ui.files_directory.setText(self.directory)
-        self.ui.input_list.setRowCount(len(self.files))
+        self.ui.files_input.setRowCount(len(self.files))
 
-        self.ui.input_list.clear()
+        self.ui.files_input.clear()
         for i in range(len(self.files)):
             item = _QTableWidgetItem()
-            self.ui.input_list.setItem(i, 0, item)
+            self.ui.files_input.setItem(i, 0, item)
             item.setText(_os.path.split(self.files[i])[1])
 
-        self.ui.input_count.setText(str(len(self.files)))
+        self.ui.files_input_count.setText(str(len(self.files)))
 
-    def clear_input_list(self):
-        """Clear input file list."""
-        self.ui.input_count.setText('0')
-        self.ui.input_list.clear()
-        self.files = _np.array([])
-        self.ui.input_list.setRowCount(len(self.files))
-        self.ui.files_directory.setText("")
-        self.directory = None
+    def load_database(self):
+        """Load database."""
+        filepath = _QFileDialog.getOpenFileName(
+            directory=_default_dir, filter="Database files (*.db)")
+        if len(filepath) == 0:
+            return
+
+        if isinstance(filepath, tuple):
+            filepath = filepath[0]
+
+        self.database = filepath
+        self.ui.le_database_filename.setText(filepath)
+        self.database_tab.loadDatabase(database_filename=filepath)
 
     def upload_files(self):
         """Upload files."""
-        _selected_items = self.ui.input_list.selectedItems()
+        _selected_items = self.ui.files_input.selectedItems()
 
         if _selected_items != []:
-            self.files_uploaded = _np.array([])
             for item in _selected_items:
-                self.files_uploaded = _np.append(
-                    self.files_uploaded, str(item.text()))
+                filename = item.text()
+                if filename not in self.files_uploaded:
+                    self.files_uploaded.append(filename)
 
-            self.ui.output_count.setText(str(len(self.files_uploaded)))
-
-            self.ui.output_list.setRowCount(len(self.files_uploaded))
-            self.ui.output_list.clear()
+            self.ui.files_output_count.setText(str(len(self.files_uploaded)))
+            self.ui.files_output.setRowCount(len(self.files_uploaded))
+            self.ui.files_output.clear()
 
             for i in range(len(self.files_uploaded)):
                 item = _QTableWidgetItem()
-                self.ui.output_list.setItem(i, 0, item)
+                self.ui.files_output.setItem(i, 0, item)
                 item.setText(self.files_uploaded[i])
 
-    def clear_output_list(self):
-        """Clear uploaded file list."""
-        self.ui.output_count.setText('0')
-        self.ui.output_list.clear()
-        self.files_uploaded = _np.array([])
-        self.ui.output_list.setRowCount(len(self.files_uploaded))
+    def upload_database(self):
+        """Add to selected measurements."""
+        if self.database is None:
+            return
 
-    def remove_files(self):
+        selected_idns = self.database_tab.currentWidget().getSelectedIDs()
+
+        for idn in selected_idns:
+            if idn not in self.idns:
+                self.idns.append(idn)
+
+        con = _sqlite3.connect(self.database)
+        cur = con.cursor()
+        self.database_uploaded = []
+        for idn in self.idns:
+            cur.execute('SELECT * FROM measurements WHERE id = ?', (idn,))
+            m = cur.fetchone()
+            self.database_uploaded.append(m[2])
+
+        self.ui.database_output_count.setText(str(len(self.database_uploaded)))
+        self.ui.database_output.setRowCount(len(self.database_uploaded))
+        self.ui.database_output.clear()
+
+        for i in range(len(self.database_uploaded)):
+            item = _QTableWidgetItem()
+            self.ui.database_output.setItem(i, 0, item)
+            item.setText(self.database_uploaded[i])
+
+    def clear_files_input(self):
+        """Clear input file list."""
+        self.ui.files_input_count.setText('0')
+        self.ui.files_input.clear()
+        self.files = []
+        self.ui.files_input.setRowCount(len(self.files))
+        self.ui.files_directory.setText("")
+        self.directory = None
+
+    def clear_files_output(self):
+        """Clear uploaded file list."""
+        self.ui.files_output_count.setText('0')
+        self.ui.files_output.clear()
+        self.files_uploaded = []
+        self.ui.files_output.setRowCount(len(self.files_uploaded))
+
+    def clear_database_output(self):
+        """Clear uploaded database list."""
+        self.ui.database_output_count.setText('0')
+        self.ui.database_output.clear()
+        self.database_uploaded = []
+        self.idns = []
+        self.ui.database_output.setRowCount(len(self.database_uploaded))
+
+    def remove_files_output(self):
         """Remove files from uploaded list."""
-        items_to_remove = self.ui.output_list.selectedItems()
+        items_to_remove = self.ui.files_output.selectedItems()
 
         if len(items_to_remove) != 0:
             for idx in items_to_remove:
-                self.ui.output_list.removeRow(idx.row())
+                self.ui.files_output.removeRow(idx.row())
 
-        self.files_uploaded = _np.array([])
-        for idx in range(self.ui.output_list.rowCount()):
-            if self.ui.output_list.item(idx, 0):
-                self.files_uploaded = _np.append(
-                    self.files_uploaded,
-                    self.ui.output_list.item(idx, 0).text())
+        self.files_uploaded = []
+        for idx in range(self.ui.files_output.rowCount()):
+            if self.ui.files_output.item(idx, 0):
+                self.files_uploaded.append(
+                    self.ui.files_output.item(idx, 0).text())
 
-        self.ui.output_count.setText(str(len(self.files_uploaded)))
+        self.ui.files_output_count.setText(str(len(self.files_uploaded)))
 
-    def data_analysis_files(self):
+    def remove_database_output(self):
+        """Remove files from uploaded list."""
+        items_to_remove = self.ui.database_output.selectedItems()
+
+        if len(items_to_remove) != 0:
+            for item in items_to_remove:
+                row = item.row()
+                self.ui.database_output.removeRow(row)
+                self.idns.pop(row)
+                self.database_uploaded.pop(row)
+
+        self.ui.database_output_count.setText(str(len(self.database_uploaded)))
+
+    def analysis_files(self):
         """Analyse data from upload file list."""
         self._clear_data()
         self._clear_graphs()
-        self._load_data_files()
+        self.idns = []
+        self.database_uploaded = []
+        self.ui.database_output.clear()
+        self.ui.database_output.setRowCount(len(self.database_uploaded))
+        self.ui.database_output_count.setText(str(len(self.database_uploaded)))
+        self._read_data_files()
         self._update_multipoles_screen()
         self.set_default_report_file()
         self.update_report_options()
 
-    def data_analysis_database(self):
+    def analysis_database(self):
         """Analyse data from database id list."""
         self._clear_data()
         self._clear_graphs()
-        self._load_data_database()
+        self.files_uploaded = []
+        self.ui.files_output.clear()
+        self.ui.files_output.setRowCount(len(self.files_uploaded))
+        self.ui.files_output_count.setText(str(len(self.files_uploaded)))
+        self._read_data_database()
         self._update_multipoles_screen()
         self.set_default_report_file()
         self.update_report_options()
 
-    def _load_data_files(self):
+    def _read_data_files(self):
         data = _np.array([])
 
         if len(self.files_uploaded) == 0:
@@ -520,10 +486,10 @@ class MainWindow(_QMainWindow):
                 self.files_uploaded = [
                     _os.path.split(d.filename)[-1] for d in self.data]
 
-                self.ui.output_list.clear()
+                self.ui.files_output.clear()
                 for i in range(len(self.files_uploaded)):
                     item = _QTableWidgetItem()
-                    self.ui.output_list.setItem(i, 0, item)
+                    self.ui.files_output.setItem(i, 0, item)
                     item.setText(self.files_uploaded[i])
 
                 self.columns_names = self.data[0].columns_names
@@ -539,10 +505,7 @@ class MainWindow(_QMainWindow):
                 self, 'Failure', 'Failed to load data from files.',
                 _QMessageBox.Ok)
 
-    def _load_data_database(self):
-        data = _np.array([])
-        self._update_idns()
-
+    def _read_data_database(self):
         if len(self.idns) == 0:
             _QMessageBox.critical(
                 self, 'Failure', 'No IDs selected.', _QMessageBox.Ok)
@@ -553,6 +516,7 @@ class MainWindow(_QMainWindow):
                 self, 'Failure', 'Invalid database.', _QMessageBox.Ok)
             return None
 
+        data = _np.array([])
         try:
             for idn in self.idns:
                 md = self._get_measurement_data_database(idn=idn)
@@ -573,22 +537,6 @@ class MainWindow(_QMainWindow):
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load data from database.',
                 _QMessageBox.Ok)
-
-    def _update_idns(self):
-        self.idns = []
-        for idx in range(self.ui.table_ids.rowCount()):
-            item = self.ui.table_ids.item(idx, 0)
-            if item:
-                text = item.text()
-                if len(text) != 0:
-                    text_list = text.split('~')
-                    if len(text_list) == 2:
-                        idn_init = int(text_list[0])
-                        idn_final = int(text_list[1])
-                        for idn in range(idn_init, idn_final+1):
-                            self.idns.append(idn)
-                    elif len(text_list) == 1:
-                        self.idns.append(int(text_list[0]))
 
     def _sort_data(self, data):
         index = _np.array([])
@@ -788,7 +736,7 @@ class MainWindow(_QMainWindow):
 
     def screen_table(self):
         """Create new screen with table."""
-        dialog_table = TableDialog(table_df=self.table_df)
+        dialog_table = _tabledialog.TableDialog(table_df=self.table_df)
         dialog_table.exec_()
 
     def plot_multipoles_one_file(self):
