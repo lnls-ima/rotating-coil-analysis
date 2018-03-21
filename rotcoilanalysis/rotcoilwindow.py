@@ -169,6 +169,7 @@ class MainWindow(_QMainWindow):
         """Make the connections between signals and slots."""
         self.ui.bt_load_files.clicked.connect(self.load_files)
         self.ui.bt_upload_files.clicked.connect(self.upload_files)
+        self.ui.bt_refresh_files.clicked.connect(self.refresh_files)
         self.ui.bt_clear_files_input.clicked.connect(self.clear_files_input)
         self.ui.bt_clear_files_output.clicked.connect(self.clear_files_output)
         self.ui.bt_remove_files_output.clicked.connect(
@@ -177,6 +178,7 @@ class MainWindow(_QMainWindow):
 
         self.ui.bt_load_database.clicked.connect(self.load_database)
         self.ui.bt_upload_database.clicked.connect(self.upload_database)
+        self.ui.bt_refresh_database.clicked.connect(self.refresh_database)
         self.bt_clear_database_output.clicked.connect(
             self.clear_database_output)
         self.ui.bt_remove_database_output.clicked.connect(
@@ -283,36 +285,16 @@ class MainWindow(_QMainWindow):
 
     def load_files(self):
         """Load input files and sorts by date and time."""
-        filepath = _QFileDialog.getOpenFileNames(directory=_default_dir)
-        if len(filepath) == 0:
+        files = _QFileDialog.getOpenFileNames(
+            directory=_default_dir, filter="Measurement files (*.dat)")
+
+        if isinstance(files, tuple):
+            files = files[0]
+
+        if len(files) == 0:
             return
 
-        if isinstance(filepath, tuple):
-            filepath = filepath[0]
-
-        if any([x == -1 for x in [f.find('.dat') for f in filepath]]):
-            _QMessageBox.warning(
-                self, 'Warning', 'Cannot open files. Select valid files.',
-                _QMessageBox.Ok)
-            return
-
-        try:
-            index = _np.array([])
-            for i in range(len(filepath)):
-                timestamp = filepath[i][
-                    filepath[i].find('.dat')-13:filepath[i].find('.dat')]
-                time_sec = _time.mktime(_datetime.datetime.strptime(
-                    timestamp, '%y%m%d_%H%M%S').timetuple())
-                index = _np.append(index, time_sec)
-            index = index.argsort()
-
-            filelist = _np.array([])
-            for i in range(len(filepath)):
-                filelist = _np.append(filelist, filepath[index[i]])
-        except Exception:
-            filelist = _np.array(filepath)
-
-        self.files = [f for f in filelist]
+        self.files = self._sort_files(files)
         self.directory = _os.path.split(self.files[0])[0]
         self.ui.files_directory.setText(self.directory)
         self.ui.files_input.setRowCount(len(self.files))
@@ -325,6 +307,26 @@ class MainWindow(_QMainWindow):
 
         self.ui.files_input_count.setText(str(len(self.files)))
 
+    def _sort_files(self, files):
+        try:
+            index = _np.array([])
+            for i in range(len(files)):
+                timestamp = files[i][
+                    files[i].find('.dat')-13:files[i].find('.dat')]
+                time_sec = _time.mktime(_datetime.datetime.strptime(
+                    timestamp, '%y%m%d_%H%M%S').timetuple())
+                index = _np.append(index, time_sec)
+            index = index.argsort()
+
+            sorted_files = _np.array([])
+            for i in range(len(files)):
+                sorted_files = _np.append(sorted_files, files[index[i]])
+        except Exception:
+            sorted_files = _np.array(files)
+
+        sorted_files = [f for f in sorted_files]
+        return sorted_files
+
     def load_database(self):
         """Load database."""
         filepath = _QFileDialog.getOpenFileName(
@@ -336,8 +338,9 @@ class MainWindow(_QMainWindow):
             filepath = filepath[0]
 
         self.database = filepath
-        self.ui.le_database_filename.setText(filepath)
-        self.database_tab.loadDatabase(database_filename=filepath)
+        self.ui.le_database_filename.setText(self.database)
+        self.database_tab.clearDatabase()
+        self.database_tab.loadDatabase(database_filename=self.database)
 
     def upload_files(self):
         """Upload files."""
@@ -385,6 +388,35 @@ class MainWindow(_QMainWindow):
             item = _QTableWidgetItem()
             self.ui.database_output.setItem(i, 0, item)
             item.setText(self.database_uploaded[i])
+
+    def refresh_files(self):
+        """Refresh files."""
+        if self.directory is None or not _os.path.isdir(self.directory):
+            return
+
+        files = []
+        for f in _os.listdir(self.directory):
+            if f.endswith('.dat'):
+                files.append(_os.path.join(self.directory, f))
+
+        self.files = self._sort_files(files)
+        self.ui.files_input.setRowCount(len(self.files))
+
+        self.ui.files_input.clear()
+        for i in range(len(self.files)):
+            item = _QTableWidgetItem()
+            self.ui.files_input.setItem(i, 0, item)
+            item.setText(_os.path.split(self.files[i])[1])
+
+        self.ui.files_input_count.setText(str(len(self.files)))
+
+    def refresh_database(self):
+        """Refresh database."""
+        if self.database is None or not _os.path.isfile(self.database):
+            return
+
+        self.database_tab.clearDatabase()
+        self.database_tab.loadDatabase(database_filename=self.database)
 
     def clear_files_input(self):
         """Clear input file list."""

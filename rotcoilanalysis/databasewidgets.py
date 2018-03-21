@@ -30,8 +30,8 @@ class DatabaseTab(_QTabWidget):
         font.setPixelSize(_fontsize)
         font.setBold(False)
         self.setFont(font)
-        self.clear()
 
+        self.clear()
         self.database_filename = None
         self.tables = []
 
@@ -50,6 +50,12 @@ class DatabaseTab(_QTabWidget):
                     database_filename=self.database_filename,
                     table_name=table_name)
                 self.addTab(table, table_name)
+
+    def clearDatabase(self):
+        """Clear database."""
+        self.database_filename = None
+        self.tables = []
+        self.clear()
 
 
 class DatabaseTable(_QWidget):
