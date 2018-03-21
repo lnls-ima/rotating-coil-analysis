@@ -156,19 +156,32 @@ class DatabaseTable(_QWidget):
             filt = filters[idx]
 
             if filt != '':
-                if and_flag:
-                    command = command + 'AND '
-                and_flag = True
-                if data_type == str:
-                    command = command + column + ' LIKE "%' + filt + '%" '
-                else:
-                    try:
-                        value = data_type(filt)
-                        command = command + column + ' = ' + str(value) + ' '
-                    except ValueError:
-                        command = command + column + ' ' + filt + ' '
 
-        cur.execute(command)
+                if and_flag:
+                    command = command + ' AND '
+                and_flag = True
+
+                if data_type == str:
+                    command = command + column + ' LIKE "%' + filt + '%"'
+                else:
+                    if '~' in filt:
+                        fs = filt.split('~')
+                        if len(fs) == 2:
+                            command = command + column + ' >= ' + fs[0]
+                            command = command + ' AND '
+                            command = command + column + ' <= ' + fs[1]
+                    else:
+                        try:
+                            value = data_type(filt)
+                            command = command + column + ' = ' + str(value)
+                        except ValueError:
+                            command = command + column + ' ' + filt
+
+        try:
+            cur.execute(command)
+        except Exception:
+            pass
+
         data = cur.fetchall()
         self.addRowsToTable(data)
 
