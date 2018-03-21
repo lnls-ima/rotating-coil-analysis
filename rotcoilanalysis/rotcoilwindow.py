@@ -1179,8 +1179,8 @@ class MainWindow(_QMainWindow):
         self.ui.table_one_file.setColumnCount(1)
         self.ui.table_one_file.setRowCount(3)
         offset_x_str = _utils.scientific_notation(
-            self.data[idx].magnetic_center_x*1e6,
-            self.data[idx].magnetic_center_x_err*1e6)
+            self.data[idx].magnetic_center_x,
+            self.data[idx].magnetic_center_x_err)
         item = _QTableWidgetItem(offset_x_str)
         item.setTextAlignment(_Qt.AlignHCenter |
                               _Qt.AlignVCenter |
@@ -1188,8 +1188,8 @@ class MainWindow(_QMainWindow):
         self.ui.table_one_file.setItem(0, 0, item)
 
         offset_y_str = _utils.scientific_notation(
-            self.data[idx].magnetic_center_y*1e6,
-            self.data[idx].magnetic_center_y_err*1e6)
+            self.data[idx].magnetic_center_y,
+            self.data[idx].magnetic_center_y_err)
         item = _QTableWidgetItem(offset_y_str)
         item.setTextAlignment(_Qt.AlignHCenter |
                               _Qt.AlignVCenter |
@@ -1218,7 +1218,7 @@ class MainWindow(_QMainWindow):
             self.ui.table_avg.setColumnCount(1)
             self.ui.table_avg.setRowCount(3)
             offset_x_str = _utils.scientific_notation(
-                _np.mean(offset_x)*1e6, _np.std(offset_x)*1e6)
+                _np.mean(offset_x), _np.std(offset_x))
             item = _QTableWidgetItem(offset_x_str)
             item.setTextAlignment(_Qt.AlignHCenter |
                                   _Qt.AlignVCenter |
@@ -1226,7 +1226,7 @@ class MainWindow(_QMainWindow):
             self.ui.table_avg.setItem(0, 0, item)
 
             offset_y_str = _utils.scientific_notation(
-                _np.mean(offset_y)*1e6, _np.std(offset_y)*1e6)
+                _np.mean(offset_y), _np.std(offset_y))
             item = _QTableWidgetItem(offset_y_str)
             item.setTextAlignment(_Qt.AlignHCenter |
                                   _Qt.AlignVCenter |
@@ -1260,14 +1260,14 @@ class MainWindow(_QMainWindow):
 
             for i in range(len(self.data)):
                 item = _QTableWidgetItem(
-                    "%2.1e" % (self.data[i].magnetic_center_x*1e6))
+                    "%2.1e" % (self.data[i].magnetic_center_x))
                 item.setTextAlignment(_Qt.AlignHCenter |
                                       _Qt.AlignVCenter |
                                       _Qt.AlignCenter)
                 self.ui.table_all_files.setItem(0, i, item)
 
                 item = _QTableWidgetItem(
-                    "%2.1e" % (self.data[i].magnetic_center_y*1e6))
+                    "%2.1e" % (self.data[i].magnetic_center_y))
                 item.setTextAlignment(_Qt.AlignHCenter |
                                       _Qt.AlignVCenter |
                                       _Qt.AlignCenter)
@@ -1372,8 +1372,8 @@ class MainWindow(_QMainWindow):
         canvas.draw()
 
     def _plot_wiki_graph_center_offset(self, canvas, ax):
-        offset_x = [d.magnetic_center_x*1e6 for d in self.data]
-        offset_y = [d.magnetic_center_y*1e6 for d in self.data]
+        offset_x = [d.magnetic_center_x for d in self.data]
+        offset_y = [d.magnetic_center_y for d in self.data]
         xtick = [i for i in range(len(self.data))]
 
         ax.clear()

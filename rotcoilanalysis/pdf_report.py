@@ -365,8 +365,8 @@ class MagnetReport(object):
                 fontsize=_label_fontsize, bold=True)
         if n != 0:
             value = self._get_fmt_text(
-                _sci(self.data.magnetic_center_x*1e6,
-                     self.data.magnetic_center_x_err*1e6))
+                _sci(self.data.magnetic_center_x,
+                     self.data.magnetic_center_x_err))
         else:
             value = '--'
         self._add_to_table([label, '', value], initial_column_span=1)
@@ -382,8 +382,8 @@ class MagnetReport(object):
                 fontsize=_label_fontsize, bold=True)
         if n != 0:
             value = self._get_fmt_text(
-                _sci(self.data.magnetic_center_y*1e6,
-                     self.data.magnetic_center_y_err*1e6))
+                _sci(self.data.magnetic_center_y,
+                     self.data.magnetic_center_y_err))
         else:
             value = '--'
         self._add_to_table([label, '', value], initial_column_span=1)
