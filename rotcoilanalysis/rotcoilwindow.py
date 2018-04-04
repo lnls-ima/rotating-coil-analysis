@@ -415,8 +415,11 @@ class MainWindow(_QMainWindow):
         if self.database is None or not _os.path.isfile(self.database):
             return
 
+        idx = self.database_tab.currentIndex()
         self.database_tab.clearDatabase()
         self.database_tab.loadDatabase(database_filename=self.database)
+        self.database_tab.scrollDownTables()
+        self.database_tab.setCurrentIndex(idx)
 
     def clear_files_input(self):
         """Clear input file list."""

@@ -49,7 +49,14 @@ class DatabaseTab(_QTabWidget):
                 table.loadDatabaseTable(
                     database_filename=self.database_filename,
                     table_name=table_name)
+                self.tables.append(table)
                 self.addTab(table, table_name)
+
+    def scrollDownTables(self):
+        """Scroll down all tables."""
+        for idx in range(len(self.tables)):
+            self.setCurrentIndex(idx)
+            self.tables[idx].scrollDown()
 
     def clearDatabase(self):
         """Clear database."""
@@ -129,6 +136,11 @@ class DatabaseTable(_QWidget):
                 item = _QTableWidgetItem(str(data[i][j]))
                 item.setFlags(_Qt.ItemIsSelectable | _Qt.ItemIsEnabled)
                 self.ui.database_table.setItem(i + 1, j, item)
+
+    def scrollDown(self):
+        """Scroll down."""
+        vbar = self.ui.database_table.verticalScrollBar()
+        vbar.setValue(vbar.maximum())
 
     def filterColumn(self, item):
         """Apply column filter to data."""
