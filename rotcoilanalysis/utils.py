@@ -41,10 +41,13 @@ class DraggableText(object):
         def motion_notify_callback(event):
             if not self.change_position:
                 return
-            if event.xdata is None and event.ydata is None:
+            if event.xdata is None or event.ydata is None:
                 return
-            self._set_center_position(event.xdata, event.ydata)
-            self.canvas.draw()
+            try:
+                self._set_center_position(event.xdata, event.ydata)
+                self.canvas.draw()
+            except Exception:
+                pass
 
         self.canvas.mpl_connect(
             'button_press_event', button_press_callback)
@@ -96,10 +99,13 @@ class DraggableLegend(object):
         def motion_notify_callback(event):
             if not self.change_position:
                 return
-            if event.xdata is None and event.ydata is None:
+            if event.xdata is None or event.ydata is None:
                 return
-            self._set_center_position(event.xdata, event.ydata)
-            self.canvas.draw()
+            try:
+                self._set_center_position(event.xdata, event.ydata)
+                self.canvas.draw()
+            except Exception:
+                pass
 
         self.canvas.mpl_connect(
             'button_press_event', button_press_callback)

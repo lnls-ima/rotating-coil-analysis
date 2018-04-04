@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QWidget as _QWidget,
     QVBoxLayout as _QVBoxLayout,
     QSizePolicy as _QSizePolicy)
-from matplotlib.backends.backend_qt4agg import (
+from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as _FigCanvas,
     NavigationToolbar2QT as _Toolbar)
 from matplotlib.figure import Figure as _Figure
