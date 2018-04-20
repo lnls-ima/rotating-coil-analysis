@@ -121,6 +121,9 @@ class MainWindow(_QMainWindow):
         self.ui.wt_roll_offset = _mplwidget.MplWidget()
         self.ui.lt_roll_offset.addWidget(self.ui.wt_roll_offset)
 
+        self.ui.wt_temperature = _mplwidget.MplWidget()
+        self.ui.lt_temperature.addWidget(self.ui.wt_temperature)
+
         self.ui.wt_dipole = _mplwidget.MplWidget()
         self.ui.lt_dipole.addWidget(self.ui.wt_dipole)
 
@@ -157,6 +160,8 @@ class MainWindow(_QMainWindow):
         self.ui.wt_roll_offset.canvas.ax.clear()
         self.ui.wt_roll_offset.canvas.fig.clf()
         self.ui.wt_roll_offset.canvas.draw()
+        self.ui.wt_temperature.canvas.ax.clear()
+        self.ui.wt_temperature.canvas.draw()
         self.ui.wt_dipole.canvas.ax.clear()
         self.ui.wt_dipole.canvas.draw()
         self.ui.wt_quadrupole.canvas.ax.clear()
@@ -619,17 +624,20 @@ class MainWindow(_QMainWindow):
         velocity = []
         timestamp = []
         idn = []
+
+        decimals = 4
         for d in self.data:
-            main.append(d.main_coil_current_avg)
-            trim.append(d.trim_coil_current_avg)
-            ch.append(d.ch_coil_current_avg)
-            cv.append(d.cv_coil_current_avg)
-            qs.append(d.qs_coil_current_avg)
+            main.append(_np.round(d.main_coil_current_avg, decimals=decimals))
+            trim.append(_np.round(d.trim_coil_current_avg, decimals=decimals))
+            ch.append(_np.round(d.ch_coil_current_avg, decimals=decimals))
+            cv.append(_np.round(d.cv_coil_current_avg, decimals=decimals))
+            qs.append(_np.round(d.qs_coil_current_avg, decimals=decimals))
             magnet_name.append(d.magnet_name)
             start_pulse.append(d.trigger_ref)
             integrator_gain.append(d.integrator_gain)
             nr_integration_points.append(d.n_integration_points)
-            velocity.append(d.rotation_motor_speed)
+            velocity.append(_np.round(
+                d.rotation_motor_speed, decimals=decimals))
             timestamp.append(d.hour)
             idn.append(d.idn)
 
@@ -1336,6 +1344,8 @@ class MainWindow(_QMainWindow):
         self._plot_wiki_graph_center_offset(
             self.ui.wt_roll_offset.canvas, ax_offset)
 
+        self._plot_wiki_graph_tempeature(
+            self.ui.wt_temperature.canvas, self.ui.wt_temperature.canvas.ax)
         self._plot_wiki_graph_multipole(
             self.ui.wt_dipole.canvas, self.ui.wt_dipole.canvas.ax, 0)
         self._plot_wiki_graph_multipole(
@@ -1553,6 +1563,42 @@ class MainWindow(_QMainWindow):
             fontsize=_annotation_fontsize,
             bbox=self.bbox,
             tol=200)
+
+        canvas.fig.tight_layout()
+        canvas.fig.subplots_adjust(left=0.12)
+        canvas.draw()
+
+    def _plot_wiki_graph_tempeature(self, canvas, ax):
+        label = "Temperature"
+        unit = "deg C"
+
+        temperature = [d.temperature for d in self.data]
+        xtick = [i for i in range(len(self.data))]
+
+        ax.clear()
+        ax.set_xticks(xtick)
+        ax.set_xticklabels(
+            self.xticklabels, rotation=90, fontsize=_tickx_fontsize)
+        ax.set_xlabel(self.xlabel, fontsize=_label_fontsize)
+        ax.tick_params(axis='y', labelsize=_ticky_fontsize)
+        ax.yaxis.grid(1, which='major', linestyle="-", color='0.85')
+        ax.set_axisbelow(True)
+
+        if len(self.title) != 0:
+            ax.set_title(
+                self.title, fontsize=_title_fontsize, weight='bold')
+
+        ax.set_ylabel("%s [%s]" % (label, unit), fontsize=_label_fontsize)
+
+        ax.plot(xtick, temperature, "-o",
+                color=self.purple,
+                markeredgecolor=self.purple,
+                markersize=self.markersize,
+                linewidth=self.linewidth)
+
+        self._expand_data_limits(ax)
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
 
         canvas.fig.tight_layout()
         canvas.fig.subplots_adjust(left=0.12)

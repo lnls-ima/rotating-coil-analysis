@@ -67,8 +67,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1272</width>
-             <height>651</height>
+             <width>704</width>
+             <height>315</height>
             </rect>
            </property>
            <attribute name="label">
@@ -3670,6 +3670,16 @@
            <layout class="QGridLayout" name="gridLayout_24">
             <item row="0" column="0">
              <layout class="QVBoxLayout" name="lt_roll_offset"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="temperature">
+           <attribute name="title">
+            <string>Temperature</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="lt_temperature"/>
             </item>
            </layout>
           </widget>
