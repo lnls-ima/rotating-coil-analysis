@@ -1,9 +1,11 @@
 """Read rotating coil measurement file."""
 
-import numpy as _np
-import pandas as _pd
 import os as _os
 import re as _re
+import time as _time
+import numpy as _np
+import pandas as _pd
+import datetime as _datetime
 import sqlite3 as _sqlite3
 
 
@@ -19,7 +21,6 @@ class MeasurementData(object):
     """Rotationg coil measurement data."""
 
     _n_harmonics = 15
-    _raw_curve_mult_factor = 1e-12
 
     def __init__(self, filename=None, idn=None, database=None):
         """Read data from file.
@@ -92,6 +93,10 @@ class MeasurementData(object):
         self._curves = None
         self._curves_df = None
         self._columns_names = None
+
+        self._raw_curve_mult_factor = 1e-12
+        self._raw_curve_mult_factor_mod = 1
+        self._raw_curve_mult_factor_mod_date = '12/03/2018'
 
         if self._filename is not None:
             self._read_from_file()
@@ -444,6 +449,14 @@ class MeasurementData(object):
         else:
             return self._analysis_interval[1] - self._analysis_interval[0]
 
+    def _update_raw_curve_mult_factor(self):
+        date_sec = _time.mktime(_datetime.datetime.strptime(
+            self._date, '%d/%m/%Y').timetuple())
+        mod_date_sec = _time.mktime(_datetime.datetime.strptime(
+            self._raw_curve_mult_factor_mod_date, '%d/%m/%Y').timetuple())
+        if date_sec >= mod_date_sec:
+            self._raw_curve_mult_factor = self._raw_curve_mult_factor_mod
+
     def _read_from_database(self):
         if not _os.path.isfile(self._database):
             raise IOError('File not found: %s' % self._database)
@@ -461,7 +474,10 @@ class MeasurementData(object):
 
         self._magnet_name = meas[1]
         self._filename = meas[2]
+
         self._date = meas[3]
+        self._update_raw_curve_mult_factor()
+
         self._hour = meas[4]
         self._operator = meas[5]
         self._software_version = meas[6]
@@ -561,6 +577,7 @@ class MeasurementData(object):
         self._date = _find_value(self._measurement_data, ['date', 'data'])
         if self._date is None and len(filename_split) > 1:
             self._date = filename_split[-2]
+        self._update_raw_curve_mult_factor()
 
         # Read Hour
         self._hour = _find_value(self._measurement_data, ['hour', 'hora'])

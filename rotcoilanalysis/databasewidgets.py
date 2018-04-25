@@ -124,6 +124,7 @@ class DatabaseTable(_QWidget):
 
         self.ui.database_table.blockSignals(False)
         self.ui.database_table.itemChanged.connect(self.filterColumn)
+        self.ui.database_table.itemSelectionChanged.connect(self.selectLine)
 
     def addRowsToTable(self, data):
         """Add rows to table."""
@@ -141,6 +142,27 @@ class DatabaseTable(_QWidget):
         """Scroll down."""
         vbar = self.ui.database_table.verticalScrollBar()
         vbar.setValue(vbar.maximum())
+
+    def selectLine(self):
+        """Select the entire line."""
+        if (self.database_table.rowCount() == 0
+           or self.database_table.columnCount() == 0
+           or len(self.columns) == 0 or len(self.data_types) == 0):
+            return
+
+        selected = self.ui.database_table.selectedItems()
+        rows = [s.row() for s in selected]
+
+        if 0 in rows:
+            return
+
+        self.ui.database_table.blockSignals(True)
+        for row in rows:
+            for col in range(len(self.columns)):
+                item = self.ui.database_table.item(row, col)
+                if item and not item.isSelected():
+                    item.setSelected(True)
+        self.ui.database_table.blockSignals(False)
 
     def filterColumn(self, item):
         """Apply column filter to data."""
