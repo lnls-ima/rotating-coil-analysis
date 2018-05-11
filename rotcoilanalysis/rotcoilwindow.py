@@ -817,8 +817,12 @@ class MainWindow(_QMainWindow):
 
     def screen_table(self):
         """Create new screen with table."""
-        dialog_table = _tabledialog.TableDialog(table_df=self.table_df)
-        dialog_table.exec_()
+        try:
+            dialog_table = _tabledialog.TableDialog(table_df=self.table_df)
+            dialog_table.exec_()
+        except Exception:
+            _QMessageBox.critical(
+                self, 'Failure', 'Failed to open table.', _QMessageBox.Ok)            
 
     def plot_multipoles_one_file(self):
         """Plot multipoles from the specified file."""
