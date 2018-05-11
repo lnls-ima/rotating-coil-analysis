@@ -273,6 +273,11 @@ class MeasurementData(object):
         4 - skew quadrupole
         """
         return self._magnet_model
+    
+    @property
+    def magnet_family(self):
+        """Magnet family"""
+        return self._magnet_family
 
     @property
     def coil_name(self):
@@ -493,21 +498,22 @@ class MeasurementData(object):
         self._magnet_resistance_std = meas[32]
         self._accelerator_type = meas[33]
         self._magnet_model = meas[34]
-        self._coil_name = meas[35]
-        self._coil_type = meas[36]
-        self._measurement_type = meas[37]
-        self._n_turns_normal = meas[38]
-        self._radius1_normal = meas[39]
-        self._radius2_normal = meas[40]
-        self._n_turns_bucked = meas[41]
-        self._radius1_bucked = meas[42]
-        self._radius2_bucked = meas[43]
-        self._comments = meas[45]
-        self._normalization_radius = meas[46]
-        self._magnetic_center_x = meas[48]
-        self._magnetic_center_y = meas[49]
-        self._read_data = [l for l in meas[50].split('\n') if len(l) != 0]
-        self._raw_curve = [l for l in meas[51].split('\n') if len(l) != 0]
+        self._magnet_family = meas[35]
+        self._coil_name = meas[36]
+        self._coil_type = meas[37]
+        self._measurement_type = meas[38]
+        self._n_turns_normal = meas[39]
+        self._radius1_normal = meas[40]
+        self._radius2_normal = meas[41]
+        self._n_turns_bucked = meas[42]
+        self._radius1_bucked = meas[43]
+        self._radius2_bucked = meas[44]
+        self._comments = meas[46]
+        self._normalization_radius = meas[47]
+        self._magnetic_center_x = meas[49]
+        self._magnetic_center_y = meas[50]
+        self._read_data = [l for l in meas[51].split('\n') if len(l) != 0]
+        self._raw_curve = [l for l in meas[52].split('\n') if len(l) != 0]
 
         columns_names_str = self._read_data[0]
         self._columns_names = columns_names_str.split()

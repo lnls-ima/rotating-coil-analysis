@@ -10,7 +10,6 @@ from PyQt5.QtWidgets import (
     QWidget as _QWidget,
     QTableWidgetItem as _QTableWidgetItem)
 
-
 _basepath = _path.dirname(_path.abspath(__file__))
 _fontsize = 15
 
@@ -80,6 +79,7 @@ class DatabaseTable(_QWidget):
         font.setPixelSize(_fontsize)
         font.setBold(False)
         self.ui.database_table.setFont(font)
+        self.ui.database_table.setAlternatingRowColors(True) #Added by Vitor
 
         self.database_filename = None
         self.table_name = None
@@ -116,6 +116,11 @@ class DatabaseTable(_QWidget):
         if len(data) > 0:
             self.data_types = [
                 type(data[0][col]) for col in range(len(self.columns))]
+            #Added by Vitor:
+            if self.table_name == 'measurements':
+                self.data_types[35] = str
+            elif self.table_name == 'sets_of_measurements':
+                self.data_types[2] = str
 
         self.ui.database_table.setRowCount(1)
         for j in range(len(self.columns)):
