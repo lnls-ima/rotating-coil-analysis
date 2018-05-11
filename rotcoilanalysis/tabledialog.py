@@ -23,9 +23,8 @@ class TableDialog(_QDialog):
         self.table_df = table_df
 
         # setup the ui
-        uifile = _path.join(_basepath, _path.join('ui', 'dialog.ui'))
+        uifile = _path.join(_basepath, _path.join('ui', 'tabledialog.ui'))
         self.ui = _uic.loadUi(uifile, self)
-
         self.setAttribute(_Qt.WA_DeleteOnClose)
 
         self.move(

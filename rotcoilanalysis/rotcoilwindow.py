@@ -822,7 +822,7 @@ class MainWindow(_QMainWindow):
             dialog_table.exec_()
         except Exception:
             _QMessageBox.critical(
-                self, 'Failure', 'Failed to open table.', _QMessageBox.Ok)            
+                self, 'Failure', 'Failed to open table.', _QMessageBox.Ok)
 
     def plot_multipoles_one_file(self):
         """Plot multipoles from the specified file."""
