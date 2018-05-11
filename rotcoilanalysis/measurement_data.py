@@ -71,6 +71,7 @@ class MeasurementData(object):
         self._magnet_resistance_std = None
         self._accelerator_type = None
         self._magnet_model = None
+        self._magnet_family = None
         self._coil_name = None
         self._coil_type = None
         self._measurement_type = None
@@ -98,10 +99,10 @@ class MeasurementData(object):
         self._raw_curve_mult_factor_mod = 1
         self._raw_curve_mult_factor_mod_date = '12/03/2018'
 
-        if self._filename is not None:
-            self._read_from_file()
-        else:
+        if self._idn is not None:
             self._read_from_database()
+        else:
+            self._read_from_file()
 
     @property
     def filename(self):
@@ -278,10 +279,10 @@ class MeasurementData(object):
         4 - skew quadrupole
         """
         return self._magnet_model
-    
+
     @property
     def magnet_family(self):
-        """Magnet family"""
+        """Magnet family (str)."""
         return self._magnet_family
 
     @property
@@ -473,63 +474,30 @@ class MeasurementData(object):
         cur = conn.cursor()
         cur.execute('SELECT * FROM measurements WHERE id = ?', (self._idn, ))
         meas = cur.fetchone()
+        description = [d[0] for d in cur.description]
 
         if meas is None:
             raise ValueError('Invalid database ID.')
 
-        self._magnet_name = meas[1]
-        self._filename = meas[2]
+        for name in description:
+            if (name not in
+               ['id', 'analisys_interval', 'read_data', 'raw_curve']):
+                idx = description.index(name)
+                att_name = '_' + name
+                if hasattr(self, att_name):
+                    setattr(self, att_name, meas[idx])
 
-        self._date = meas[3]
         self._update_raw_curve_mult_factor()
 
-        self._hour = meas[4]
-        self._operator = meas[5]
-        self._software_version = meas[6]
-        self._bench = meas[7]
-        self._temperature = meas[8]
-        self._rotation_motor_speed = meas[9]
-        self._rotation_motor_acceleration = meas[10]
-        self._coil_rotation_direction = meas[11]
-        self._integrator_gain = meas[12]
-        self._trigger_ref = meas[13]
-        self._n_integration_points = meas[14]
-        self._n_turns = meas[15]
-        self._n_collections = meas[16]
-        interval = meas[17].split('-')
-        self._analysis_interval = [int(interval[0]), int(interval[1])]
-        self._main_coil_current_avg = meas[19]
-        self._main_coil_current_std = meas[20]
-        self._ch_coil_current_avg = meas[21]
-        self._ch_coil_current_std = meas[22]
-        self._cv_coil_current_avg = meas[23]
-        self._cv_coil_current_std = meas[24]
-        self._qs_coil_current_avg = meas[25]
-        self._qs_coil_current_std = meas[26]
-        self._trim_coil_current_avg = meas[27]
-        self._trim_coil_current_std = meas[28]
-        self._main_coil_volt_avg = meas[29]
-        self._main_coil_volt_std = meas[30]
-        self._magnet_resistance_avg = meas[31]
-        self._magnet_resistance_std = meas[32]
-        self._accelerator_type = meas[33]
-        self._magnet_model = meas[34]
-        self._magnet_family = meas[35]
-        self._coil_name = meas[36]
-        self._coil_type = meas[37]
-        self._measurement_type = meas[38]
-        self._n_turns_normal = meas[39]
-        self._radius1_normal = meas[40]
-        self._radius2_normal = meas[41]
-        self._n_turns_bucked = meas[42]
-        self._radius1_bucked = meas[43]
-        self._radius2_bucked = meas[44]
-        self._comments = meas[46]
-        self._normalization_radius = meas[47]
-        self._magnetic_center_x = meas[49]
-        self._magnetic_center_y = meas[50]
-        self._read_data = [l for l in meas[51].split('\n') if len(l) != 0]
-        self._raw_curve = [l for l in meas[52].split('\n') if len(l) != 0]
+        if 'analisys_interval' in description:
+            interval = meas[description.index('analisys_interval')].split('-')
+            self._analysis_interval = [int(interval[0]), int(interval[1])]
+
+        read_data = meas[description.index('read_data')]
+        self._read_data = [l for l in read_data.split('\n') if len(l) != 0]
+
+        raw_curve = meas[description.index('raw_curve')]
+        self._raw_curve = [l for l in raw_curve.split('\n') if len(l) != 0]
 
         columns_names_str = self._read_data[0]
         self._columns_names = columns_names_str.split()
