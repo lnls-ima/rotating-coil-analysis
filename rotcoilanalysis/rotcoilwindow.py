@@ -605,6 +605,15 @@ class MainWindow(_QMainWindow):
 
             if len(data) > 0:
                 self.data = self._sort_data(data)
+                self.idns = [d.idn for d in self.data]
+                self.database_uploaded = [d.filename for d in self.data]
+
+                self.ui.database_output.clear()
+                for i in range(len(self.database_uploaded)):
+                    item = _QTableWidgetItem()
+                    self.ui.database_output.setItem(i, 0, item)
+                    item.setText(self.database_uploaded[i])
+
                 self.columns_names = self.data[0].columns_names
                 self.reference_radius = self.data[0].normalization_radius
                 self.default_harmonic = self.data[0].main_harmonic
