@@ -69,3 +69,6 @@ doc/documentation.html
 
 # PyBuilder
 target/
+
+rotcoilanalysis/.project
+rotcoilanalysis/.pydevproject
