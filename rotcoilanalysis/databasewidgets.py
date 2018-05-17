@@ -54,6 +54,10 @@ class DatabaseTab(_QTabWidget):
 
     def clearDatabase(self):
         """Clear database."""
+        ntabs = self.count()
+        for idx in range(ntabs):
+            self.removeTab(idx)
+            self.tables[idx].deleteLater()
         self.database_filename = None
         self.tables = []
         self.clear()
