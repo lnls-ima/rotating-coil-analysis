@@ -17,7 +17,6 @@ from PyQt5.QtWidgets import (
     QMessageBox as _QMessageBox,
     QTableWidgetItem as _QTableWidgetItem,
     QHeaderView as _QHeaderView,
-    QProgressDialog as _QProgressDialog,
     QApplication as _QApplication)
 from PyQt5.QtGui import QPixmap as _QPixmap
 from PyQt5.QtCore import Qt as _Qt
@@ -79,8 +78,6 @@ class MainWindow(_QMainWindow):
             self.geometry().width()/2,
             _QDesktopWidget().availableGeometry().center().y() -
             self.geometry().height()/2)
-
-        self.progress_dialog = None
 
         self.directory = None
         self.preview_doc = None
@@ -352,8 +349,8 @@ class MainWindow(_QMainWindow):
             return
 
         try:
-            self.start_progress_dialog("Loading database, Please Wait!")
-            _QApplication.processEvents()
+            self.blockSignals(True)
+            _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
             if self.database is not None and filepath != self.database:
                 self.clear_database_output()
@@ -362,35 +359,14 @@ class MainWindow(_QMainWindow):
             self.database_tab.clearDatabase()
             self.database_tab.loadDatabase(database_filename=self.database)
 
-            self.stop_close_dialog()
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
 
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load database.', _QMessageBox.Ok)
-
-    def start_progress_dialog(self, title):
-        """Start progress dialog."""
-        self.progress_dialog = _QProgressDialog(parent=self)
-        self.progress_dialog.setAutoReset(True)
-        self.progress_dialog.setAutoClose(True)
-        self.progress_dialog.setMinimum(0)
-        self.progress_dialog.setMaximum(100)
-        self.progress_dialog.resize(400, 50)
-        self.progress_dialog.setWindowTitle(title)
-        self.progress_dialog.canceled.connect(self.close_progress_dialog)
-        self.progress_dialog.setValue(0)
-        self.progress_dialog.forceShow()
-
-    def stop_close_dialog(self):
-        """Stop progress dialog."""
-        if self.progress_dialog is not None:
-            self.progress_dialog.setValue(100)
-
-    def close_progress_dialog(self):
-        """Close progress dialog."""
-        self.database = None
-        self.ui.le_database_filename.setText("")
-        self.database_tab.clearDatabase()
 
     def upload_files(self):
         """Upload files."""
@@ -483,8 +459,8 @@ class MainWindow(_QMainWindow):
             return
 
         try:
-            self.start_progress_dialog("Updating database, Please Wait!")
-            _QApplication.processEvents()
+            self.blockSignals(True)
+            _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
             idx = self.database_tab.currentIndex()
             self.database_tab.clearDatabase()
@@ -492,9 +468,12 @@ class MainWindow(_QMainWindow):
             self.database_tab.scrollDownTables()
             self.database_tab.setCurrentIndex(idx)
 
-            self.stop_close_dialog()
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
 
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to update database.', _QMessageBox.Ok)
 
