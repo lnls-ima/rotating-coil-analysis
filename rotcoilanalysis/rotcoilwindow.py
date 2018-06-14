@@ -2,7 +2,6 @@
 
 import numpy as _np
 import pandas as _pd
-import importlib as _importlib
 import time as _time
 import datetime as _datetime
 import os as _os
@@ -30,12 +29,15 @@ from . import mplwidget as _mplwidget
 from . import databasewidgets as _databasewidgets
 from . import tabledialog as _tabledialog
 
+# # For PyQt4
+# import importlib as _importlib
+# if _importlib.util.find_spec('popplerqt4') is not None:
+#     poppler = _importlib.import_module('popplerqt4')
+#     _preview_enabled = True
+# else:
+#     _preview_enabled = False
 
-if _importlib.util.find_spec('popplerqt5') is not None:
-    poppler = _importlib.import_module('popplerqt5')
-    _preview_enabled = True
-else:
-    _preview_enabled = False
+_preview_enabled = False
 
 if _os.name == 'nt':
     _fontsize = 14
