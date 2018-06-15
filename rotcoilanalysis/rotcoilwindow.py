@@ -414,7 +414,7 @@ class MainWindow(_QMainWindow):
             for idn in self.idns:
                 cur.execute('SELECT * FROM measurements WHERE id = ?', (idn,))
                 m = cur.fetchone()
-                self.database_uploaded.append(m[2])
+                self.database_uploaded.append("ID %i: %s" % (m[0], m[2]))
 
             self.ui.database_output_count.setText(
                 str(len(self.database_uploaded)))
@@ -629,7 +629,9 @@ class MainWindow(_QMainWindow):
             if len(data) > 0:
                 self.data = self._sort_data(data)
                 self.idns = [d.idn for d in self.data]
-                self.database_uploaded = [d.filename for d in self.data]
+                self.database_uploaded = [
+                    "ID %i: %s" % (self.idns[i], self.data[i].filename)
+                    for i in range(len(self.data))]
 
                 self.ui.database_output.clear()
                 for i in range(len(self.database_uploaded)):

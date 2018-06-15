@@ -210,10 +210,10 @@ class DatabaseTable(_QTableWidget):
 
         if len(data) > self.number_rows_sb.value():
             tabledata = data[-self.number_rows_sb.value()::]
-            self.initial_id_sb.setValue(int(tabledata[0][0]))
         else:
             tabledata = data
 
+        self.initial_id_sb.setValue(int(tabledata[0][0]))
         self.setRowCount(len(tabledata) + 1)
         self.initial_table_id = tabledata[0][0]
 
