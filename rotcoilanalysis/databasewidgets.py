@@ -2,15 +2,24 @@
 
 import os.path as _path
 import sqlite3 as _sqlite3
+import numpy as _np
 from PyQt5.QtCore import Qt as _Qt
 from PyQt5.QtGui import QFont as _QFont
 from PyQt5.QtWidgets import (
+    QWidget as _QWidget,
+    QLabel as _QLabel,
     QTabWidget as _QTabWidget,
     QTableWidget as _QTableWidget,
-    QTableWidgetItem as _QTableWidgetItem)
+    QTableWidgetItem as _QTableWidgetItem,
+    QVBoxLayout as _QVBoxLayout,
+    QHBoxLayout as _QHBoxLayout,
+    QSpinBox as _QSpinBox,
+    )
 
 _basepath = _path.dirname(_path.abspath(__file__))
 _fontsize = 15
+_max_number_rows = 1000
+_max_str_size = 1000
 
 
 class DatabaseTab(_QTabWidget):
@@ -18,7 +27,7 @@ class DatabaseTab(_QTabWidget):
 
     def __init__(self, parent=None):
         """Setup the ui."""
-        super(DatabaseTab, self).__init__(parent)
+        super().__init__(parent)
 
         font = _QFont()
         font.setPixelSize(_fontsize)
@@ -40,11 +49,33 @@ class DatabaseTab(_QTabWidget):
             table_name = r[0]
             if table_name != "sqlite_sequence" and table_name != 'failures':
                 table = DatabaseTable(self)
+                tab = _QWidget()
+                vlayout = _QVBoxLayout()
+                hlayout = _QHBoxLayout()
+
+                initial_id_la = _QLabel("Initial ID:")
+                initial_id_sb = _QSpinBox()
+                hlayout.addWidget(initial_id_la)
+                hlayout.addWidget(initial_id_sb)
+                hlayout.addSpacing(50)
+
+                number_rows_la = _QLabel("Maximum number of rows:")
+                number_rows_sb = _QSpinBox()
+                hlayout.addWidget(number_rows_la)
+                hlayout.addWidget(number_rows_sb)
+
                 table.loadDatabaseTable(
-                    database_filename=self.database_filename,
-                    table_name=table_name)
+                    self.database_filename,
+                    table_name,
+                    initial_id_sb,
+                    number_rows_sb)
+
+                vlayout.addWidget(table)
+                vlayout.addLayout(hlayout)
+                tab.setLayout(vlayout)
+
                 self.tables.append(table)
-                self.addTab(table, table_name)
+                self.addTab(tab, table_name)
 
     def scrollDownTables(self):
         """Scroll down all tables."""
@@ -68,7 +99,7 @@ class DatabaseTable(_QTableWidget):
 
     def __init__(self, parent=None):
         """Setup the ui."""
-        super(DatabaseTable, self).__init__(parent)
+        super().__init__(parent)
 
         font = _QFont()
         font.setPixelSize(_fontsize)
@@ -83,11 +114,46 @@ class DatabaseTable(_QTableWidget):
         self.table_name = None
         self.column_names = []
         self.data_types = []
+        self.data = []
+        self.initial_table_id = None
+        self.initial_id_sb = None
+        self.number_rows_sb = None
 
-    def loadDatabaseTable(self, database_filename, table_name):
+    def changeInitialID(self):
+        """Change initial ID."""
+        initial_id = self.initial_id_sb.value()
+        if len(self.data) == 0:
+            return
+
+        if self.initial_table_id != initial_id:
+            ids = _np.array(
+                [self.data[i][0] for i in range(len(self.data))])
+            idx = _np.min(
+                _np.append(_np.where(ids >= initial_id)[0], _np.inf))
+            if _np.isinf(idx):
+                data = []
+            else:
+                data = self.data[int(idx)::]
+            if len(data) > self.number_rows_sb.value():
+                data = data[:self.number_rows_sb.value()]
+            self.addRowsToTable(data)
+
+    def loadDatabaseTable(
+            self, database_filename, table_name,
+            initial_id_sb, number_rows_sb):
         """Set database filename and table name."""
         self.database_filename = database_filename
         self.table_name = table_name
+
+        self.initial_id_sb = initial_id_sb
+        self.initial_id_sb.setButtonSymbols(2)
+        self.initial_id_sb.editingFinished.connect(self.changeInitialID)
+
+        self.number_rows_sb = number_rows_sb
+        self.number_rows_sb.setButtonSymbols(2)
+        self.number_rows_sb.setMaximum(_max_number_rows)
+        self.number_rows_sb.setReadOnly(True)
+
         self.updateTable()
 
     def updateTable(self):
@@ -113,7 +179,8 @@ class DatabaseTable(_QTableWidget):
 
         if len(data) > 0:
             self.data_types = [
-                type(data[0][col]) for col in range(len(self.column_names))]
+                type(data[0][col]) for col in range(
+                    len(self.column_names))]
             # Added by Vitor:
             if self.table_name == 'measurements':
                 self.data_types[35] = str
@@ -123,6 +190,11 @@ class DatabaseTable(_QTableWidget):
         self.setRowCount(1)
         for j in range(len(self.column_names)):
             self.setItem(0, j, _QTableWidgetItem(''))
+
+        self.initial_id_sb.setMinimum(int(data[0][0]))
+        self.initial_id_sb.setMaximum(int(data[-1][0]))
+        self.number_rows_sb.setValue(len(data))
+        self.data = data[:]
         self.addRowsToTable(data)
 
         self.blockSignals(False)
@@ -134,10 +206,23 @@ class DatabaseTable(_QTableWidget):
         if len(self.column_names) == 0:
             return
 
-        self.setRowCount(len(data) + 1)
+        self.setRowCount(1)
+
+        if len(data) > self.number_rows_sb.value():
+            tabledata = data[-self.number_rows_sb.value()::]
+            self.initial_id_sb.setValue(int(tabledata[0][0]))
+        else:
+            tabledata = data
+
+        self.setRowCount(len(tabledata) + 1)
+        self.initial_table_id = tabledata[0][0]
+
         for j in range(len(self.column_names)):
-            for i in range(len(data)):
-                item = _QTableWidgetItem(str(data[i][j]))
+            for i in range(len(tabledata)):
+                item_str = str(tabledata[i][j])
+                if len(item_str) > _max_str_size:
+                    item_str = item_str[:20] + '...'
+                item = _QTableWidgetItem(item_str)
                 item.setFlags(_Qt.ItemIsSelectable | _Qt.ItemIsEnabled)
                 self.setItem(i + 1, j, item)
 
@@ -220,12 +305,14 @@ class DatabaseTable(_QTableWidget):
             pass
 
         data = cur.fetchall()
+        self.data = data[:]
         self.addRowsToTable(data)
 
     def getSelectedIDs(self):
         """Get selected IDs."""
         selected = self.selectedItems()
         rows = [s.row() for s in selected if s.row() != 0]
+        rows = _np.unique(rows)
 
         selected_ids = []
         for row in rows:

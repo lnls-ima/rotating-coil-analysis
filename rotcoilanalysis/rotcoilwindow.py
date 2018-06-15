@@ -401,7 +401,8 @@ class MainWindow(_QMainWindow):
             return
 
         try:
-            selected_idns = self.database_tab.currentWidget().getSelectedIDs()
+            idx = self.database_tab.currentIndex()
+            selected_idns = self.database_tab.tables[idx].getSelectedIDs()
 
             for idn in selected_idns:
                 if idn not in self.idns:
