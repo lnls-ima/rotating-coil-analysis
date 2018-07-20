@@ -784,25 +784,44 @@ class MeasurementData(object):
         if self._multipoles is None or self.main_harmonic is None:
             return
 
-        n = self.main_harmonic - 1
         normal = self._multipoles[:, 1]
         normal_err = self._multipoles[:, 2]
         skew = self._multipoles[:, 3]
         skew_err = self._multipoles[:, 4]
 
+        if self._magnet_model == 4:
+            n = 1
+            main_mult = skew
+            main_mult_err = skew_err
+            perp_mult = normal
+            perp_mult_err = normal_err
+            dy_sign = -1
+        else:
+            n = self.main_harmonic - 1
+            main_mult = normal
+            main_mult_err = normal_err
+            perp_mult = skew
+            perp_mult_err = skew_err
+            dy_sign = 1
+
         if self._magnetic_center_x is None:
-            self._magnetic_center_x = (normal[n-1]/(n*normal[n]))*1e6
+            self._magnetic_center_x = (-1/n)*(main_mult[n-1]/main_mult[n])*1e6
+            print(self._magnetic_center_x)
 
         self._magnetic_center_x_err = (
-            ((normal_err[n-1]/(n*normal[n]))**2 -
-             (normal[n-1]*normal_err[n]/(n*(normal[n]**2)))**2)**(1/2))*1e6
+            ((main_mult_err[n-1]/(n*main_mult[n]))**2 +
+             (main_mult[n-1]*main_mult_err[n]/(
+                n*(main_mult[n]**2)))**2)**(1/2))*1e6
 
         if self._magnetic_center_y is None:
-            self._magnetic_center_y = (skew[n-1]/(n*normal[n]))*1e6
+            self._magnetic_center_y = (
+                (-1/n)*(dy_sign)*(perp_mult[n-1]/main_mult[n])*1e6)
+            print(self._magnetic_center_y)
 
         self._magnetic_center_y_err = (
-            ((skew_err[n-1]/(n*normal[n]))**2 -
-             (skew[n-1]*normal_err[n]/(n*(normal[n]**2)))**2)**(1/2))*1e6
+            ((perp_mult_err[n-1]/(n*main_mult[n]))**2 +
+             (perp_mult[n-1]*main_mult_err[n]/(
+                n*(main_mult[n]**2)))**2)**(1/2))*1e6
 
     def _get_raw_curves_from_file_data(self):
         index = _search_in_file_lines(
