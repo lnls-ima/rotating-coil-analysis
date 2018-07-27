@@ -702,17 +702,28 @@ class MainWindow(_QMainWindow):
 
         decimals = 4
         for d in self.data:
-            main.append(_np.round(d.main_coil_current_avg, decimals=decimals))
-            trim.append(_np.round(d.trim_coil_current_avg, decimals=decimals))
-            ch.append(_np.round(d.ch_coil_current_avg, decimals=decimals))
-            cv.append(_np.round(d.cv_coil_current_avg, decimals=decimals))
-            qs.append(_np.round(d.qs_coil_current_avg, decimals=decimals))
+            main.append(
+                _np.round(d.main_coil_current_avg, decimals=decimals)
+                if d.main_coil_current_avg is not None else None)
+            trim.append(
+                _np.round(d.trim_coil_current_avg, decimals=decimals)
+                if d.trim_coil_current_avg is not None else None)
+            ch.append(
+                _np.round(d.ch_coil_current_avg, decimals=decimals)
+                if d.ch_coil_current_avg is not None else None)
+            cv.append(
+                _np.round(d.cv_coil_current_avg, decimals=decimals)
+                if d.cv_coil_current_avg is not None else None)
+            qs.append(
+                _np.round(d.qs_coil_current_avg, decimals=decimals)
+                if d.qs_coil_current_avg is not None else None)
             magnet_name.append(d.magnet_name)
             start_pulse.append(d.trigger_ref)
             integrator_gain.append(d.integrator_gain)
             nr_integration_points.append(d.n_integration_points)
-            velocity.append(_np.round(
-                d.rotation_motor_speed, decimals=decimals))
+            velocity.append(
+                _np.round(d.rotation_motor_speed, decimals=decimals)
+                if d.rotation_motor_speed is not None else None)
             timestamp.append(d.hour)
             idn.append(d.idn)
 

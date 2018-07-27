@@ -806,7 +806,6 @@ class MeasurementData(object):
 
         if self._magnetic_center_x is None:
             self._magnetic_center_x = (-1/n)*(main_mult[n-1]/main_mult[n])*1e6
-            print(self._magnetic_center_x)
 
         self._magnetic_center_x_err = (
             ((main_mult_err[n-1]/(n*main_mult[n]))**2 +
@@ -816,7 +815,6 @@ class MeasurementData(object):
         if self._magnetic_center_y is None:
             self._magnetic_center_y = (
                 (-1/n)*(dy_sign)*(perp_mult[n-1]/main_mult[n])*1e6)
-            print(self._magnetic_center_y)
 
         self._magnetic_center_y_err = (
             ((perp_mult_err[n-1]/(n*main_mult[n]))**2 +
