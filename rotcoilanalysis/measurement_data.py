@@ -784,6 +784,17 @@ class MeasurementData(object):
         if self._multipoles is None or self.main_harmonic is None:
             return
 
+        if self.main_harmonic == 1:
+            if self._magnetic_center_x is None:
+                self._magnetic_center_x = 0
+
+            if self._magnetic_center_y is None:
+                self._magnetic_center_y = 0
+
+            self._magnetic_center_x_err = 0
+            self._magnetic_center_y_err = 0
+            return
+
         normal = self._multipoles[:, 1]
         normal_err = self._multipoles[:, 2]
         skew = self._multipoles[:, 3]

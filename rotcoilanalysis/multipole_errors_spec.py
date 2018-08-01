@@ -7,6 +7,70 @@ import random as _random
 def _get_multipole_errors_spec():
     multipole_errors = {}
 
+    # Calibration magnets
+    _dict = {}
+    _dict['main'] = 0
+    _dict['normal_sys_monomials'] = _np.array([
+        1, 2, 4, 6])
+    _dict['normal_sys_multipoles'] = _np.array([
+        -2e-6, -1.5e-4, 8e-6, -9e-6])
+    _dict['normal_rms_monomials'] = _np.array([
+        1, 2, 3, 4, 5, 6])
+    _dict['normal_rms_multipoles'] = _np.array([
+        7e-3, 3e-3, 9e-4, 2e-4, 8e-5, 1e-6])
+    _dict['skew_sys_monomials'] = _np.array([])
+    _dict['skew_sys_multipoles'] = _np.array([])
+    _dict['skew_rms_monomials'] = _np.array([
+        1, 2, 3, 4, 5, 6])
+    _dict['skew_rms_multipoles'] = _np.array([
+        7e-3, 2e-3, 9e-4, 4e-4, 9e-5, 4e-5])
+    _dict['offset_x'] = 0
+    _dict['offset_y'] = 0
+    _dict['roll'] = 2e-2
+    multipole_errors["DPM"] = _dict
+
+    _dict = {}
+    _dict['main'] = 1
+    _dict['normal_sys_monomials'] = _np.array([])
+    _dict['normal_sys_multipoles'] = _np.array([])
+    _dict['normal_rms_monomials'] = _np.array([
+        2, 3, 4, 5, 6, 7, 8])
+    _dict['normal_rms_multipoles'] = _np.array([
+        5e-3, 1e-3, 5e-4, 2e-4, 4e-5, 1e-5, 3e-6])
+    _dict['skew_sys_monomials'] = _np.array([
+        5, 9, 13])
+    _dict['skew_sys_multipoles'] = _np.array([
+        3.4e-6, -9.5e-7, -8.7e-7])
+    _dict['skew_rms_monomials'] = _np.array([
+        2, 3, 4, 5, 6, 7, 8, 9])
+    _dict['skew_rms_multipoles'] = _np.array([
+        4e-3, 2e-3, 6e-4, 3e-4, 8e-5, 5e-7, 5e-6, 1e-6])
+    _dict['offset_x'] = 3e-4
+    _dict['offset_y'] = 3e-4
+    _dict['roll'] = 2e-2
+    multipole_errors["QPM"] = _dict
+
+    _dict = {}
+    _dict['main'] = 2
+    _dict['normal_sys_monomials'] = _np.array([
+        8, 14])
+    _dict['normal_sys_multipoles'] = _np.array([
+        2.4e-4, -1.6e-4])
+    _dict['normal_rms_monomials'] = _np.array([
+        3, 4, 5, 6, 7, 8, 9])
+    _dict['normal_rms_multipoles'] = _np.array([
+        4e-3, 2e-3, 3e-4, 1e-4, 3e-5, 7e-7, 2e-6])
+    _dict['skew_sys_monomials'] = _np.array([])
+    _dict['skew_sys_multipoles'] = _np.array([])
+    _dict['skew_rms_monomials'] = _np.array([
+        3, 4, 5, 6, 7, 8, 9])
+    _dict['skew_rms_multipoles'] = _np.array([
+        2e-3, 2e-3, 6e-4, 1e-4, 5e-5, 9e-6, 2e-6])
+    _dict['offset_x'] = 2e-4
+    _dict['offset_y'] = 2e-4
+    _dict['roll'] = 1e-2
+    multipole_errors["SPM"] = _dict
+
     # Booster sextupole
     _dict = {}
     _dict['main'] = 2
@@ -71,23 +135,6 @@ def _get_multipole_errors_spec():
     _dict['offset_y'] = 160e-6
     _dict['roll'] = 0.8e-3
     multipole_errors["QS"] = _dict
-
-#     # Storage Ring sextupole S15
-#     _dict = {}
-#     _dict['main'] = 2
-#     _dict['normal_sys_monomials'] = _np.array([4, 6, 8, 14])
-#     _dict['normal_sys_multipoles'] = _np.array(
-#         [-7.0e-5, -1.4e-4, -2.4e-3, +1.4e-3])
-#     _dict['normal_rms_monomials'] = _np.array([3, 4, 5, 6])
-#     _dict['normal_rms_multipoles'] = _np.array([1.5, 1.5, 1.5, 1.5])*1e-4
-#     _dict['skew_sys_monomials'] = _np.array([])
-#     _dict['skew_sys_multipoles'] = _np.array([])
-#     _dict['skew_rms_monomials'] = _np.array([3, 4, 5, 6])
-#     _dict['skew_rms_multipoles'] = _np.array([0.5, 0.5, 0.5, 0.5])*1e-4
-#     _dict['offset_x'] = 40e-6
-#     _dict['offset_y'] = 40e-6
-#     _dict['roll'] = 0.3e-3
-#     multipole_errors["S15"] = _dict
 
     # Storage Ring sextupole S15
     _dict = {}
