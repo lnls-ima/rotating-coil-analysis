@@ -71,6 +71,8 @@ class MeasurementData(object):
         self._magnet_resistance_std = None
         self._accelerator_type = None
         self._magnet_model = None
+        self._main_harmonic = None
+        self._skew_magnet = None
         self._magnet_family = None
         self._coil_name = None
         self._coil_type = None
@@ -277,6 +279,7 @@ class MeasurementData(object):
         2 - quadrupole
         3 - sextupole
         4 - skew quadrupole
+        5 - skew dipole
         """
         return self._magnet_model
 
@@ -373,22 +376,12 @@ class MeasurementData(object):
     @property
     def main_harmonic(self):
         """Magnet main harmonic [1 for dipole, 2 for quadrupole, ...]."""
-        if self._magnet_model in [1, 2, 3]:
-            return self._magnet_model
-        elif self._magnet_model == 4:
-            return 2
-        else:
-            return None
+        return self._main_harmonic
 
     @property
     def skew_magnet(self):
         """Return True if the magnet is skew, False otherwise."""
-        if self._magnet_model in [1, 2, 3]:
-            return False
-        elif self._magnet_model == 4:
-            return True
-        else:
-            return None
+        return self._skew_magnet
 
     @property
     def multipoles(self):
@@ -512,6 +505,19 @@ class MeasurementData(object):
             curves.append(value.split()[1:])
         self._curves = _np.array(curves).astype(
             _np.float64)*self._raw_curve_mult_factor
+
+        if self._magnet_model in [1, 2, 3]:
+            self._main_harmonic = self._magnet_model
+            self._skew_magnet = False
+        elif self._magnet_model == 4:
+            self._main_harmonic = 2
+            self._skew_magnet = True
+        elif self._magnet_model == 5:
+            self._main_harmonic = 1
+            self._skew_magnet = True
+        else:
+            self._main_harmonic = None
+            self._skew_magnet = None
 
         self._set_magnet_center_error()
         self._create_data_frames()
@@ -760,16 +766,18 @@ class MeasurementData(object):
         except Exception:
             self._normalization_radius = None
 
-        main_harm = _np.nonzero(self._multipoles[:, 7])[0][0] + 1
+        self._main_harmonic = _np.nonzero(self._multipoles[:, 7])[0][0] + 1
         if 'SnMagnet' in columns_names_str:
-            skew = True
+            self._skew_magnet = True
         else:
-            skew = False
+            self._skew_magnet = False
 
-        if not skew:
-            self._magnet_model = main_harm
-        elif skew and main_harm == 2:
+        if not self._skew_magnet:
+            self._magnet_model = self._main_harmonic
+        elif self._skew_magnet and self._main_harmonic == 2:
             self._magnet_model = 4
+        elif self._skew_magnet and self._main_harmonic == 1:
+            self._magnet_model = 5
         else:
             raise MeasurementDataError('Invalid magnet model.')
 
@@ -800,7 +808,7 @@ class MeasurementData(object):
         skew = self._multipoles[:, 3]
         skew_err = self._multipoles[:, 4]
 
-        if self._magnet_model == 4:
+        if self.skew_magnet:
             n = 1
             main_mult = skew
             main_mult_err = skew_err
