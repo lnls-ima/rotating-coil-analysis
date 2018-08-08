@@ -1117,14 +1117,26 @@ class MainWindow(_QMainWindow):
             if all_files:
                 index_list = list(range(len(self.data)))
                 columns = self.default_file_id
-                magnet_names = [
-                    d.magnet_name.split('-')[0].strip() for d in self.data]
+                magnet_names = []
+                for d in self.data:
+                    name_split = d.magnet_name.split('-')
+                    if (len(name_split) > 1 and name_split[1].endswith('H')
+                       or name_split[1].endswith('V')):
+                        name = name_split[0] + name_split[1][-1]
+                    else:
+                        name = name_split[0]
+                    magnet_names.append(name.strip())
             else:
                 idx = self.ui.cb_files_3.currentIndex()
                 index_list = [idx]
                 columns = [self.default_file_id[idx]]
-                magnet_names = [
-                    self.data[idx].magnet_name.split('-')[0].strip()]
+                name_split = self.data[idx].magnet_name.split('-')
+                if (len(name_split) > 1 and name_split[1].endswith('H')
+                   or name_split[1].endswith('V')):
+                    name = name_split[0] + name_split[1][-1]
+                else:
+                    name = name_split[0]
+                magnet_names = [name]
 
             residual_normal = []
             residual_skew = []
@@ -1218,6 +1230,7 @@ class MainWindow(_QMainWindow):
 
             self.table_df = residual_field_df
             self.ui.bt_table_5.setEnabled(True)
+
         except Exception:
             _QMessageBox.critical(
                 self,

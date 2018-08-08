@@ -71,6 +71,37 @@ def _get_multipole_errors_spec():
     _dict['roll'] = 1e-2
     multipole_errors["SPM"] = _dict
 
+    # TB Corrector
+    _dict = {}
+    _dict['main'] = 0
+    _dict['normal_sys_monomials'] = _np.array([2, 4, 6])
+    _dict['normal_sys_multipoles'] = _np.array([-0.4, -0.009, -0.03])
+    _dict['normal_rms_monomials'] = _np.array([])
+    _dict['normal_rms_multipoles'] = _np.array([])
+    _dict['skew_sys_monomials'] = _np.array([])
+    _dict['skew_sys_multipoles'] = _np.array([])
+    _dict['skew_rms_monomials'] = _np.array([])
+    _dict['skew_rms_multipoles'] = _np.array([])
+    _dict['offset_x'] = 160e-6
+    _dict['offset_y'] = 160e-6
+    _dict['roll'] = 0.8e-3
+    multipole_errors["TBCH"] = _dict
+
+    _dict = {}
+    _dict['main'] = 0
+    _dict['normal_sys_monomials'] = _np.array([])
+    _dict['normal_sys_multipoles'] = _np.array([])
+    _dict['normal_rms_monomials'] = _np.array([])
+    _dict['normal_rms_multipoles'] = _np.array([])
+    _dict['skew_sys_monomials'] = _np.array([2, 4, 6])
+    _dict['skew_sys_multipoles'] = _np.array([0.4, -0.03, 0.03])
+    _dict['skew_rms_monomials'] = _np.array([])
+    _dict['skew_rms_multipoles'] = _np.array([])
+    _dict['offset_x'] = 160e-6
+    _dict['offset_y'] = 160e-6
+    _dict['roll'] = 0.8e-3
+    multipole_errors["TBCV"] = _dict
+
     # Booster sextupole
     _dict = {}
     _dict['main'] = 2

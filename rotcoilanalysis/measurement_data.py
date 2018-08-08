@@ -893,10 +893,15 @@ class MeasurementData(object):
         normal = self._multipoles[:, 1]
         skew = self._multipoles[:, 3]
 
+        if self.skew_magnet:
+            main_mult = skew[n]
+        else:
+            main_mult = normal[n]
+
         for i in range(nrpts):
             for m in range(n+1, nr_harmonics):
-                residual_normal[i] += (normal[m]/normal[n])*(pos[i]**(m - n))
-                residual_skew[i] += (skew[m]/normal[n])*(pos[i]**(m - n))
+                residual_normal[i] += (normal[m]/main_mult)*(pos[i]**(m - n))
+                residual_skew[i] += (skew[m]/main_mult)*(pos[i]**(m - n))
 
         return residual_normal, residual_skew
 
@@ -923,12 +928,17 @@ class MeasurementData(object):
         normal = self._multipoles[:, 1]
         skew = self._multipoles[:, 3]
 
+        if self.skew_magnet:
+            main_mult = skew[n]
+        else:
+            main_mult = normal[n]
+
         for i in range(nrpts):
             for m in range(n+1, nr_harmonics):
                 residual_mult_normal[m, i] = (
-                    normal[m]/normal[n])*(pos[i]**(m - n))
+                    normal[m]/main_mult)*(pos[i]**(m - n))
                 residual_mult_skew[m, i] = (
-                    skew[m]/normal[n])*(pos[i]**(m - n))
+                    skew[m]/main_mult)*(pos[i]**(m - n))
 
         return residual_mult_normal, residual_mult_skew
 
