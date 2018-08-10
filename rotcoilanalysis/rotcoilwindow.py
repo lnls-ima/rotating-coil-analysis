@@ -1712,10 +1712,6 @@ class MainWindow(_QMainWindow):
         canvas.draw()
 
     def _plot_wiki_graph_multipole(self, canvas, ax, n):
-        magnet_model = [d.magnet_model for d in self.data]
-        if not all(x == magnet_model[0] for x in magnet_model):
-            return
-
         if n == 0:
             label = "$\int$ B.ds"
             unit = "T.m"
