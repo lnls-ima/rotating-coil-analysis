@@ -8,7 +8,7 @@ import os as _os
 import matplotlib.ticker as _mtick
 import matplotlib.gridspec as _gridspec
 import sqlite3 as _sqlite3
-
+import importlib as _importlib
 from PyQt5.QtWidgets import (
     QMainWindow as _QMainWindow,
     QDesktopWidget as _QDesktopWidget,
@@ -29,15 +29,12 @@ from . import mplwidget as _mplwidget
 from . import databasewidgets as _databasewidgets
 from . import tabledialog as _tabledialog
 
-# # For PyQt4
-# import importlib as _importlib
-# if _importlib.util.find_spec('popplerqt4') is not None:
-#     poppler = _importlib.import_module('popplerqt4')
-#     _preview_enabled = True
-# else:
-#     _preview_enabled = False
-
-_preview_enabled = False
+if _importlib.util.find_spec('wand') is not None:
+    _wandimage = _importlib.import_module('wand.image')
+    _preview_enabled = True
+else:
+    _wandimage = None
+    _preview_enabled = False
 
 if _os.name == 'nt':
     _fontsize = 14
@@ -58,8 +55,9 @@ else:
 
 _addlimx = 0.02
 _addlimy = 0.25
-_whfactor = 0.625
-_figure_width = 320
+_whfactor = 0.7
+_figure_width = 300
+_report_figsize = [685, 480]
 
 _default_dir = _os.path.expanduser('~')
 _basepath = _os.path.dirname(_os.path.abspath(__file__))
@@ -88,8 +86,10 @@ class MainWindow(_QMainWindow):
         self.idns = []
         self.files_uploaded = []
         self.database_uploaded = []
+        self.preview_filenames = []
         self.normal_color = 'blue'
         self.skew_color = 'red'
+        self.figsize = None
 
         self._add_plot_widgets()
         self._connect_widgets()
@@ -886,6 +886,9 @@ class MainWindow(_QMainWindow):
     def _plot_multipoles(self, multipole_idx, all_files=False):
         self.ui.wt_multipoles.canvas.ax.clear()
 
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
+
         try:
             if all_files:
                 index_list = list(range(len(self.data)))
@@ -950,13 +953,21 @@ class MainWindow(_QMainWindow):
 
             self.ui.wt_multipoles.canvas.fig.tight_layout()
             self.ui.wt_multipoles.canvas.draw()
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to plot multipoles.', _QMessageBox.Ok)
 
     def plot_hysteresis(self):
         """Plot hysteresis."""
         self.ui.wt_multipoles.canvas.ax.clear()
+
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
         try:
             self._enable_tables(False)
@@ -1016,7 +1027,11 @@ class MainWindow(_QMainWindow):
                 table_df.index = [str(i) for i in table_df.index]
                 self.table_df = table_df
                 self.ui.bt_table_3.setEnabled(True)
+                self.blockSignals(False)
+                _QApplication.restoreOverrideCursor()
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to plot hysteresis.', _QMessageBox.Ok)
 
@@ -1044,6 +1059,9 @@ class MainWindow(_QMainWindow):
 
     def _plot_raw_data(self, all_files=False):
         self.ui.wt_multipoles.canvas.ax.clear()
+
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
         try:
             if all_files:
@@ -1082,7 +1100,12 @@ class MainWindow(_QMainWindow):
             if len(index_list) == 1:
                 self.table_df = self.data[index_list[0]].curves_df
                 self.ui.bt_table_4.setEnabled(True)
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to plot raw data.', _QMessageBox.Ok)
 
@@ -1100,8 +1123,18 @@ class MainWindow(_QMainWindow):
         self._plot_residual_multipoles(all_files=True)
         self._update_roll_offset_tables()
 
-    def _plot_residual_field(self, all_files=False):
+    def _plot_residual_field(self, all_files=False, figsize=None):
         self.ui.wt_residual.canvas.ax.clear()
+
+        if self.figsize is None:
+            dpi = self.ui.wt_residual.canvas.fig.dpi
+            self.figsize = self.ui.wt_residual.canvas.fig.get_size_inches()*dpi
+
+        if figsize is None:
+            figsize = self.figsize
+
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
         try:
             xmin = self.ui.ds_range_min.value()/1000
@@ -1120,9 +1153,12 @@ class MainWindow(_QMainWindow):
                 magnet_names = []
                 for d in self.data:
                     name_split = d.magnet_name.split('-')
-                    if (len(name_split) > 1 and name_split[1].endswith('H')
-                       or name_split[1].endswith('V')):
-                        name = name_split[0] + name_split[1][-1]
+                    if len(name_split) > 1 and len(name_split[1]) > 0:
+                        if (name_split[1].endswith('H')
+                           or name_split[1].endswith('V')):
+                            name = name_split[0] + name_split[1][-1]
+                        else:
+                            name = name_split[0]
                     else:
                         name = name_split[0]
                     magnet_names.append(name.strip())
@@ -1131,9 +1167,12 @@ class MainWindow(_QMainWindow):
                 index_list = [idx]
                 columns = [self.default_file_id[idx]]
                 name_split = self.data[idx].magnet_name.split('-')
-                if (len(name_split) > 1 and name_split[1].endswith('H')
-                   or name_split[1].endswith('V')):
-                    name = name_split[0] + name_split[1][-1]
+                if len(name_split) > 1 and len(name_split[1]) > 0:
+                    if (name_split[1].endswith('H')
+                       or name_split[1].endswith('V')):
+                        name = name_split[0] + name_split[1][-1]
+                    else:
+                        name = name_split[0]
                 else:
                     name = name_split[0]
                 magnet_names = [name]
@@ -1225,13 +1264,22 @@ class MainWindow(_QMainWindow):
                 'Residual Normalized %s Component' % field_comp,
                 fontsize=_fontsize)
             self.ui.wt_residual.canvas.ax.grid('on')
+
+            dpi = self.ui.wt_residual.canvas.fig.dpi
+            figsize_inches = [figsize[0]/dpi, figsize[1]/dpi]
+            self.ui.wt_residual.canvas.fig.set_size_inches(
+                figsize_inches, forward=True)
             self.ui.wt_residual.canvas.fig.tight_layout()
             self.ui.wt_residual.canvas.draw()
 
             self.table_df = residual_field_df
             self.ui.bt_table_5.setEnabled(True)
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
 
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self,
                 'Failure',
@@ -1240,6 +1288,9 @@ class MainWindow(_QMainWindow):
 
     def _plot_residual_multipoles(self, all_files=False):
         self.ui.wt_residual_comp.canvas.ax.clear()
+
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
         try:
             if all_files:
@@ -1349,7 +1400,12 @@ class MainWindow(_QMainWindow):
             self.ui.wt_residual_comp.canvas.fig.suptitle(
                 "Residual Normalized %s Multipoles" % field_comp)
             self.ui.wt_residual_comp.canvas.draw()
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self,
                 'Failure',
@@ -1484,6 +1540,9 @@ class MainWindow(_QMainWindow):
         self.ui.wt_roll_offset.canvas.ax.clear()
         self.ui.wt_roll_offset.canvas.fig.clf()
 
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
+
         try:
             self._set_wiki_graph_variables()
             gs = _gridspec.GridSpec(3, 1)
@@ -1510,7 +1569,12 @@ class MainWindow(_QMainWindow):
                 self.ui.wt_sextupole.canvas,
                 self.ui.wt_sextupole.canvas.ax,
                 2)
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+
         except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to update graphs.', _QMessageBox.Ok)
 
@@ -1893,6 +1957,12 @@ class MainWindow(_QMainWindow):
 
         filepath = _os.path.join(_basepath, 'magnet_report.pdf')
 
+        if self.magnet_report is None:
+            msg = 'Failed to create the magnet report.'
+            _QMessageBox.critical(
+                self, 'Failed', msg, _QMessageBox.Ok)
+            return
+
         try:
             self.magnet_report.save(filepath)
         except TypeError:
@@ -1902,11 +1972,9 @@ class MainWindow(_QMainWindow):
                 self, 'Failed', msg, _QMessageBox.Ok)
             return
 
-        self.preview_doc = poppler.Poppler.Document.load(filepath)
-        page_count = 0
-        while self.preview_doc.page(page_count) is not None:
-            page_count = page_count + 1
+        self.preview_filenames = convert_pdf_to_png(filepath)
 
+        page_count = len(self.preview_filenames)
         self.ui.page_sb.setMaximum(page_count)
         self.ui.page_sb.setValue(1)
         self.update_preview_page()
@@ -1921,13 +1989,9 @@ class MainWindow(_QMainWindow):
         """Update preview page."""
         self.ui.preview.clear()
 
-        if self.preview_doc is None:
-            return
-
         try:
-            page = self.preview_doc.page(self.ui.page_sb.value()-1)
-            image = page.renderToImage(150, 150)
-            pixmap = _QPixmap.fromImage(image)
+            page = self.ui.page_sb.value() - 1
+            pixmap = _QPixmap(self.preview_filenames[page])
             self.ui.preview.setPixmap(pixmap)
             self.ui.preview.setScaledContents(True)
         except Exception:
@@ -1948,13 +2012,13 @@ class MainWindow(_QMainWindow):
             self.ui.cb_files_3.setCurrentIndex(idx)
 
             self.ui.rb_norm_2.setChecked(True)
-            self._plot_residual_field(all_files=False)
+            self._plot_residual_field(all_files=False, figsize=_report_figsize)
             self.ui.wt_residual.canvas.fig.tight_layout()
             normal_filepath = _os.path.join(_basepath, 'normal.png')
             self.ui.wt_residual.canvas.fig.savefig(normal_filepath)
 
             self.ui.rb_skew_2.setChecked(True)
-            self._plot_residual_field(all_files=False)
+            self._plot_residual_field(all_files=False, figsize=_report_figsize)
             self.ui.wt_residual.canvas.fig.tight_layout()
             skew_filepath = _os.path.join(_basepath, 'skew.png')
             self.ui.wt_residual.canvas.fig.savefig(skew_filepath)
@@ -1983,9 +2047,30 @@ class MainWindow(_QMainWindow):
                 args['resistance'] = self.ui.resistance_value.text()
 
             self.magnet_report = _pdf_report.MagnetReport(data, **args)
+
         except Exception:
             _QMessageBox.critical(
                 self,
                 'Failure',
                 'Failed to create magnet report',
                 _QMessageBox.Ok)
+
+
+def convert_pdf_to_png(filename, resolution=150):
+    """Convert a PDF into images."""
+    all_pages = _wandimage.Image(filename=filename, resolution=resolution)
+
+    image_filenames = []
+    for i, page in enumerate(all_pages.sequence):
+        with _wandimage.Image(page) as img:
+            img.format = 'png'
+            img.background_color = _wandimage.Color('white')
+            img.alpha_channel = 'remove'
+
+            path_split = _os.path.split(filename)
+            image_filename = path_split[1].replace('.pdf', '')
+            image_filename = '{}_{}.png'.format(image_filename, i)
+            image_filename = _os.path.join(path_split[0], image_filename)
+            img.save(filename=image_filename)
+            image_filenames.append(image_filename)
+    return image_filenames

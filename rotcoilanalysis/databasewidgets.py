@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout as _QVBoxLayout,
     QHBoxLayout as _QHBoxLayout,
     QSpinBox as _QSpinBox,
+    QAbstractItemView as _QAbstractItemView,
     )
 
 _basepath = _path.dirname(_path.abspath(__file__))
@@ -197,6 +198,8 @@ class DatabaseTable(_QTableWidget):
         self.data = data[:]
         self.addRowsToTable(data)
 
+        self.setSelectionBehavior(_QAbstractItemView.SelectRows)
+
         self.blockSignals(False)
         self.itemChanged.connect(self.filterColumn)
         self.itemSelectionChanged.connect(self.selectLine)
@@ -212,6 +215,9 @@ class DatabaseTable(_QTableWidget):
             tabledata = data[-self.number_rows_sb.value()::]
         else:
             tabledata = data
+
+        if len(tabledata) == 0:
+            return
 
         self.initial_id_sb.setValue(int(tabledata[0][0]))
         self.setRowCount(len(tabledata) + 1)
@@ -242,15 +248,9 @@ class DatabaseTable(_QTableWidget):
         rows = [s.row() for s in selected]
 
         if 0 in rows:
-            return
-
-        self.blockSignals(True)
-        for row in rows:
-            for col in range(len(self.column_names)):
-                item = self.item(row, col)
-                if item and not item.isSelected():
-                    item.setSelected(True)
-        self.blockSignals(False)
+            self.setSelectionBehavior(_QAbstractItemView.SelectItems)
+        else:
+            self.setSelectionBehavior(_QAbstractItemView.SelectRows)
 
     def filterColumn(self, item):
         """Apply column filter to data."""

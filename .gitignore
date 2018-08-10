@@ -1,7 +1,6 @@
 old_versions/
-normal.png
-skew.png
-magnet_report.pdf
+rotcoilanalysis/*.pdf
+rotcoilanalysis/*.png
 
 # --------------- Default lnls-ima ---------------
 *~

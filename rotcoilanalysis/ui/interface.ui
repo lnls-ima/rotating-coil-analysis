@@ -15,6 +15,9 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="margin">
+     <number>5</number>
+    </property>
     <item>
      <widget class="QTabWidget" name="main_tab">
       <property name="enabled">
@@ -784,8 +787,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1272</width>
-             <height>651</height>
+             <width>1280</width>
+             <height>659</height>
             </rect>
            </property>
            <attribute name="label">
@@ -2507,7 +2510,7 @@
            </font>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="residual_field">
            <attribute name="title">
@@ -2647,6 +2650,9 @@
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Preferred</enum>
+                 </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>245</width>
@@ -2755,6 +2761,9 @@
              <spacer name="verticalSpacer_4">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Preferred</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>

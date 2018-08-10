@@ -62,12 +62,12 @@ class TableDialog(_QDialog):
                     self.ui.tb_general.setItem(
                      idx, _jdx,
                      _QTableWidgetItem(
-                        '{0:1g}'.format(df.iat[idx, _jdx])))
+                        '{0:1g}'.format(df.iloc[idx, _jdx])))
                 else:
                     self.ui.tb_general.setItem(
                         idx, _jdx,
                         _QTableWidgetItem(
-                            '{0:0.8e}'.format(df.iat[idx, _jdx])))
+                            '{0:0.8e}'.format(df.iloc[idx, _jdx])))
 
         _QApplication.processEvents()
 
