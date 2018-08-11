@@ -5,6 +5,7 @@ import pandas as _pd
 import time as _time
 import datetime as _datetime
 import os as _os
+import locale as _locale
 import matplotlib.ticker as _mtick
 import matplotlib.gridspec as _gridspec
 import sqlite3 as _sqlite3
@@ -29,11 +30,11 @@ from . import mplwidget as _mplwidget
 from . import databasewidgets as _databasewidgets
 from . import tabledialog as _tabledialog
 
-if _importlib.util.find_spec('wand') is not None:
-    _wandimage = _importlib.import_module('wand.image')
+if _importlib.util.find_spec('ghostscript') is not None:
+    _ghostscript = _importlib.import_module('ghostscript')
     _preview_enabled = True
 else:
-    _wandimage = None
+    _ghostscript = None
     _preview_enabled = False
 
 if _os.name == 'nt':
@@ -2052,21 +2053,30 @@ class MainWindow(_QMainWindow):
                 _QMessageBox.Ok)
 
 
-def convert_pdf_to_png(filename, resolution=150):
+def convert_pdf_to_png(filename):
     """Convert a PDF into images."""
-    all_pages = _wandimage.Image(filename=filename, resolution=resolution)
+    path_split = _os.path.split(filename)
+    image_filename = path_split[1].replace('.pdf', '')
+    image_filepath = _os.path.join(path_split[0], image_filename)
+
+    args = [
+        "ps2pdf",
+        "-dNOPAUSE", "-dBATCH", "-dSAFER",
+        "-sDEVICE=png16m",
+        "-q",
+        "-sOutputFile=" + image_filepath + '_%d.png',
+        "-r150",
+        "-f", filename
+        ]
+
+    encoding = _locale.getpreferredencoding()
+    args = [a.encode(encoding) for a in args]
+
+    _ghostscript.Ghostscript(*args)
 
     image_filenames = []
-    for i, page in enumerate(all_pages.sequence):
-        with _wandimage.Image(page) as img:
-            img.format = 'png'
-            img.background_color = _wandimage.Color('white')
-            img.alpha_channel = 'remove'
+    for path in _os.listdir(path_split[0]):
+        if image_filename in path and path.endswith('png'):
+            image_filenames.append(_os.path.join(path_split[0], path))
 
-            path_split = _os.path.split(filename)
-            image_filename = path_split[1].replace('.pdf', '')
-            image_filename = '{}_{}.png'.format(image_filename, i)
-            image_filename = _os.path.join(path_split[0], image_filename)
-            img.save(filename=image_filename)
-            image_filenames.append(image_filename)
     return image_filenames
