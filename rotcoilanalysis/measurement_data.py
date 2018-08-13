@@ -272,18 +272,6 @@ class MeasurementData(object):
         return self._accelerator_type
 
     @property
-    def magnet_model(self):
-        """Magnet model.
-
-        1 - dipole
-        2 - quadrupole
-        3 - sextupole
-        4 - skew quadrupole
-        5 - skew dipole
-        """
-        return self._magnet_model
-
-    @property
     def magnet_family(self):
         """Magnet family (str)."""
         return self._magnet_family
@@ -515,6 +503,9 @@ class MeasurementData(object):
         elif self._magnet_model == 5:
             self._main_harmonic = 1
             self._skew_magnet = True
+        elif self._magnet_model == 6:
+            self._main_harmonic = 1
+            self._skew_magnet = False
         else:
             self._main_harmonic = None
             self._skew_magnet = None
