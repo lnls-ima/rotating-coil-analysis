@@ -17,7 +17,9 @@ from PyQt5.QtWidgets import (
     QMessageBox as _QMessageBox,
     QTableWidgetItem as _QTableWidgetItem,
     QHeaderView as _QHeaderView,
-    QApplication as _QApplication)
+    QApplication as _QApplication,
+    QVBoxLayout as _QVBoxLayout,
+)
 from PyQt5.QtGui import QPixmap as _QPixmap
 from PyQt5.QtCore import Qt as _Qt
 from PyQt5 import uic as _uic
@@ -79,6 +81,12 @@ class MainWindow(_QMainWindow):
             self.geometry().width()/2,
             _QDesktopWidget().availableGeometry().center().y() -
             self.geometry().height()/2)
+
+        self.files_checkable_combobox = _utils.CheckableComboBox()
+        _layout = _QVBoxLayout()
+        _layout.setContentsMargins(0, 0, 0, 0)
+        _layout.addWidget(self.files_checkable_combobox)
+        self.ui.cb_files_wg.setLayout(_layout)
 
         self.directory = None
         self.preview_doc = None
@@ -158,7 +166,7 @@ class MainWindow(_QMainWindow):
         self.ui.wt_residual_comp.canvas.ax.clear()
         self.ui.wt_residual_comp.canvas.fig.clf()
         self.ui.wt_residual_comp.canvas.draw()
-        self.ui.table_one_file.setColumnCount(0)
+        self.ui.table_selected_files.setColumnCount(0)
         self.ui.table_avg.setColumnCount(0)
         self.ui.table_all_files.setColumnCount(0)
         self.ui.wt_roll_offset.canvas.ax.clear()
@@ -732,8 +740,8 @@ class MainWindow(_QMainWindow):
         tol = 1
 
         df_array = _np.array([
-            main, trim, ch, cv, qs, magnet_name, start_pulse,
-            integrator_gain, nr_integration_points, velocity, timestamp, idn])
+            main, trim, ch, cv, qs, magnet_name, idn, start_pulse,
+            integrator_gain, nr_integration_points, velocity, timestamp])
 
         df_columns = [
             'Main Current (A)',
@@ -742,12 +750,13 @@ class MainWindow(_QMainWindow):
             'CV Current (A)',
             'QS Current (A)',
             'Magnet Name',
+            'Database ID',
             'Trigger Pulse',
             'Integrator Gain',
             'Number Integration Points',
             'Frequency',
             'Timestamp',
-            'Database ID']
+            ]
 
         iddf = _pd.DataFrame(df_array.T, columns=df_columns)
 
@@ -809,8 +818,8 @@ class MainWindow(_QMainWindow):
 
         self.ui.cb_files_1.clear()
         self.ui.cb_files_2.clear()
-        self.ui.cb_files_3.clear()
         self.ui.cb_files_4.clear()
+        self.files_checkable_combobox.clear()
 
         self.ui.cb_multipoles_1.clear()
         self.ui.cb_multipoles_2.clear()
@@ -824,8 +833,14 @@ class MainWindow(_QMainWindow):
         if len(self.data) > 0:
             self.ui.cb_files_1.addItems(self.default_file_id)
             self.ui.cb_files_2.addItems(self.default_file_id)
-            self.ui.cb_files_3.addItems(self.default_file_id)
             self.ui.cb_files_4.addItems(self.default_file_id)
+            for index, element in enumerate(self.default_file_id):
+                self.files_checkable_combobox.addItem(element)
+                item = self.files_checkable_combobox.model().item(index, 0)
+                if index == 0:
+                    item.setCheckState(_Qt.Checked)
+                else:
+                    item.setCheckState(_Qt.Unchecked)
 
             self.ui.file_label_1.setText(self.default_file_id_name + ":")
             self.ui.file_label_2.setText(self.default_file_id_name + ":")
@@ -1124,7 +1139,7 @@ class MainWindow(_QMainWindow):
         self._plot_residual_multipoles(all_files=True)
         self._update_roll_offset_tables()
 
-    def _plot_residual_field(self, all_files=False, figsize=None):
+    def _plot_residual_field(self, all_files=False, figsize=None, idx=None):
         self.ui.wt_residual.canvas.ax.clear()
 
         if self.figsize is None:
@@ -1138,6 +1153,18 @@ class MainWindow(_QMainWindow):
         _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
         try:
+            if idx is not None and all_files is False:
+                index_list = [idx]
+                columns = [self.default_file_id[idx]]
+            elif all_files:
+                index_list = list(range(len(self.data)))
+                columns = self.default_file_id
+                avg_label = 'All Files Average'
+            else:
+                index_list = self.files_checkable_combobox.checkedIndexes()
+                columns = [self.default_file_id[i] for i in index_list]
+                avg_label = 'Selected Files Average'
+
             xmin = self.ui.ds_range_min.value()/1000
             xmax = self.ui.ds_range_max.value()/1000
             xstep = self.ui.ds_range_step.value()/1000
@@ -1148,26 +1175,15 @@ class MainWindow(_QMainWindow):
 
             rref = self.ui.ds_reference_radius.value()/1000
 
-            if all_files:
-                index_list = list(range(len(self.data)))
-                columns = self.default_file_id
-                magnet_names = []
-                for d in self.data:
-                    name_split = d.magnet_name.split('-')
-                    if len(name_split) > 1 and len(name_split[1]) > 0:
-                        if (name_split[1].endswith('H')
-                           or name_split[1].endswith('V')):
-                            name = name_split[0] + name_split[1][-1]
-                        else:
-                            name = name_split[0]
-                    else:
-                        name = name_split[0]
-                    magnet_names.append(name.strip())
-            else:
-                idx = self.ui.cb_files_3.currentIndex()
-                index_list = [idx]
-                columns = [self.default_file_id[idx]]
-                name_split = self.data[idx].magnet_name.split('-')
+            if len(index_list) == 0:
+                self.ui.wt_residual.canvas.draw()
+                self.blockSignals(False)
+                _QApplication.restoreOverrideCursor()
+                return
+
+            magnet_names = []
+            for d in self.data:
+                name_split = d.magnet_name.split('-')
                 if len(name_split) > 1 and len(name_split[1]) > 0:
                     if (name_split[1].endswith('H')
                        or name_split[1].endswith('V')):
@@ -1176,7 +1192,7 @@ class MainWindow(_QMainWindow):
                         name = name_split[0]
                 else:
                     name = name_split[0]
-                magnet_names = [name]
+                magnet_names.append(name.strip())
 
             residual_normal = []
             residual_skew = []
@@ -1203,14 +1219,14 @@ class MainWindow(_QMainWindow):
                 color = self.skew_color
 
             if self.ui.cb_avg_3.currentIndex() == 1 and len(index_list) > 1:
-                legend = False
+                if len(index_list) <= 3:
+                    legend = True
+                else:
+                    legend = False
                 residual_field_df.plot(
                     legend=legend,
                     marker='o',
                     ax=self.ui.wt_residual.canvas.ax)
-                title = (
-                    'Residual Normalized %s Integrated Field ' % field_comp +
-                    'for All Analized Files')
                 style = ['-*m', '--k', '--k']
             else:
                 legend = True
@@ -1218,21 +1234,16 @@ class MainWindow(_QMainWindow):
                 if len(index_list) > 1:
                     residual_field_df.mean(axis=1).plot(
                         legend=legend,
-                        label="Average",
+                        label=avg_label,
                         marker='o',
                         color=color,
                         yerr=residual_field_df.std(axis=1),
                         ax=self.ui.wt_residual.canvas.ax)
 
-                    title = ('Average Residual Normalized %s ' % field_comp +
-                             'Integrated Field for All Analized Files')
                 else:
                     residual_field_df.plot(
                         legend=legend, marker='o', color=color,
                         ax=self.ui.wt_residual.canvas.ax)
-
-                    title = ('Residual Normalized ' + field_comp +
-                             ' Integrated Field')
 
             if (self.ui.cb_spec_on.currentIndex() == 0 and
                all(x == magnet_names[0] for x in magnet_names)):
@@ -1258,6 +1269,7 @@ class MainWindow(_QMainWindow):
                         ax=self.ui.wt_residual.canvas.ax,
                         style=style)
 
+            title = 'Residual Normalized ' + field_comp + ' Integrated Field'
             self.ui.wt_residual.canvas.ax.set_title(title, fontsize=_fontsize)
             self.ui.wt_residual.canvas.ax.set_xlabel(
                 'Transversal Position X [m]', fontsize=_fontsize)
@@ -1298,9 +1310,14 @@ class MainWindow(_QMainWindow):
                 index_list = list(range(len(self.data)))
                 columns = self.default_file_id
             else:
-                idx = self.ui.cb_files_3.currentIndex()
-                index_list = [idx]
-                columns = [self.default_file_id[idx]]
+                index_list = self.files_checkable_combobox.checkedIndexes()
+                columns = [self.default_file_id[idx] for idx in index_list]
+
+            if len(index_list) == 0:
+                self.ui.wt_residual.canvas.draw()
+                self.blockSignals(False)
+                _QApplication.restoreOverrideCursor()
+                return
 
             xmin = self.ui.ds_range_min.value()/1000
             xmax = self.ui.ds_range_max.value()/1000
@@ -1422,44 +1439,53 @@ class MainWindow(_QMainWindow):
 
     def _update_roll_offset_tables(self):
         try:
-            idx = self.ui.cb_files_3.currentIndex()
-            columns = self.default_file_id
+            index_list = self.files_checkable_combobox.checkedIndexes()
+            columns = [self.default_file_id[idx] for idx in index_list]
+            data = [self.data[idx] for idx in index_list]
 
-            self.ui.table_one_file.setColumnCount(1)
-            self.ui.table_one_file.setRowCount(3)
-            offset_x_str = _utils.scientific_notation(
-                self.data[idx].magnetic_center_x,
-                self.data[idx].magnetic_center_x_err)
-            item = _QTableWidgetItem(offset_x_str)
-            item.setTextAlignment(_Qt.AlignHCenter |
-                                  _Qt.AlignVCenter |
-                                  _Qt.AlignCenter)
-            self.ui.table_one_file.setItem(0, 0, item)
+            if len(index_list) != 0:
+                offset_x = [d.magnetic_center_x for d in data]
+                offset_y = [d.magnetic_center_y for d in data]
+                roll = [d.roll for d in data]
 
-            offset_y_str = _utils.scientific_notation(
-                self.data[idx].magnetic_center_y,
-                self.data[idx].magnetic_center_y_err)
-            item = _QTableWidgetItem(offset_y_str)
-            item.setTextAlignment(_Qt.AlignHCenter |
-                                  _Qt.AlignVCenter |
-                                  _Qt.AlignCenter)
-            self.ui.table_one_file.setItem(1, 0, item)
+                self.ui.table_selected_files.setColumnCount(len(data))
+                self.ui.table_selected_files.setRowCount(3)
 
-            roll_str = _utils.scientific_notation(
-                self.data[idx].roll*1e3, self.data[idx].roll_err*1e3)
-            item = _QTableWidgetItem(roll_str)
-            item.setTextAlignment(_Qt.AlignHCenter |
-                                  _Qt.AlignVCenter |
-                                  _Qt.AlignCenter)
-            self.ui.table_one_file.setItem(2, 0, item)
+                header = self.ui.table_selected_files.horizontalHeader()
+                header.setDefaultSectionSize(100)
+                try:
+                    header.setResizeMode(_QHeaderView.Stretch)
+                except AttributeError:
+                    header.setSectionResizeMode(_QHeaderView.Stretch)
 
-            self.ui.table_one_file.setHorizontalHeaderLabels([columns[idx]])
-            hh_one = self.ui.table_one_file.horizontalHeader()
-            hh_one.setCascadingSectionResizes(False)
-            hh_one.setStretchLastSection(True)
+                for i in range(len(data)):
+                    item = _QTableWidgetItem(
+                        "%2.1e" % (data[i].magnetic_center_x))
+                    item.setTextAlignment(_Qt.AlignHCenter |
+                                          _Qt.AlignVCenter |
+                                          _Qt.AlignCenter)
+                    self.ui.table_selected_files.setItem(0, i, item)
+
+                    item = _QTableWidgetItem(
+                        "%2.1e" % (data[i].magnetic_center_y))
+                    item.setTextAlignment(_Qt.AlignHCenter |
+                                          _Qt.AlignVCenter |
+                                          _Qt.AlignCenter)
+                    self.ui.table_selected_files.setItem(1, i, item)
+
+                    item = _QTableWidgetItem(
+                        "%2.1e" % (data[i].roll*1e3))
+                    item.setTextAlignment(_Qt.AlignHCenter |
+                                          _Qt.AlignVCenter |
+                                          _Qt.AlignCenter)
+                    self.ui.table_selected_files.setItem(2, i, item)
+                self.ui.table_selected_files.setHorizontalHeaderLabels(columns)
+
+            else:
+                self.ui.table_selected_files.setColumnCount(0)
 
             if len(self.data) > 1:
-
+                columns = self.default_file_id
                 offset_x = [d.magnetic_center_x for d in self.data]
                 offset_y = [d.magnetic_center_y for d in self.data]
                 roll = [d.roll for d in self.data]
@@ -1931,6 +1957,9 @@ class MainWindow(_QMainWindow):
         if self.magnet_report is None:
             self._create_magnet_report()
 
+        if self.magnet_report is None:
+            return
+
         try:
             self.magnet_report.save(filename)
             msg = 'Magnet report saved in file: \n\n%s' % filename
@@ -2005,22 +2034,22 @@ class MainWindow(_QMainWindow):
             idx = self.ui.cb_files_4.currentIndex()
             data = self.data[idx]
 
-            prev_idx = self.ui.cb_files_3.currentIndex()
-            self.ui.cb_files_3.setCurrentIndex(idx)
-
             self.ui.rb_norm_2.setChecked(True)
-            self._plot_residual_field(all_files=False, figsize=_report_figsize)
+            self._plot_residual_field(
+                all_files=False, figsize=_report_figsize, idx=idx)
             self.ui.wt_residual.canvas.fig.tight_layout()
             normal_filepath = _os.path.join(_basepath, 'normal.png')
             self.ui.wt_residual.canvas.fig.savefig(normal_filepath)
 
             self.ui.rb_skew_2.setChecked(True)
-            self._plot_residual_field(all_files=False, figsize=_report_figsize)
+            self._plot_residual_field(
+                all_files=False, figsize=_report_figsize, idx=idx)
             self.ui.wt_residual.canvas.fig.tight_layout()
             skew_filepath = _os.path.join(_basepath, 'skew.png')
             self.ui.wt_residual.canvas.fig.savefig(skew_filepath)
 
-            self.ui.cb_files_3.setCurrentIndex(prev_idx)
+            self.ui.wt_residual.canvas.ax.clear()
+            self.ui.wt_residual.canvas.draw()
 
             if self.ui.cb_language.currentIndex() == 0:
                 english = True

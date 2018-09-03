@@ -1,6 +1,49 @@
 """Utils."""
 
 import numpy as _np
+from PyQt5.QtCore import Qt as _Qt
+from PyQt5.QtGui import QStandardItemModel as _QStandardItemModel
+from PyQt5.QtWidgets import (
+    QComboBox as _QComboBox,
+    QListView as _QListView,
+)
+
+
+class CheckableComboBox(_QComboBox):
+    """Combo box with checkable items."""
+
+    def __init__(self, parent=None):
+        """Initialize object."""
+        super().__init__(parent)
+        self.setView(_QListView(self))
+        self.view().pressed.connect(self.handleItemPressed)
+        self.setModel(_QStandardItemModel(self))
+
+    def handleItemPressed(self, index):
+        """Change item check state."""
+        item = self.model().itemFromIndex(index)
+        if item.checkState() == _Qt.Checked:
+            item.setCheckState(_Qt.Unchecked)
+        else:
+            item.setCheckState(_Qt.Checked)
+
+    def checkedItems(self):
+        """Get checked items."""
+        checkedItems = []
+        for index in range(self.count()):
+            item = self.model().item(index)
+            if item.checkState() == _Qt.Checked:
+                checkedItems.append(item)
+        return checkedItems
+
+    def checkedIndexes(self):
+        """Get checked indexes."""
+        checkedIndexes = []
+        for index in range(self.count()):
+            item = self.model().item(index)
+            if item.checkState() == _Qt.Checked:
+                checkedIndexes.append(index)
+        return checkedIndexes
 
 
 class DraggableText(object):
