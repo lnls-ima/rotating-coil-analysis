@@ -5,11 +5,13 @@ import pandas as _pd
 import time as _time
 import datetime as _datetime
 import os as _os
+import sys as _sys
 import locale as _locale
 import matplotlib.ticker as _mtick
 import matplotlib.gridspec as _gridspec
 import sqlite3 as _sqlite3
 import importlib as _importlib
+import traceback as _traceback
 from PyQt5.QtWidgets import (
     QMainWindow as _QMainWindow,
     QDesktopWidget as _QDesktopWidget,
@@ -159,7 +161,7 @@ class MainWindow(_QMainWindow):
         self.table_df = None
         self.magnet_report = None
         self.preview_doc = None
-        self.update_report = Trues
+        self.update_report = True
 
     def _clear_graphs(self):
         self.ui.wt_multipoles.canvas.ax.clear()
@@ -1596,7 +1598,7 @@ class MainWindow(_QMainWindow):
             self._plot_wiki_graph_multipole(
                 self.ui.wt_dipole_abs.canvas,
                 self.ui.wt_dipole_abs.canvas.ax,
-                0, abs=True)            
+                0, mabs=True)            
             self._plot_wiki_graph_multipole(
                 self.ui.wt_quadrupole.canvas,
                 self.ui.wt_quadrupole.canvas.ax,
@@ -1747,7 +1749,7 @@ class MainWindow(_QMainWindow):
         canvas.fig.subplots_adjust(left=0.08)
         canvas.draw()
 
-    def _plot_wiki_graph_multipole(self, canvas, ax, n, abs=False):
+    def _plot_wiki_graph_multipole(self, canvas, ax, n, mabs=False):
         if n == 0:
             label = "$\int$ B.ds"
             unit = "T.m"
@@ -1760,10 +1762,11 @@ class MainWindow(_QMainWindow):
         else:
             return
 
-        if not abs:
-            multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
-        else:
+        if mabs:
             multipole = [d.multipoles_df.iloc[n, 5] for d in self.data]
+        else:
+            multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
+
         xtick = [i for i in range(len(self.data))]
 
         ax.clear()
