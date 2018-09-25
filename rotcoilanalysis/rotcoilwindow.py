@@ -147,8 +147,14 @@ class MainWindow(_QMainWindow):
         self.ui.wt_quadrupole = _mplwidget.MplWidget()
         self.ui.lt_quadrupole.addWidget(self.ui.wt_quadrupole)
 
+        self.ui.wt_quadrupole_abs = _mplwidget.MplWidget()
+        self.ui.lt_quadrupole_abs.addWidget(self.ui.wt_quadrupole_abs)
+
         self.ui.wt_sextupole = _mplwidget.MplWidget()
         self.ui.lt_sextupole.addWidget(self.ui.wt_sextupole)
+
+        self.ui.wt_sextupole_abs = _mplwidget.MplWidget()
+        self.ui.lt_sextupole_abs.addWidget(self.ui.wt_sextupole_abs)
 
     def _clear_data(self):
         self.data = _np.array([])
@@ -1604,9 +1610,17 @@ class MainWindow(_QMainWindow):
                 self.ui.wt_quadrupole.canvas.ax,
                 1)
             self._plot_wiki_graph_multipole(
+                self.ui.wt_quadrupole_abs.canvas,
+                self.ui.wt_quadrupole_abs.canvas.ax,
+                1, mabs=True) 
+            self._plot_wiki_graph_multipole(
                 self.ui.wt_sextupole.canvas,
                 self.ui.wt_sextupole.canvas.ax,
                 2)
+            self._plot_wiki_graph_multipole(
+                self.ui.wt_sextupole_abs.canvas,
+                self.ui.wt_sextupole_abs.canvas.ax,
+                2, mabs=True)             
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
 
