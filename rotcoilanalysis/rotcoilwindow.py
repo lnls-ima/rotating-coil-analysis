@@ -139,6 +139,9 @@ class MainWindow(_QMainWindow):
         self.ui.wt_dipole = _mplwidget.MplWidget()
         self.ui.lt_dipole.addWidget(self.ui.wt_dipole)
 
+        self.ui.wt_dipole_abs = _mplwidget.MplWidget()
+        self.ui.lt_dipole_abs.addWidget(self.ui.wt_dipole_abs)
+
         self.ui.wt_quadrupole = _mplwidget.MplWidget()
         self.ui.lt_quadrupole.addWidget(self.ui.wt_quadrupole)
 
@@ -156,7 +159,7 @@ class MainWindow(_QMainWindow):
         self.table_df = None
         self.magnet_report = None
         self.preview_doc = None
-        self.update_report = True
+        self.update_report = Trues
 
     def _clear_graphs(self):
         self.ui.wt_multipoles.canvas.ax.clear()
@@ -176,6 +179,8 @@ class MainWindow(_QMainWindow):
         self.ui.wt_temperature.canvas.draw()
         self.ui.wt_dipole.canvas.ax.clear()
         self.ui.wt_dipole.canvas.draw()
+        self.ui.wt_dipole_abs.canvas.ax.clear()
+        self.ui.wt_dipole_abs.canvas.draw()
         self.ui.wt_quadrupole.canvas.ax.clear()
         self.ui.wt_quadrupole.canvas.draw()
         self.ui.wt_sextupole.canvas.ax.clear()
@@ -1589,6 +1594,10 @@ class MainWindow(_QMainWindow):
                 self.ui.wt_dipole.canvas.ax,
                 0)
             self._plot_wiki_graph_multipole(
+                self.ui.wt_dipole_abs.canvas,
+                self.ui.wt_dipole_abs.canvas.ax,
+                0, abs=True)            
+            self._plot_wiki_graph_multipole(
                 self.ui.wt_quadrupole.canvas,
                 self.ui.wt_quadrupole.canvas.ax,
                 1)
@@ -1738,7 +1747,7 @@ class MainWindow(_QMainWindow):
         canvas.fig.subplots_adjust(left=0.08)
         canvas.draw()
 
-    def _plot_wiki_graph_multipole(self, canvas, ax, n):
+    def _plot_wiki_graph_multipole(self, canvas, ax, n, abs=False):
         if n == 0:
             label = "$\int$ B.ds"
             unit = "T.m"
@@ -1751,7 +1760,10 @@ class MainWindow(_QMainWindow):
         else:
             return
 
-        multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
+        if not abs:
+            multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
+        else:
+            multipole = [d.multipoles_df.iloc[n, 5] for d in self.data]
         xtick = [i for i in range(len(self.data))]
 
         ax.clear()
