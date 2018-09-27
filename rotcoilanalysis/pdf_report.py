@@ -263,8 +263,8 @@ class MagnetReport(object):
         label = self._get_fmt_text(
             self.temperature_label + ' [°C]',
             fontsize=_label_fontsize, bold=True)
-        value = self._get_fmt_text(str(self.data.temperature))
-        if self.data.temperature == 0:
+        value = self._get_fmt_text(str(self.data.temperature_magnet))
+        if self.data.temperature_magnet == 0:
             value = '--'
         self._add_to_table([label, '', value], initial_column_span=1)
 

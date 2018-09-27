@@ -1820,7 +1820,8 @@ class MainWindow(_QMainWindow):
         label = "Temperature"
         unit = "deg C"
 
-        temperature = [d.temperature for d in self.data]
+        temperature_magnet = [d.temperature_magnet for d in self.data]
+        temperature_water = [d.temperature_water for d in self.data]
         xtick = [i for i in range(len(self.data))]
 
         ax.clear()
@@ -1838,18 +1839,25 @@ class MainWindow(_QMainWindow):
 
         ax.set_ylabel("%s [%s]" % (label, unit), fontsize=_label_fontsize)
 
-        ax.plot(xtick, temperature, "-o",
+        ax.plot(xtick, temperature_magnet, "-o",
                 color=self.purple,
                 markeredgecolor=self.purple,
                 markersize=self.markersize,
-                linewidth=self.linewidth)
+                linewidth=self.linewidth,
+                label='Magnet')
+
+        ax.plot(xtick, temperature_water, "-o",
+                color=self.blue,
+                markeredgecolor=self.blue,
+                markersize=self.markersize,
+                linewidth=self.linewidth,
+                label='Water')
 
         self._expand_data_limits(ax)
-        xmin, xmax = ax.get_xlim()
-        ymin, ymax = ax.get_ylim()
+        _utils.DraggableLegend(canvas, ax, tol=200)
 
         canvas.fig.tight_layout()
-        canvas.fig.subplots_adjust(left=0.12)
+        canvas.fig.subplots_adjust(left=0.05)
         canvas.draw()
 
     def _expand_data_limits(self, ax):
