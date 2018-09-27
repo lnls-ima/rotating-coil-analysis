@@ -5,11 +5,13 @@ import pandas as _pd
 import time as _time
 import datetime as _datetime
 import os as _os
+import sys as _sys
 import locale as _locale
 import matplotlib.ticker as _mtick
 import matplotlib.gridspec as _gridspec
 import sqlite3 as _sqlite3
 import importlib as _importlib
+import traceback as _traceback
 from PyQt5.QtWidgets import (
     QMainWindow as _QMainWindow,
     QDesktopWidget as _QDesktopWidget,
@@ -139,11 +141,20 @@ class MainWindow(_QMainWindow):
         self.ui.wt_dipole = _mplwidget.MplWidget()
         self.ui.lt_dipole.addWidget(self.ui.wt_dipole)
 
+        self.ui.wt_dipole_abs = _mplwidget.MplWidget()
+        self.ui.lt_dipole_abs.addWidget(self.ui.wt_dipole_abs)
+
         self.ui.wt_quadrupole = _mplwidget.MplWidget()
         self.ui.lt_quadrupole.addWidget(self.ui.wt_quadrupole)
 
+        self.ui.wt_quadrupole_abs = _mplwidget.MplWidget()
+        self.ui.lt_quadrupole_abs.addWidget(self.ui.wt_quadrupole_abs)
+
         self.ui.wt_sextupole = _mplwidget.MplWidget()
         self.ui.lt_sextupole.addWidget(self.ui.wt_sextupole)
+
+        self.ui.wt_sextupole_abs = _mplwidget.MplWidget()
+        self.ui.lt_sextupole_abs.addWidget(self.ui.wt_sextupole_abs)
 
     def _clear_data(self):
         self.data = _np.array([])
@@ -176,6 +187,8 @@ class MainWindow(_QMainWindow):
         self.ui.wt_temperature.canvas.draw()
         self.ui.wt_dipole.canvas.ax.clear()
         self.ui.wt_dipole.canvas.draw()
+        self.ui.wt_dipole_abs.canvas.ax.clear()
+        self.ui.wt_dipole_abs.canvas.draw()
         self.ui.wt_quadrupole.canvas.ax.clear()
         self.ui.wt_quadrupole.canvas.draw()
         self.ui.wt_sextupole.canvas.ax.clear()
@@ -1589,13 +1602,25 @@ class MainWindow(_QMainWindow):
                 self.ui.wt_dipole.canvas.ax,
                 0)
             self._plot_wiki_graph_multipole(
+                self.ui.wt_dipole_abs.canvas,
+                self.ui.wt_dipole_abs.canvas.ax,
+                0, mabs=True)            
+            self._plot_wiki_graph_multipole(
                 self.ui.wt_quadrupole.canvas,
                 self.ui.wt_quadrupole.canvas.ax,
                 1)
             self._plot_wiki_graph_multipole(
+                self.ui.wt_quadrupole_abs.canvas,
+                self.ui.wt_quadrupole_abs.canvas.ax,
+                1, mabs=True) 
+            self._plot_wiki_graph_multipole(
                 self.ui.wt_sextupole.canvas,
                 self.ui.wt_sextupole.canvas.ax,
                 2)
+            self._plot_wiki_graph_multipole(
+                self.ui.wt_sextupole_abs.canvas,
+                self.ui.wt_sextupole_abs.canvas.ax,
+                2, mabs=True)             
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
 
@@ -1738,7 +1763,7 @@ class MainWindow(_QMainWindow):
         canvas.fig.subplots_adjust(left=0.08)
         canvas.draw()
 
-    def _plot_wiki_graph_multipole(self, canvas, ax, n):
+    def _plot_wiki_graph_multipole(self, canvas, ax, n, mabs=False):
         if n == 0:
             label = "$\int$ B.ds"
             unit = "T.m"
@@ -1751,7 +1776,11 @@ class MainWindow(_QMainWindow):
         else:
             return
 
-        multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
+        if mabs:
+            multipole = [d.multipoles_df.iloc[n, 5] for d in self.data]
+        else:
+            multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
+
         xtick = [i for i in range(len(self.data))]
 
         ax.clear()

@@ -15,7 +15,16 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
      <number>5</number>
     </property>
     <item>
@@ -38,7 +47,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideRight</enum>
@@ -70,8 +79,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>704</width>
-             <height>315</height>
+             <width>694</width>
+             <height>316</height>
             </rect>
            </property>
            <attribute name="label">
@@ -753,7 +762,16 @@
                <string>Files Directory:</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout">
-               <property name="margin">
+               <property name="leftMargin">
+                <number>6</number>
+               </property>
+               <property name="topMargin">
+                <number>6</number>
+               </property>
+               <property name="rightMargin">
+                <number>6</number>
+               </property>
+               <property name="bottomMargin">
                 <number>6</number>
                </property>
                <item>
@@ -787,8 +805,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1250</width>
-             <height>674</height>
+             <width>1248</width>
+             <height>680</height>
             </rect>
            </property>
            <attribute name="label">
@@ -807,7 +825,16 @@
                <string>Database Filename</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_15">
-               <property name="margin">
+               <property name="leftMargin">
+                <number>6</number>
+               </property>
+               <property name="topMargin">
+                <number>6</number>
+               </property>
+               <property name="rightMargin">
+                <number>6</number>
+               </property>
+               <property name="bottomMargin">
                 <number>6</number>
                </property>
                <item>
@@ -1436,14 +1463,23 @@
         <item row="0" column="0">
          <widget class="QFrame" name="group_box_7">
           <layout class="QGridLayout" name="gridLayout_14">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <property name="horizontalSpacing">
             <number>0</number>
            </property>
            <property name="verticalSpacing">
             <number>9</number>
-           </property>
-           <property name="margin">
-            <number>0</number>
            </property>
            <item row="0" column="0">
             <widget class="QFrame" name="frame">
@@ -1460,13 +1496,22 @@
               <enum>QFrame::Plain</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_13">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <property name="horizontalSpacing">
                <number>20</number>
               </property>
               <property name="verticalSpacing">
-               <number>0</number>
-              </property>
-              <property name="margin">
                <number>0</number>
               </property>
               <item row="0" column="0">
@@ -3663,6 +3708,16 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="dipole_abs">
+           <attribute name="title">
+            <string>Integrated Dipole (ABS)</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_29">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="lt_dipole_abs"/>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="quadrupole">
            <attribute name="title">
             <string>Integrated Quadrupole</string>
@@ -3673,6 +3728,16 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="quadrupole_abs">
+           <attribute name="title">
+            <string>Integrated Quadrupole (ABS)</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_30">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="lt_quadrupole_abs"/>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="sextupole">
            <attribute name="title">
             <string>Integrated Sextupole</string>
@@ -3680,6 +3745,16 @@
            <layout class="QGridLayout" name="gridLayout_27">
             <item row="0" column="0">
              <layout class="QVBoxLayout" name="lt_sextupole"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="sextupole_abs">
+           <attribute name="title">
+            <string>Integrated Sextupole (ABS)</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_31">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="lt_sextupole_abs"/>
             </item>
            </layout>
           </widget>
@@ -3697,7 +3772,7 @@
      <x>0</x>
      <y>0</y>
      <width>1282</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
