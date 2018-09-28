@@ -436,6 +436,11 @@ class MeasurementData(object):
         else:
             return self._analysis_interval[1] - self._analysis_interval[0]
 
+    @property
+    def raw_data_avg(self):
+        """Average of raw data."""
+        return self._curves_df.mean(axis=1).values
+
     def _update_raw_curve_mult_factor(self):
         date_sec = _time.mktime(_datetime.datetime.strptime(
             self._date, '%d/%m/%Y').timetuple())

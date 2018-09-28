@@ -584,6 +584,17 @@ class MainWindow(_QMainWindow):
         self.set_default_report_file()
         self.update_report_options()
 
+    def print_raw_data_stats(self):
+        try:
+            print('ID\tMean\tMeanAbs')
+            for d in self.data:
+                raw_data_avg = d.raw_data_avg
+                mean = _np.mean(raw_data_avg)
+                mean_abs = _np.mean(_np.abs(raw_data_avg))
+                print('{0:d}\t{1:f}\t{2:f}'.format(d.idn, mean, mean_abs))
+        except Exception:
+            pass
+
     def _read_data_files(self):
         data = _np.array([])
 
