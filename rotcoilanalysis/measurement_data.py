@@ -45,7 +45,8 @@ class MeasurementData(object):
         self._operator = None
         self._software_version = None
         self._bench = None
-        self._temperature = None
+        self._temperature_magnet = None
+        self._temperature_water = None
         self._rotation_motor_speed = None
         self._rotation_motor_acceleration = None
         self._coil_rotation_direction = None
@@ -147,9 +148,14 @@ class MeasurementData(object):
         return self._bench
 
     @property
-    def temperature(self):
-        """Temperature (float) [degrees Celsius]."""
-        return self._temperature
+    def temperature_magnet(self):
+        """Magnet temperature (float) [degrees Celsius]."""
+        return self._temperature_magnet
+
+    @property
+    def temperature_water(self):
+        """Water temperature (float) [degrees Celsius]."""
+        return self._temperature_water
 
     @property
     def rotation_motor_speed(self):
@@ -581,7 +587,7 @@ class MeasurementData(object):
         self._software_version = _find_value(
             self._measurement_data, 'software_version')
 
-        self._temperature = _find_value(
+        self._temperature_magnet = _find_value(
             self._measurement_data,
             ['temperature', 'temperatura_ima'],
             vtype=float)

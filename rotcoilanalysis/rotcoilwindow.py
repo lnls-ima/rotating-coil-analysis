@@ -5,11 +5,13 @@ import pandas as _pd
 import time as _time
 import datetime as _datetime
 import os as _os
+import sys as _sys
 import locale as _locale
 import matplotlib.ticker as _mtick
 import matplotlib.gridspec as _gridspec
 import sqlite3 as _sqlite3
 import importlib as _importlib
+import traceback as _traceback
 from PyQt5.QtWidgets import (
     QMainWindow as _QMainWindow,
     QDesktopWidget as _QDesktopWidget,
@@ -139,14 +141,14 @@ class MainWindow(_QMainWindow):
         self.ui.wt_dipole = _mplwidget.MplWidget()
         self.ui.lt_dipole.addWidget(self.ui.wt_dipole)
 
-        self.ui.wt_dipole_abs = _mplwidget.MplWidget()
-        self.ui.lt_dipole_abs.addWidget(self.ui.wt_dipole_abs)
-
         self.ui.wt_quadrupole = _mplwidget.MplWidget()
         self.ui.lt_quadrupole.addWidget(self.ui.wt_quadrupole)
 
         self.ui.wt_sextupole = _mplwidget.MplWidget()
         self.ui.lt_sextupole.addWidget(self.ui.wt_sextupole)
+
+        self.ui.wt_other = _mplwidget.MplWidget()
+        self.ui.lt_other.addWidget(self.ui.wt_other)
 
     def _clear_data(self):
         self.data = _np.array([])
@@ -159,7 +161,7 @@ class MainWindow(_QMainWindow):
         self.table_df = None
         self.magnet_report = None
         self.preview_doc = None
-        self.update_report = Trues
+        self.update_report = True
 
     def _clear_graphs(self):
         self.ui.wt_multipoles.canvas.ax.clear()
@@ -179,12 +181,12 @@ class MainWindow(_QMainWindow):
         self.ui.wt_temperature.canvas.draw()
         self.ui.wt_dipole.canvas.ax.clear()
         self.ui.wt_dipole.canvas.draw()
-        self.ui.wt_dipole_abs.canvas.ax.clear()
-        self.ui.wt_dipole_abs.canvas.draw()
         self.ui.wt_quadrupole.canvas.ax.clear()
         self.ui.wt_quadrupole.canvas.draw()
         self.ui.wt_sextupole.canvas.ax.clear()
         self.ui.wt_sextupole.canvas.draw()
+        self.ui.wt_other.canvas.ax.clear()
+        self.ui.wt_other.canvas.draw()
         self.clear_magnet_report()
 
     def _connect_widgets(self):
@@ -254,6 +256,9 @@ class MainWindow(_QMainWindow):
         self.ui.bt_table_3.clicked.connect(self.screen_table)
         self.ui.bt_table_4.clicked.connect(self.screen_table)
         self.ui.bt_table_5.clicked.connect(self.screen_table)
+        self.ui.yvalues_cmb.currentIndexChanged.connect(
+            self.update_plot_options)
+        self.ui.updateplot_btn.clicked.connect(self.update_other_plot)
 
     def _enable_buttons(self, enable):
         if len(self.data) > 1:
@@ -839,6 +844,7 @@ class MainWindow(_QMainWindow):
 
         self.ui.cb_multipoles_1.clear()
         self.ui.cb_multipoles_2.clear()
+        self.ui.yvalues_cmb.clear()
 
         self.ui.cb_hyst_axis.clear()
         self.ui.cb_hyst_axis_label.clear()
@@ -889,8 +895,37 @@ class MainWindow(_QMainWindow):
                 self.ui.cb_harmonic.setCurrentIndex(self.default_harmonic - 1)
 
             self._enable_buttons(True)
+            self._add_yvalues_options()
+
         else:
             self._enable_buttons(False)
+
+    def _add_yvalues_options(self):
+        self.ui.yvalues_cmb.addItems(self.columns_names[1:])
+        data_attrs = [
+            'temperature_magnet',
+            'temperature_water',
+            'rotation_motor_speed',
+            'rotation_motor_acceleration',
+            'integrator_gain',
+            'trigger_ref',
+            'n_integration_points',
+            'main_coil_current_avg',
+            'main_coil_current_std',
+            'ch_coil_current_avg',
+            'ch_coil_current_std',
+            'cv_coil_current_avg',
+            'cv_coil_current_std',
+            'qs_coil_current_avg',
+            'qs_coil_current_std',
+            'trim_coil_current_avg',
+            'trim_coil_current_std',
+            'main_coil_volt_avg',
+            'main_coil_volt_std',
+            'magnet_resistance_avg',
+            'magnet_resistance_std',
+            ]
+        self.ui.yvalues_cmb.addItems(data_attrs)
 
     def screen_table(self):
         """Create new screen with table."""
@@ -1575,6 +1610,28 @@ class MainWindow(_QMainWindow):
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to update tables.', _QMessageBox.Ok)
 
+    def update_other_plot(self):
+        """Update plot in tab other."""
+        if len(self.data) <= 1:
+            return
+
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
+
+        try:
+            self._set_wiki_graph_variables()
+            self._plot_wiki_graph_other(
+                self.ui.wt_other.canvas,
+                self.ui.wt_other.canvas.ax)
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+
+        except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+            _QMessageBox.critical(
+                self, 'Failure', 'Failed to update graphs.', _QMessageBox.Ok)
+
     def plot_wiki_graphs(self):
         """Plot roll, offset and multipoles graphs (wiki format)."""
         if len(self.data) <= 1:
@@ -1605,10 +1662,6 @@ class MainWindow(_QMainWindow):
                 self.ui.wt_dipole.canvas.ax,
                 0)
             self._plot_wiki_graph_multipole(
-                self.ui.wt_dipole_abs.canvas,
-                self.ui.wt_dipole_abs.canvas.ax,
-                0, abs=True)            
-            self._plot_wiki_graph_multipole(
                 self.ui.wt_quadrupole.canvas,
                 self.ui.wt_quadrupole.canvas.ax,
                 1)
@@ -1616,6 +1669,10 @@ class MainWindow(_QMainWindow):
                 self.ui.wt_sextupole.canvas,
                 self.ui.wt_sextupole.canvas.ax,
                 2)
+            self._plot_wiki_graph_other(
+                self.ui.wt_other.canvas,
+                self.ui.wt_other.canvas.ax)
+
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
 
@@ -1758,7 +1815,7 @@ class MainWindow(_QMainWindow):
         canvas.fig.subplots_adjust(left=0.08)
         canvas.draw()
 
-    def _plot_wiki_graph_multipole(self, canvas, ax, n, abs=False):
+    def _plot_wiki_graph_multipole(self, canvas, ax, n):
         if n == 0:
             label = "$\int$ B.ds"
             unit = "T.m"
@@ -1771,10 +1828,8 @@ class MainWindow(_QMainWindow):
         else:
             return
 
-        if not abs:
-            multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
-        else:
-            multipole = [d.multipoles_df.iloc[n, 5] for d in self.data]
+        multipole = [d.multipoles_df.iloc[n, 1] for d in self.data]
+
         xtick = [i for i in range(len(self.data))]
 
         ax.clear()
@@ -1843,7 +1898,8 @@ class MainWindow(_QMainWindow):
         label = "Temperature"
         unit = "deg C"
 
-        temperature = [d.temperature for d in self.data]
+        temperature_magnet = [d.temperature_magnet for d in self.data]
+        temperature_water = [d.temperature_water for d in self.data]
         xtick = [i for i in range(len(self.data))]
 
         ax.clear()
@@ -1861,19 +1917,111 @@ class MainWindow(_QMainWindow):
 
         ax.set_ylabel("%s [%s]" % (label, unit), fontsize=_label_fontsize)
 
-        ax.plot(xtick, temperature, "-o",
+        ax.plot(xtick, temperature_magnet, "-o",
                 color=self.purple,
                 markeredgecolor=self.purple,
                 markersize=self.markersize,
-                linewidth=self.linewidth)
+                linewidth=self.linewidth,
+                label='Magnet')
+
+        ax.plot(xtick, temperature_water, "-o",
+                color=self.blue,
+                markeredgecolor=self.blue,
+                markersize=self.markersize,
+                linewidth=self.linewidth,
+                label='Water')
 
         self._expand_data_limits(ax)
-        xmin, xmax = ax.get_xlim()
-        ymin, ymax = ax.get_ylim()
+        _utils.DraggableLegend(canvas, ax, tol=200)
 
         canvas.fig.tight_layout()
-        canvas.fig.subplots_adjust(left=0.12)
+        canvas.fig.subplots_adjust(left=0.05)
         canvas.draw()
+
+    def _plot_wiki_graph_other(self, canvas, ax):
+        try:
+            ylabel = self.ui.ylabel_le.text()
+            color_text = self.ui.color_cmb.currentText()
+            color = getattr(self, color_text)
+            addstatistics = self.ui.addstatistics_chb.isChecked()
+            yvalues_text = self.ui.yvalues_cmb.currentText()
+
+            yvalues = []
+            if yvalues_text in self.columns_names:
+                n = self.ui.multipole_sb.value()
+                for d in self.data:
+                    column_values = d.multipoles_df.loc[:, yvalues_text]
+                    yvalues.append(column_values[n-1])
+            else:
+                for d in self.data:
+                    yvalues.append(getattr(d, yvalues_text))
+
+            xvalues = [i for i in range(len(self.data))]
+
+            ax.clear()
+            ax.set_xticks(xvalues)
+            ax.set_xticklabels(
+                self.xticklabels, rotation=90, fontsize=_tickx_fontsize)
+            ax.set_xlabel(self.xlabel, fontsize=_label_fontsize)
+            ax.tick_params(axis='y', labelsize=_ticky_fontsize)
+            ax.yaxis.grid(1, which='major', linestyle="-", color='0.85')
+            ax.set_axisbelow(True)
+
+            if len(self.title) != 0:
+                ax.set_title(
+                    self.title, fontsize=_title_fontsize, weight='bold')
+
+            ax.set_ylabel(ylabel, fontsize=_label_fontsize)
+
+            ax.plot(xvalues, yvalues, "-o",
+                    color=color,
+                    markeredgecolor=color,
+                    markersize=self.markersize,
+                    linewidth=self.linewidth)
+
+            self._expand_data_limits(ax)
+
+            if addstatistics:
+                xmin, xmax = ax.get_xlim()
+                ymin, ymax = ax.get_ylim()
+
+                if len(yvalues) > 1:
+                    diffsum = _np.sum(
+                        [(v - _np.mean(yvalues))**2 for v in yvalues])
+                    rmsd = _np.sqrt(diffsum/(len(yvalues)-1))
+                else:
+                    rmsd = 0
+
+                rms_error = 100*rmsd/abs(_np.mean(yvalues))
+                pv_variation = (100*abs(max(yvalues) - min(yvalues)) /
+                                abs(_np.mean(yvalues)))
+
+                std = _np.std(yvalues)
+                exponent = int('{:e}'.format(std).split('e')[-1])
+                if exponent > 0:
+                    mean_str = '{:4.0f}'.format(_np.mean(yvalues))
+                    std_str = '{:4.0f}'.format(std)
+                else:
+                    ps = str(abs(exponent))
+                    mean_str = ('{:4.' + ps + 'f}').format(_np.mean(yvalues))
+                    std_str = ('{:4.' + ps + 'f}').format(std)
+
+                line1 = '%s = (%s ± %s)' % (ylabel, mean_str, std_str)
+                line2 = "rms excitation error = %3.2f %%" % (rms_error)
+                line3 = "peak-valey variation = %2.1f %%" % (pv_variation)
+                text = "\n".join([line1, line2, line3])
+                _utils.DraggableText(
+                    canvas, ax, (xmax + xmin)/2, (ymax + ymin)/2, text,
+                    color=color,
+                    fontsize=_annotation_fontsize,
+                    bbox=self.bbox,
+                    tol=200)
+
+            canvas.fig.tight_layout()
+            canvas.draw()
+
+        except Exception:
+            _traceback.print_exc(file=_sys.stdout)
 
     def _expand_data_limits(self, ax):
         xmin, xmax = ax.get_xlim()
@@ -1894,6 +2042,18 @@ class MainWindow(_QMainWindow):
 
         ax.set_xlim((xmin, xmax))
         ax.set_ylim((ymin, ymax))
+
+    def update_plot_options(self):
+        """Update plot options."""
+        yvalues_text = self.ui.yvalues_cmb.currentText()
+        self.ui.ylabel_le.setText(yvalues_text)
+
+        if yvalues_text in self.columns_names:
+            self.ui.multipole_la.show()
+            self.ui.multipole_sb.show()
+        else:
+            self.ui.multipole_la.hide()
+            self.ui.multipole_sb.hide()
 
     def change_wiki_graphs_label(self):
         """Change wiki graphs label."""

@@ -70,8 +70,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>694</width>
-             <height>316</height>
+             <width>704</width>
+             <height>315</height>
             </rect>
            </property>
            <attribute name="label">
@@ -787,8 +787,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1248</width>
-             <height>680</height>
+             <width>1250</width>
+             <height>674</height>
             </rect>
            </property>
            <attribute name="label">
@@ -3515,7 +3515,7 @@
               </font>
              </property>
              <property name="text">
-              <string>X Ticks:</string>
+              <string>X Values:</string>
              </property>
             </widget>
            </item>
@@ -3550,6 +3550,13 @@
              </property>
             </spacer>
            </item>
+           <item row="0" column="2" colspan="4">
+            <widget class="QLineEdit" name="wiki_graphs_title">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="4">
             <widget class="QLabel" name="wiki_graphs_xlabel_label">
              <property name="font">
@@ -3564,13 +3571,6 @@
            </item>
            <item row="1" column="5">
             <widget class="QLineEdit" name="wiki_graphs_xlabel">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2" colspan="4">
-            <widget class="QLineEdit" name="wiki_graphs_title">
              <property name="text">
               <string/>
              </property>
@@ -3655,7 +3655,7 @@
           </widget>
           <widget class="QWidget" name="dipole">
            <attribute name="title">
-            <string>Integrated Dipole</string>
+            <string>Integrated Normal Dipole</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_25">
             <item row="0" column="0">
@@ -3663,19 +3663,9 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="dipole_abs">
-           <attribute name="title">
-            <string>Integrated Dipole (ABS)</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_29">
-            <item row="0" column="0">
-             <layout class="QVBoxLayout" name="lt_dipole_abs"/>
-            </item>
-           </layout>
-          </widget>
           <widget class="QWidget" name="quadrupole">
            <attribute name="title">
-            <string>Integrated Quadrupole</string>
+            <string>Integrated Normal Quadrupole</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_26">
             <item row="0" column="0">
@@ -3685,11 +3675,252 @@
           </widget>
           <widget class="QWidget" name="sextupole">
            <attribute name="title">
-            <string>Integrated Sextupole</string>
+            <string>Integrated Normal Sextupole</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_27">
             <item row="0" column="0">
              <layout class="QVBoxLayout" name="lt_sextupole"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="other">
+           <attribute name="title">
+            <string>Other</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <layout class="QVBoxLayout" name="lt_other"/>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="title">
+               <string>Plot Options</string>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLabel" name="wiki_graphs_label_label_2">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Y Values:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="yvalues_cmb">
+                 <property name="minimumSize">
+                  <size>
+                   <width>250</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="multipole_la">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>N:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="multipole_sb">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>15</number>
+                 </property>
+                 <property name="value">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_9">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="wiki_graphs_xlabel_label_2">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Y Label:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="ylabel_le">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_18">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="wiki_graphs_label_label_3">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Color:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="color_cmb">
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>blue</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>green</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>red</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>purple</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_19">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="addstatistics_chb">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Add Statistics</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="updateplot_btn">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Update Plot</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -3707,7 +3938,7 @@
      <x>0</x>
      <y>0</y>
      <width>1282</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
