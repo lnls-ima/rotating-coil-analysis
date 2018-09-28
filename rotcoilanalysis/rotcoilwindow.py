@@ -598,6 +598,7 @@ class MainWindow(_QMainWindow):
                 mean_abs = _np.mean(_np.abs(raw_data_avg))
                 print('{0:d}\t{1:f}\t{2:f}'.format(d.idn, mean, mean_abs))
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             pass
 
     def _read_data_files(self):
