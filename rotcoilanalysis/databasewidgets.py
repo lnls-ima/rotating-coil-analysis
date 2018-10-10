@@ -56,20 +56,36 @@ class DatabaseTab(_QTabWidget):
 
                 initial_id_la = _QLabel("Initial ID:")
                 initial_id_sb = _QSpinBox()
+                initial_id_sb.setMinimumWidth(100)
+                initial_id_sb.setButtonSymbols(2)
+                hlayout.addStretch(0)
                 hlayout.addWidget(initial_id_la)
                 hlayout.addWidget(initial_id_sb)
-                hlayout.addSpacing(50)
+                hlayout.addSpacing(30)
 
-                number_rows_la = _QLabel("Maximum number of rows:")
+                number_rows_la = _QLabel("Number of rows:")
                 number_rows_sb = _QSpinBox()
+                number_rows_sb.setMinimumWidth(100)
+                number_rows_sb.setButtonSymbols(2)
+                number_rows_sb.setReadOnly(True)
                 hlayout.addWidget(number_rows_la)
                 hlayout.addWidget(number_rows_sb)
+                hlayout.addSpacing(30)
+
+                max_number_rows_la = _QLabel("Maximum number of rows:")
+                max_number_rows_sb = _QSpinBox()
+                max_number_rows_sb.setMinimumWidth(100)
+                max_number_rows_sb.setButtonSymbols(2)
+                max_number_rows_sb.setReadOnly(True)
+                hlayout.addWidget(max_number_rows_la)
+                hlayout.addWidget(max_number_rows_sb)
 
                 table.loadDatabaseTable(
                     self.database_filename,
                     table_name,
                     initial_id_sb,
-                    number_rows_sb)
+                    number_rows_sb,
+                    max_number_rows_sb)
 
                 vlayout.addWidget(table)
                 vlayout.addLayout(hlayout)
@@ -98,20 +114,27 @@ class DatabaseTab(_QTabWidget):
 class DatabaseTable(_QTableWidget):
     """Database table widget."""
 
+    _datatype_dict = {
+        'INTEGER': int,
+        'REAL': float,
+        'TEXT': str,
+        }
+
+    _hidden_columns = [
+        'read_data',
+        'raw_curve',
+        ]
+
     def __init__(self, parent=None):
-        """Setup the ui."""
+        """Set up the ui."""
         super().__init__(parent)
 
-        font = _QFont()
-        font.setPixelSize(_fontsize)
-        font.setBold(False)
-        self.setFont(font)
-        self.setAlternatingRowColors(True)  # Added by Vitor
+        self.setAlternatingRowColors(True)
         self.verticalHeader().hide()
         self.horizontalHeader().setStretchLastSection(True)
         self.horizontalHeader().setDefaultSectionSize(120)
 
-        self.database_filename = None
+        self.database = None
         self.table_name = None
         self.column_names = []
         self.data_types = []
@@ -119,89 +142,93 @@ class DatabaseTable(_QTableWidget):
         self.initial_table_id = None
         self.initial_id_sb = None
         self.number_rows_sb = None
+        self.max_number_rows_sb = None
 
     def changeInitialID(self):
         """Change initial ID."""
         initial_id = self.initial_id_sb.value()
-        if len(self.data) == 0:
-            return
-
-        if self.initial_table_id != initial_id:
-            ids = _np.array(
-                [self.data[i][0] for i in range(len(self.data))])
-            idx = _np.min(
-                _np.append(_np.where(ids >= initial_id)[0], _np.inf))
-            if _np.isinf(idx):
-                data = []
-            else:
-                data = self.data[int(idx)::]
-            if len(data) > self.number_rows_sb.value():
-                data = data[:self.number_rows_sb.value()]
-            self.addRowsToTable(data)
+        self.filterColumn(initial_id=initial_id)
 
     def loadDatabaseTable(
-            self, database_filename, table_name,
-            initial_id_sb, number_rows_sb):
+            self, database, table_name,
+            initial_id_sb, number_rows_sb, max_number_rows_sb):
         """Set database filename and table name."""
-        self.database_filename = database_filename
+        self.database = database
         self.table_name = table_name
 
         self.initial_id_sb = initial_id_sb
-        self.initial_id_sb.setButtonSymbols(2)
         self.initial_id_sb.editingFinished.connect(self.changeInitialID)
 
         self.number_rows_sb = number_rows_sb
-        self.number_rows_sb.setButtonSymbols(2)
         self.number_rows_sb.setMaximum(_max_number_rows)
-        self.number_rows_sb.setReadOnly(True)
+
+        self.max_number_rows_sb = max_number_rows_sb
+        self.max_number_rows_sb.setMaximum(_max_number_rows)
 
         self.updateTable()
 
     def updateTable(self):
         """Update table."""
-        if self.database_filename is None or self.table_name is None:
+        if self.database is None or self.table_name is None:
             return
-
+        
         self.blockSignals(True)
+        self.clearContents()
         self.setColumnCount(0)
         self.setRowCount(0)
 
-        con = _sqlite3.connect(self.database_filename)
+        con = _sqlite3.connect(self.database)
         cur = con.cursor()
-        command = 'SELECT * FROM ' + self.table_name
-        cur.execute(command)
 
-        self.column_names = [description[0] for description in cur.description]
+        cmd = "PRAGMA TABLE_INFO({0})".format(self.table_name)
+        cur.execute(cmd)
+        table_info = cur.fetchall()
+        
+        self.column_names = []
+        self.data_types = []
+        for ti in table_info:
+            column_name = ti[1]
+            column_type = ti[2]
+            if column_name not in self._hidden_columns:
+                self.column_names.append(column_name)
+                self.data_types.append(self._datatype_dict[column_type])
+               
         self.setColumnCount(len(self.column_names))
         self.setHorizontalHeaderLabels(self.column_names)
-
-        command = 'SELECT * FROM ' + self.table_name
-        data = cur.execute(command).fetchall()
-
-        if len(data) > 0:
-            self.data_types = [
-                type(data[0][col]) for col in range(
-                    len(self.column_names))]
-            # Added by Vitor:
-            if self.table_name == 'measurements':
-                self.data_types[35] = str
-            elif self.table_name == 'sets_of_measurements':
-                self.data_types[2] = str
 
         self.setRowCount(1)
         for j in range(len(self.column_names)):
             self.setItem(0, j, _QTableWidgetItem(''))
+  
+        column_names_str = ''
+        for col_name in self.column_names:
+            column_names_str = column_names_str + '"{0:s}", '.format(col_name)
+        column_names_str = column_names_str[:-2]
 
-        self.initial_id_sb.setMinimum(int(data[0][0]))
-        self.initial_id_sb.setMaximum(int(data[-1][0]))
-        self.number_rows_sb.setValue(len(data))
-        self.data = data[:]
-        self.addRowsToTable(data)
+        cmd = 'SELECT * FROM (SELECT {0:s} FROM {1:s} ORDER BY id DESC LIMIT {2:d}) ORDER BY id ASC'.format(
+             column_names_str, self.table_name, _max_number_rows)
+        data = cur.execute(cmd).fetchall()
 
+        if len(data) > 0:
+            cmd = 'SELECT MIN(id) FROM {0}'.format(self.table_name)
+            min_idn = cur.execute(cmd).fetchone()[0]
+            self.initial_id_sb.setMinimum(min_idn)
+
+            cmd = 'SELECT MAX(id) FROM {0}'.format(self.table_name)
+            max_idn = cur.execute(cmd).fetchone()[0]               
+            self.initial_id_sb.setMaximum(max_idn)
+            
+            self.max_number_rows_sb.setValue(len(data))
+            self.data = data[:]
+            self.addRowsToTable(data)
+        else:
+            self.initial_id_sb.setMinimum(0)
+            self.initial_id_sb.setMaximum(0)
+            self.max_number_rows_sb.setValue(0)
+        
         self.setSelectionBehavior(_QAbstractItemView.SelectRows)
-
         self.blockSignals(False)
-        self.itemChanged.connect(self.filterColumn)
+        self.itemChanged.connect(self.filterChanged)
         self.itemSelectionChanged.connect(self.selectLine)
 
     def addRowsToTable(self, data):
@@ -211,8 +238,8 @@ class DatabaseTable(_QTableWidget):
 
         self.setRowCount(1)
 
-        if len(data) > self.number_rows_sb.value():
-            tabledata = data[-self.number_rows_sb.value()::]
+        if len(data) > self.max_number_rows_sb.value():
+            tabledata = data[-self.max_number_rows_sb.value()::]
         else:
             tabledata = data
 
@@ -221,13 +248,14 @@ class DatabaseTable(_QTableWidget):
 
         self.initial_id_sb.setValue(int(tabledata[0][0]))
         self.setRowCount(len(tabledata) + 1)
+        self.number_rows_sb.setValue(len(tabledata))
         self.initial_table_id = tabledata[0][0]
 
         for j in range(len(self.column_names)):
             for i in range(len(tabledata)):
                 item_str = str(tabledata[i][j])
                 if len(item_str) > _max_str_size:
-                    item_str = item_str[:20] + '...'
+                    item_str = item_str[:10] + '...'
                 item = _QTableWidgetItem(item_str)
                 item.setFlags(_Qt.ItemIsSelectable | _Qt.ItemIsEnabled)
                 self.setItem(i + 1, j, item)
@@ -252,56 +280,80 @@ class DatabaseTable(_QTableWidget):
         else:
             self.setSelectionBehavior(_QAbstractItemView.SelectRows)
 
-    def filterColumn(self, item):
+    def filterChanged(self, item):
+        """Apply column filter to data."""
+        if item.row() == 0:
+            self.filterColumn()
+
+    def filterColumn(self, initial_id=None):
         """Apply column filter to data."""
         if (self.rowCount() == 0
            or self.columnCount() == 0
-           or len(self.column_names) == 0 or len(self.data_types) == 0
-           or item.row() != 0):
+           or len(self.column_names) == 0 or len(self.data_types) == 0):
             return
-
-        con = _sqlite3.connect(self.database_filename)
-        cur = con.cursor()
-        command = 'SELECT * FROM ' + self.table_name
-
-        and_flag = False
-        filters = []
-        for idx in range(len(self.column_names)):
-            filters.append(self.item(0, idx).text())
-
-        if any(filt != '' for filt in filters):
-            command = command + ' WHERE '
-
-        for idx in range(len(self.column_names)):
-            column = self.column_names[idx]
-            data_type = self.data_types[idx]
-            filt = filters[idx]
-
-            if filt != '':
-
-                if and_flag:
-                    command = command + ' AND '
-                and_flag = True
-
-                if data_type == str:
-                    command = command + column + ' LIKE "%' + filt + '%"'
-                else:
-                    if '~' in filt:
-                        fs = filt.split('~')
-                        if len(fs) == 2:
-                            command = command + column + ' >= ' + fs[0]
-                            command = command + ' AND '
-                            command = command + column + ' <= ' + fs[1]
-                    else:
-                        try:
-                            value = data_type(filt)
-                            command = command + column + ' = ' + str(value)
-                        except ValueError:
-                            command = command + column + ' ' + filt
-
+        
         try:
-            cur.execute(command)
+            con = _sqlite3.connect(self.database)
+            cur = con.cursor()
+            column_names_str = ''
+            for col_name in self.column_names:
+                column_names_str = column_names_str + '"{0:s}", '.format(col_name)
+            column_names_str = column_names_str[:-2]
+            cmd = 'SELECT {0:s} FROM {1:s}'.format(
+                column_names_str, self.table_name)
+
+            and_flag = False
+            filters = []
+            for idx in range(len(self.column_names)):
+                filters.append(self.item(0, idx).text())
+    
+            if any(filt != '' for filt in filters):
+                cmd = cmd + ' WHERE '
+    
+            for idx in range(len(self.column_names)):
+                column = self.column_names[idx]
+                data_type = self.data_types[idx]
+                filt = filters[idx]
+    
+                if filt != '':
+    
+                    if and_flag:
+                        cmd = cmd + ' AND '
+                    and_flag = True
+    
+                    if data_type == str:
+                        cmd = cmd + column + ' LIKE "%' + filt + '%"'
+                    else:
+                        if '~' in filt:
+                            fs = filt.split('~')
+                            if len(fs) == 2:
+                                cmd = cmd + column + ' >= ' + fs[0]
+                                cmd = cmd + ' AND '
+                                cmd = cmd + column + ' <= ' + fs[1]
+                        elif filt.lower() == 'none' or filt.lower() == 'null':
+                            cmd = cmd + column + ' IS NULL'
+                        else:
+                            try:
+                                value = data_type(filt)
+                                cmd = cmd + column + ' = ' + str(value)
+                            except ValueError:
+                                cmd = cmd + column + ' ' + filt
+    
+            if initial_id is not None:
+                if 'WHERE' in cmd:
+                    cmd = 'SELECT * FROM (' + cmd + ' AND id >= {0:d} LIMIT {1:d})'.format(
+                        initial_id, _max_number_rows)
+                else:
+                    cmd = 'SELECT * FROM (' + cmd + ' WHERE id >= {0:d} LIMIT {1:d})'.format(
+                        initial_id, _max_number_rows)
+    
+            else:
+                cmd = 'SELECT * FROM (' + cmd + ' ORDER BY id DESC LIMIT {0:d}) ORDER BY id ASC'.format(
+                    _max_number_rows)
+        
+            cur.execute(cmd)
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             pass
 
         data = cur.fetchall()
