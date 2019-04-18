@@ -698,9 +698,17 @@ class MainWindow(_QMainWindow):
         return sort_data
 
     def _get_measurement_data_file(self, filename):
+        if self.ui.gb_magnet_type.isChecked():
+            main_harmonic = self.ui.sb_main_harmonic.value()
+            skew_magnet = self.ui.chb_skew_magnet.isChecked()
+        else:
+            main_harmonic = None
+            skew_magnet = None
+
         try:
             filepath = _os.path.join(self.directory, filename)
-            df = _measurement_data.MeasurementData(filepath)
+            df = _measurement_data.MeasurementData(
+                filepath, main_harmonic=main_harmonic, skew_magnet=skew_magnet)
             return df
         except _measurement_data.MeasurementDataError as e:
             _QMessageBox.warning(
@@ -708,9 +716,17 @@ class MainWindow(_QMainWindow):
             return None
 
     def _get_measurement_data_database(self, idn):
+        if self.ui.gb_magnet_type.isChecked():
+            main_harmonic = self.ui.sb_main_harmonic.value()
+            skew_magnet = self.ui.chb_skew_magnet.isChecked()
+        else:
+            main_harmonic = None
+            skew_magnet = None
+
         try:
             df = _measurement_data.MeasurementData(
-                idn=idn, database=self.database)
+                idn=idn, database=self.database,
+                main_harmonic=main_harmonic, skew_magnet=skew_magnet)
             return df
         except _measurement_data.MeasurementDataError as e:
             _QMessageBox.warning(
@@ -758,8 +774,8 @@ class MainWindow(_QMainWindow):
             timestamp.append(d.hour)
             idn.append(d.idn)
 
-        tol_main = 2
-        tol = 1
+        tol_main = 0.1
+        tol = 0.1
 
         df_array = _np.array([
             main, trim, ch, cv, qs, magnet_name, idn, start_pulse,

@@ -22,12 +22,17 @@ class MeasurementData(object):
 
     _n_harmonics = 15
 
-    def __init__(self, filename=None, idn=None, database=None):
-        """Read data from file.
+    def __init__(
+            self, filename=None, idn=None, database=None,
+            main_harmonic=None, skew_magnet=None):
+        """Read data from file or from database table.
 
         Args:
-            filename (str): rotating coil file path.
-            id (int): measurement id in database table
+            filename (str): rotating coil file path,
+            idn (int): measurement id in database table,
+            database (str): database file path,
+            main_harmonic (int): 1 for dipole, 2 for quadrupole, ...
+            skew_magnet (bool): True for skew magnets, False otherwise.
         """
         if ((filename is None and idn is None)
            or (filename is not None and idn is not None)
@@ -72,8 +77,6 @@ class MeasurementData(object):
         self._magnet_resistance_std = None
         self._accelerator_type = None
         self._magnet_model = None
-        self._main_harmonic = None
-        self._skew_magnet = None
         self._magnet_family = None
         self._coil_name = None
         self._coil_type = None
@@ -97,6 +100,9 @@ class MeasurementData(object):
         self._curves = None
         self._curves_df = None
         self._columns_names = None
+
+        self._main_harmonic = main_harmonic
+        self._skew_magnet = skew_magnet
 
         self._raw_curve_mult_factor = 1e-12
         self._raw_curve_mult_factor_mod = 1
@@ -505,21 +511,25 @@ class MeasurementData(object):
         self._curves = _np.array(curves).astype(
             _np.float64)*self._raw_curve_mult_factor
 
-        if self._magnet_model in [1, 2, 3]:
-            self._main_harmonic = self._magnet_model
-            self._skew_magnet = False
-        elif self._magnet_model == 4:
-            self._main_harmonic = 2
-            self._skew_magnet = True
-        elif self._magnet_model == 5:
-            self._main_harmonic = 1
-            self._skew_magnet = True
-        elif self._magnet_model == 6:
-            self._main_harmonic = 1
-            self._skew_magnet = False
-        else:
-            self._main_harmonic = None
-            self._skew_magnet = None
+        if self._main_harmonic is None:
+            if self._magnet_model in [1, 2, 3]:
+                self._main_harmonic = self._magnet_model
+            elif self._magnet_model == 4:
+                self._main_harmonic = 2
+            elif self._magnet_model == 5:
+                self._main_harmonic = 1
+            elif self._magnet_model == 6:
+                self._main_harmonic = 1
+            else:
+                self._main_harmonic = None
+
+        if self._skew_magnet is None:
+            if self._magnet_model in [1, 2, 3, 6]:
+                self._skew_magnet = False
+            elif self._magnet_model in [4, 5]:
+                self._skew_magnet = True
+            else:
+                self._skew_magnet = None
 
         self._set_magnet_center_error()
         self._create_data_frames()
@@ -768,11 +778,18 @@ class MeasurementData(object):
         except Exception:
             self._normalization_radius = None
 
-        self._main_harmonic = _np.nonzero(self._multipoles[:, 7])[0][0] + 1
-        if 'SnMagnet' in columns_names_str:
-            self._skew_magnet = True
-        else:
-            self._skew_magnet = False
+        if self._main_harmonic is None:
+            nonzero_angles = _np.nonzero(self._multipoles[:, 7])[0]
+            if len(nonzero_angles) == 1:
+                self._main_harmonic = nonzero_angles[0] + 1
+            else:
+                self._main_harmonic = 1
+
+        if self._skew_magnet is None:
+            if 'SnMagnet' in columns_names_str:
+                self._skew_magnet = True
+            else:
+                self._skew_magnet = False
 
         if not self._skew_magnet:
             self._magnet_model = self._main_harmonic
