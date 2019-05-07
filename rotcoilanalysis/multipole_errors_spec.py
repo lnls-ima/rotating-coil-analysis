@@ -235,6 +235,86 @@ def _get_multipole_errors_spec():
     _dict['roll'] = 0.3e-3
     multipole_errors["Q30"] = _dict
 
+    # Storage Ring Fast Correctors
+    _dict = {}
+    _dict['main'] = 0
+    _dict['normal_sys_monomials'] = _np.array([2, 4, 6, 8, 10, 12, 14])
+    _dict['normal_sys_multipoles'] = _np.array(
+        [-0.45, 0.02, -0.09, 0.09, -0.09, 0.02, 0.009])
+    _dict['normal_rms_monomials'] = _np.array([])
+    _dict['normal_rms_multipoles'] = _np.array([])
+    _dict['skew_sys_monomials'] = _np.array([])
+    _dict['skew_sys_multipoles'] = _np.array([])
+    _dict['skew_rms_monomials'] = _np.array([])
+    _dict['skew_rms_multipoles'] = _np.array([])
+    _dict['offset_x'] = 40e-6
+    _dict['offset_y'] = 40e-6
+    _dict['roll'] = 0.3e-3
+    multipole_errors["PFCH"] = _dict
+
+    _dict = {}
+    _dict['main'] = 0
+    _dict['normal_sys_monomials'] = _np.array([])
+    _dict['normal_sys_multipoles'] = _np.array([])
+    _dict['normal_rms_monomials'] = _np.array([])
+    _dict['normal_rms_multipoles'] = _np.array([])
+    _dict['skew_sys_monomials'] = _np.array([2, 4, 6, 8, 10, 12, 14])
+    _dict['skew_sys_multipoles'] = _np.array(
+        [0.45, 0.009, 0.04, 0.06, -0.17, 0.18, -0.07])
+    _dict['skew_rms_monomials'] = _np.array([])
+    _dict['skew_rms_multipoles'] = _np.array([])
+    _dict['offset_x'] = 40e-6
+    _dict['offset_y'] = 40e-6
+    _dict['roll'] = 0.3e-3
+    multipole_errors["PFCV"] = _dict
+
+    _dict = {}
+    _dict['main'] = 0
+    _dict['normal_sys_monomials'] = _np.array([2, 4, 6, 8, 10, 12, 14])
+    _dict['normal_sys_multipoles'] = _np.array(
+        [0.45, -0.02, 0.03, -0.29, 0.5, -0.44, 0.15])
+    _dict['normal_rms_monomials'] = _np.array([])
+    _dict['normal_rms_multipoles'] = _np.array([])
+    _dict['skew_sys_monomials'] = _np.array([])
+    _dict['skew_sys_multipoles'] = _np.array([])
+    _dict['skew_rms_monomials'] = _np.array([])
+    _dict['skew_rms_multipoles'] = _np.array([])
+    _dict['offset_x'] = 40e-6
+    _dict['offset_y'] = 40e-6
+    _dict['roll'] = 0.3e-3
+    multipole_errors["FCCH"] = _dict
+
+    _dict = {}
+    _dict['main'] = 0
+    _dict['normal_sys_monomials'] = _np.array([])
+    _dict['normal_sys_multipoles'] = _np.array([])
+    _dict['normal_rms_monomials'] = _np.array([])
+    _dict['normal_rms_multipoles'] = _np.array([])
+    _dict['skew_sys_monomials'] = _np.array([2, 4, 6, 8, 10, 12, 14])
+    _dict['skew_sys_multipoles'] = _np.array(
+        [-0.45, -0.004, 0.011, 0.11, -0.22, 0.19, -0.06])
+    _dict['skew_rms_monomials'] = _np.array([])
+    _dict['skew_rms_multipoles'] = _np.array([])
+    _dict['offset_x'] = 40e-6
+    _dict['offset_y'] = 40e-6
+    _dict['roll'] = 0.3e-3
+    multipole_errors["FCCV"] = _dict
+
+    _dict = {}
+    _dict['main'] = 1
+    _dict['normal_sys_monomials'] = _np.array([])
+    _dict['normal_sys_multipoles'] = _np.array([])
+    _dict['normal_rms_monomials'] = _np.array([])
+    _dict['normal_rms_multipoles'] = _np.array([])
+    _dict['skew_sys_monomials'] = _np.array([5, 9, 13])
+    _dict['skew_sys_multipoles'] = _np.array([0.052, -0.0051, -0.0033])
+    _dict['skew_rms_monomials'] = _np.array([])
+    _dict['skew_rms_multipoles'] = _np.array([])
+    _dict['offset_x'] = 40e-6
+    _dict['offset_y'] = 40e-6
+    _dict['roll'] = 0.3e-3
+    multipole_errors["FCQS"] = _dict
+
     return multipole_errors
 
 
