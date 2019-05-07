@@ -1259,6 +1259,8 @@ class MainWindow(_QMainWindow):
                     if (name_split[1].endswith('H')
                        or name_split[1].endswith('V')):
                         name = name_split[0] + name_split[1][-1]
+                    elif name_split[1].endswith('_45'):
+                        name = name_split[0] + '45'
                     else:
                         name = name_split[0]
                 else:

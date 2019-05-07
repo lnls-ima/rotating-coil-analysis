@@ -250,7 +250,7 @@ def _get_multipole_errors_spec():
     _dict['offset_x'] = 40e-6
     _dict['offset_y'] = 40e-6
     _dict['roll'] = 0.3e-3
-    multipole_errors["PFCH"] = _dict
+    multipole_errors["FCCH"] = _dict
 
     _dict = {}
     _dict['main'] = 0
@@ -266,7 +266,7 @@ def _get_multipole_errors_spec():
     _dict['offset_x'] = 40e-6
     _dict['offset_y'] = 40e-6
     _dict['roll'] = 0.3e-3
-    multipole_errors["PFCV"] = _dict
+    multipole_errors["FCCV"] = _dict
 
     _dict = {}
     _dict['main'] = 0
@@ -282,7 +282,7 @@ def _get_multipole_errors_spec():
     _dict['offset_x'] = 40e-6
     _dict['offset_y'] = 40e-6
     _dict['roll'] = 0.3e-3
-    multipole_errors["FCCH"] = _dict
+    multipole_errors["FCCH45"] = _dict
 
     _dict = {}
     _dict['main'] = 0
@@ -298,7 +298,7 @@ def _get_multipole_errors_spec():
     _dict['offset_x'] = 40e-6
     _dict['offset_y'] = 40e-6
     _dict['roll'] = 0.3e-3
-    multipole_errors["FCCV"] = _dict
+    multipole_errors["FCCV45"] = _dict
 
     _dict = {}
     _dict['main'] = 1
