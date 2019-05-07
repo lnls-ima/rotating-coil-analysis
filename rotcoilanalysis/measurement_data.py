@@ -479,7 +479,7 @@ class MeasurementData(object):
 
         for name in description:
             if (name not in
-               ['id', 'analisys_interval', 'read_data', 'raw_curve']):
+               ['id', 'analisys_interval', 'read_data', 'raw_curve', 'main_harmonic']):
                 idx = description.index(name)
                 att_name = '_' + name
                 if hasattr(self, att_name):

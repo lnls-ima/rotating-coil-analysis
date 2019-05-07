@@ -636,6 +636,7 @@ class MainWindow(_QMainWindow):
                     _QMessageBox.Ok)
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load data from files.',
                 _QMessageBox.Ok)
@@ -680,6 +681,7 @@ class MainWindow(_QMainWindow):
                     _QMessageBox.Ok)
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load data from database.',
                 _QMessageBox.Ok)
