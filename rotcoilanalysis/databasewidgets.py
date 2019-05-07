@@ -48,7 +48,8 @@ class DatabaseTab(_QTabWidget):
 
         for r in res:
             table_name = r[0]
-            if table_name != "sqlite_sequence" and table_name != 'failures':
+            if table_name != "sqlite_sequence" and (table_name != 'failures'
+                                                    and table_name != 'main'):
                 table = DatabaseTable(self)
                 tab = _QWidget()
                 vlayout = _QVBoxLayout()

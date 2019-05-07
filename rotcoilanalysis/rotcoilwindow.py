@@ -588,6 +588,7 @@ class MainWindow(_QMainWindow):
         self._update_multipoles_screen()
         self.set_default_report_file()
         self.update_report_options()
+        self.print_raw_data_stats()
 
     def print_raw_data_stats(self):
         try:
@@ -596,7 +597,7 @@ class MainWindow(_QMainWindow):
                 raw_data_avg = d.raw_data_avg
                 mean = _np.mean(raw_data_avg)
                 mean_abs = _np.mean(_np.abs(raw_data_avg))
-                print('{0:d}\t{1:f}\t{2:f}'.format(d.idn, mean, mean_abs))
+                print('{0:d}\t{1:15e}\t{2:15e}'.format(d.idn, mean, mean_abs))
         except Exception:
             _traceback.print_exc(file=_sys.stdout)
             pass
