@@ -1230,6 +1230,7 @@ class MainWindow(_QMainWindow):
 
             xnpts = int(((xmax - xmin)/xstep) + 1)
             xpos = _np.linspace(xmin, xmax, xnpts)
+            xpos_mm = xpos*1000
             index = _np.char.mod('%0.4f', xpos)
 
             rref = self.ui.ds_reference_radius.value()/1000
@@ -1283,6 +1284,7 @@ class MainWindow(_QMainWindow):
                 else:
                     legend = False
                 residual_field_df.plot(
+                    x=xpos_mm,
                     legend=legend,
                     marker='o',
                     ax=self.ui.wt_residual.canvas.ax)
@@ -1291,7 +1293,10 @@ class MainWindow(_QMainWindow):
                 legend = True
                 style = ['-*m', '--k', '--g']
                 if len(index_list) > 1:
-                    residual_field_df.mean(axis=1).plot(
+                    residual_field_mean_df = _pd.DataFrame(
+                        residual_field_df.mean(axis=1))
+                    residual_field_mean_df.plot(
+                        x=xpos_mm,
                         legend=legend,
                         label=avg_label,
                         marker='o',
@@ -1301,6 +1306,7 @@ class MainWindow(_QMainWindow):
 
                 else:
                     residual_field_df.plot(
+                        x=xpos_mm,
                         legend=legend, marker='o', color=color,
                         ax=self.ui.wt_residual.canvas.ax)
 
@@ -1324,6 +1330,7 @@ class MainWindow(_QMainWindow):
                     residue['Lower limit'] = _pd.Series(
                         min_residue, index=index)
                     residue.plot(
+                        x=xpos_mm,
                         legend=legend,
                         ax=self.ui.wt_residual.canvas.ax,
                         style=style)
@@ -1331,7 +1338,7 @@ class MainWindow(_QMainWindow):
             title = 'Residual Normalized ' + field_comp + ' Integrated Field'
             self.ui.wt_residual.canvas.ax.set_title(title, fontsize=_fontsize)
             self.ui.wt_residual.canvas.ax.set_xlabel(
-                'Transversal Position X [m]', fontsize=_fontsize)
+                'Transversal Position X [mm]', fontsize=_fontsize)
             self.ui.wt_residual.canvas.ax.set_ylabel(
                 'Residual Normalized %s Component' % field_comp,
                 fontsize=_fontsize)
@@ -1390,6 +1397,7 @@ class MainWindow(_QMainWindow):
 
             xnpts = int(((xmax - xmin)/xstep) + 1)
             xpos = _np.linspace(xmin, xmax, xnpts)
+            xpos_mm = xpos*1000
             index = _np.char.mod('%0.4f', xpos)
 
             if len(index_list) == 0:
@@ -1441,6 +1449,7 @@ class MainWindow(_QMainWindow):
                 else:
                     legend = False
                 integrated_field_df.plot(
+                    x=xpos_mm,
                     legend=legend,
                     marker='o',
                     ax=self.ui.wt_integrated_field.canvas.ax)
@@ -1449,7 +1458,9 @@ class MainWindow(_QMainWindow):
                 legend = True
                 style = ['-*m', '--k', '--g']
                 if len(index_list) > 1:
-                    integrated_field_df.mean(axis=1).plot(
+                    intfield_mean_df = _pd.DataFrame(integrated_field_df.mean(axis=1))
+                    intfield_mean_df.plot(
+                        x=xpos_mm,
                         legend=legend,
                         label=avg_label,
                         marker='o',
@@ -1459,13 +1470,14 @@ class MainWindow(_QMainWindow):
 
                 else:
                     integrated_field_df.plot(
+                        x=xpos_mm,
                         legend=legend, marker='o', color=color,
                         ax=self.ui.wt_integrated_field.canvas.ax)
 
             title = field_comp + ' Integrated Field'
             self.ui.wt_integrated_field.canvas.ax.set_title(title, fontsize=_fontsize)
             self.ui.wt_integrated_field.canvas.ax.set_xlabel(
-                'Transversal Position X [m]', fontsize=_fontsize)
+                'Transversal Position X [mm]', fontsize=_fontsize)
             self.ui.wt_integrated_field.canvas.ax.set_ylabel(
                 '%s Integrated Field [G.cm]' % field_comp,
                 fontsize=_fontsize)
