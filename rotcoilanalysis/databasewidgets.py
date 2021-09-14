@@ -1,5 +1,7 @@
 """Database tables widgets."""
 
+import traceback
+import sys
 import os.path as _path
 import sqlite3 as _sqlite3
 import numpy as _np
@@ -40,60 +42,65 @@ class DatabaseTab(_QTabWidget):
         self.tables = []
 
     def loadDatabase(self, database_filename):
-        """Load database."""
-        self.database_filename = database_filename
-        con = _sqlite3.connect(self.database_filename)
-        cur = con.cursor()
-        res = cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        try:
+            """Load database."""
+            self.database_filename = database_filename
+            con = _sqlite3.connect(self.database_filename)
+            cur = con.cursor()
+            res = cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
 
-        for r in res:
-            table_name = r[0]
-            if table_name != "sqlite_sequence" and (table_name != 'failures'
-                                                    and table_name != 'main'):
-                table = DatabaseTable(self)
-                tab = _QWidget()
-                vlayout = _QVBoxLayout()
-                hlayout = _QHBoxLayout()
+            for r in res:
+                table_name = r[0]
+                if table_name != "sqlite_sequence" and (table_name !=
+                                                        'failures' and
+                                                        table_name !=
+                                                        'main'):
+                    table = DatabaseTable(self)
+                    tab = _QWidget()
+                    vlayout = _QVBoxLayout()
+                    hlayout = _QHBoxLayout()
 
-                initial_id_la = _QLabel("Initial ID:")
-                initial_id_sb = _QSpinBox()
-                initial_id_sb.setMinimumWidth(100)
-                initial_id_sb.setButtonSymbols(2)
-                hlayout.addStretch(0)
-                hlayout.addWidget(initial_id_la)
-                hlayout.addWidget(initial_id_sb)
-                hlayout.addSpacing(30)
+                    initial_id_la = _QLabel("Initial ID:")
+                    initial_id_sb = _QSpinBox()
+                    initial_id_sb.setMinimumWidth(100)
+                    initial_id_sb.setButtonSymbols(2)
+                    hlayout.addStretch(0)
+                    hlayout.addWidget(initial_id_la)
+                    hlayout.addWidget(initial_id_sb)
+                    hlayout.addSpacing(30)
 
-                number_rows_la = _QLabel("Number of rows:")
-                number_rows_sb = _QSpinBox()
-                number_rows_sb.setMinimumWidth(100)
-                number_rows_sb.setButtonSymbols(2)
-                number_rows_sb.setReadOnly(True)
-                hlayout.addWidget(number_rows_la)
-                hlayout.addWidget(number_rows_sb)
-                hlayout.addSpacing(30)
+                    number_rows_la = _QLabel("Number of rows:")
+                    number_rows_sb = _QSpinBox()
+                    number_rows_sb.setMinimumWidth(100)
+                    number_rows_sb.setButtonSymbols(2)
+                    number_rows_sb.setReadOnly(True)
+                    hlayout.addWidget(number_rows_la)
+                    hlayout.addWidget(number_rows_sb)
+                    hlayout.addSpacing(30)
 
-                max_number_rows_la = _QLabel("Maximum number of rows:")
-                max_number_rows_sb = _QSpinBox()
-                max_number_rows_sb.setMinimumWidth(100)
-                max_number_rows_sb.setButtonSymbols(2)
-                max_number_rows_sb.setReadOnly(True)
-                hlayout.addWidget(max_number_rows_la)
-                hlayout.addWidget(max_number_rows_sb)
+                    max_number_rows_la = _QLabel("Maximum number of rows:")
+                    max_number_rows_sb = _QSpinBox()
+                    max_number_rows_sb.setMinimumWidth(100)
+                    max_number_rows_sb.setButtonSymbols(2)
+                    max_number_rows_sb.setReadOnly(True)
+                    hlayout.addWidget(max_number_rows_la)
+                    hlayout.addWidget(max_number_rows_sb)
 
-                table.loadDatabaseTable(
-                    self.database_filename,
-                    table_name,
-                    initial_id_sb,
-                    number_rows_sb,
-                    max_number_rows_sb)
+                    table.loadDatabaseTable(
+                        self.database_filename,
+                        table_name,
+                        initial_id_sb,
+                        number_rows_sb,
+                        max_number_rows_sb)
 
-                vlayout.addWidget(table)
-                vlayout.addLayout(hlayout)
-                tab.setLayout(vlayout)
+                    vlayout.addWidget(table)
+                    vlayout.addLayout(hlayout)
+                    tab.setLayout(vlayout)
 
-                self.tables.append(table)
-                self.addTab(tab, table_name)
+                    self.tables.append(table)
+                    self.addTab(tab, table_name)
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
 
     def scrollDownTables(self):
         """Scroll down all tables."""
@@ -354,7 +361,7 @@ class DatabaseTable(_QTableWidget):
         
             cur.execute(cmd)
         except Exception:
-            _traceback.print_exc(file=_sys.stdout)
+            traceback.print_exc(file=sys.stdout)
             pass
 
         data = cur.fetchall()

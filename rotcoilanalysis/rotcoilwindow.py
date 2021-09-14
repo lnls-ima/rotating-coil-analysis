@@ -132,6 +132,9 @@ class MainWindow(_QMainWindow):
         self.ui.wt_residual_comp.canvas.ax.get_xaxis().set_visible(False)
         self.ui.wt_residual_comp.canvas.ax.get_yaxis().set_visible(False)
 
+        self.ui.wt_integrated_field = _mplwidget.MplWidget()
+        self.ui.lt_integrated_field.addWidget(self.ui.wt_integrated_field)
+
         self.ui.wt_roll_offset = _mplwidget.MplWidget()
         self.ui.lt_roll_offset.addWidget(self.ui.wt_roll_offset)
 
@@ -171,6 +174,7 @@ class MainWindow(_QMainWindow):
         self.ui.wt_residual_comp.canvas.ax.clear()
         self.ui.wt_residual_comp.canvas.fig.clf()
         self.ui.wt_residual_comp.canvas.draw()
+        self.ui.wt_integrated_field.canvas.draw()
         self.ui.table_selected_files.setColumnCount(0)
         self.ui.table_avg.setColumnCount(0)
         self.ui.table_all_files.setColumnCount(0)
@@ -388,6 +392,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load database.', _QMessageBox.Ok)
+            _traceback.print_exc(file=_sys.stdout)
 
     def upload_files(self):
         """Upload files."""
@@ -588,7 +593,6 @@ class MainWindow(_QMainWindow):
         self._update_multipoles_screen()
         self.set_default_report_file()
         self.update_report_options()
-        self.print_raw_data_stats()
 
     def print_raw_data_stats(self):
         try:
@@ -597,7 +601,7 @@ class MainWindow(_QMainWindow):
                 raw_data_avg = d.raw_data_avg
                 mean = _np.mean(raw_data_avg)
                 mean_abs = _np.mean(_np.abs(raw_data_avg))
-                print('{0:d}\t{1:15e}\t{2:15e}'.format(d.idn, mean, mean_abs))
+                print('{0:d}\t{1:f}\t{2:f}'.format(d.idn, mean, mean_abs))
         except Exception:
             _traceback.print_exc(file=_sys.stdout)
             pass
@@ -636,7 +640,6 @@ class MainWindow(_QMainWindow):
                     _QMessageBox.Ok)
 
         except Exception:
-            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load data from files.',
                 _QMessageBox.Ok)
@@ -681,7 +684,6 @@ class MainWindow(_QMainWindow):
                     _QMessageBox.Ok)
 
         except Exception:
-            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load data from database.',
                 _QMessageBox.Ok)
@@ -701,17 +703,9 @@ class MainWindow(_QMainWindow):
         return sort_data
 
     def _get_measurement_data_file(self, filename):
-        if self.ui.gb_magnet_type.isChecked():
-            main_harmonic = self.ui.sb_main_harmonic.value()
-            skew_magnet = self.ui.chb_skew_magnet.isChecked()
-        else:
-            main_harmonic = None
-            skew_magnet = None
-
         try:
             filepath = _os.path.join(self.directory, filename)
-            df = _measurement_data.MeasurementData(
-                filepath, main_harmonic=main_harmonic, skew_magnet=skew_magnet)
+            df = _measurement_data.MeasurementData(filepath)
             return df
         except _measurement_data.MeasurementDataError as e:
             _QMessageBox.warning(
@@ -719,17 +713,9 @@ class MainWindow(_QMainWindow):
             return None
 
     def _get_measurement_data_database(self, idn):
-        if self.ui.gb_magnet_type.isChecked():
-            main_harmonic = self.ui.sb_main_harmonic.value()
-            skew_magnet = self.ui.chb_skew_magnet.isChecked()
-        else:
-            main_harmonic = None
-            skew_magnet = None
-
         try:
             df = _measurement_data.MeasurementData(
-                idn=idn, database=self.database,
-                main_harmonic=main_harmonic, skew_magnet=skew_magnet)
+                idn=idn, database=self.database)
             return df
         except _measurement_data.MeasurementDataError as e:
             _QMessageBox.warning(
@@ -777,8 +763,8 @@ class MainWindow(_QMainWindow):
             timestamp.append(d.hour)
             idn.append(d.idn)
 
-        tol_main = 0.1
-        tol = 0.1
+        tol_main = 2
+        tol = 1
 
         df_array = _np.array([
             main, trim, ch, cv, qs, magnet_name, idn, start_pulse,
@@ -1202,6 +1188,7 @@ class MainWindow(_QMainWindow):
         self._plot_residual_field(all_files=False)
         self._plot_residual_multipoles(all_files=False)
         self._update_roll_offset_tables()
+        self._plot_integrated_field(all_files=False)
 
     def plot_residual_field_all_files(self):
         """Plot residual field of all files."""
@@ -1209,6 +1196,7 @@ class MainWindow(_QMainWindow):
         self._plot_residual_field(all_files=True)
         self._plot_residual_multipoles(all_files=True)
         self._update_roll_offset_tables()
+        self._plot_integrated_field(all_files=True)
 
     def _plot_residual_field(self, all_files=False, figsize=None, idx=None):
         self.ui.wt_residual.canvas.ax.clear()
@@ -1259,8 +1247,6 @@ class MainWindow(_QMainWindow):
                     if (name_split[1].endswith('H')
                        or name_split[1].endswith('V')):
                         name = name_split[0] + name_split[1][-1]
-                    elif name_split[1].endswith('_45'):
-                        name = name_split[0] + '45'
                     else:
                         name = name_split[0]
                 else:
@@ -1359,6 +1345,140 @@ class MainWindow(_QMainWindow):
             self.ui.wt_residual.canvas.draw()
 
             self.table_df = residual_field_df
+            self.ui.bt_table_5.setEnabled(True)
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+
+        except Exception:
+            self.blockSignals(False)
+            _QApplication.restoreOverrideCursor()
+            _QMessageBox.critical(
+                self,
+                'Failure',
+                'Failed to plot residual field.',
+                _QMessageBox.Ok)
+
+    def _plot_integrated_field(self, all_files=False, figsize=None, idx=None):
+        self.ui.wt_integrated_field.canvas.ax.clear()
+
+        if self.figsize is None:
+            dpi = self.ui.wt_integrated_field.canvas.fig.dpi
+            self.figsize = self.ui.wt_integrated_field.canvas.fig.get_size_inches()*dpi
+
+        if figsize is None:
+            figsize = self.figsize
+
+        self.blockSignals(True)
+        _QApplication.setOverrideCursor(_Qt.WaitCursor)
+
+        try:
+            if idx is not None and all_files is False:
+                index_list = [idx]
+                columns = [self.default_file_id[idx]]
+            elif all_files:
+                index_list = list(range(len(self.data)))
+                columns = self.default_file_id
+                avg_label = 'All Files Average'
+            else:
+                index_list = self.files_checkable_combobox.checkedIndexes()
+                columns = [self.default_file_id[i] for i in index_list]
+                avg_label = 'Selected Files Average'
+
+            xmin = self.ui.ds_range_min.value()/1000
+            xmax = self.ui.ds_range_max.value()/1000
+            xstep = self.ui.ds_range_step.value()/1000
+
+            xnpts = int(((xmax - xmin)/xstep) + 1)
+            xpos = _np.linspace(xmin, xmax, xnpts)
+            index = _np.char.mod('%0.4f', xpos)
+
+            if len(index_list) == 0:
+                self.ui.wt_integrated_field.canvas.draw()
+                self.blockSignals(False)
+                _QApplication.restoreOverrideCursor()
+                return
+
+            magnet_names = []
+            for d in self.data:
+                name_split = d.magnet_name.split('-')
+                if len(name_split) > 1 and len(name_split[1]) > 0:
+                    if (name_split[1].endswith('H')
+                       or name_split[1].endswith('V')):
+                        name = name_split[0] + name_split[1][-1]
+                    else:
+                        name = name_split[0]
+                else:
+                    name = name_split[0]
+                magnet_names.append(name.strip())
+
+            integrated_field_x = []
+            integrated_field_y = []
+            for i in index_list:
+                ibx, iby = self.data[i].calc_integrated_field(xpos)
+                integrated_field_x.append(ibx)
+                integrated_field_y.append(iby)
+            integrated_field_x = _np.array(integrated_field_x)*1e6
+            integrated_field_y = _np.array(integrated_field_y)*1e6
+
+            integrated_field_x_df = _pd.DataFrame(
+                integrated_field_x.T, index=index, columns=columns)
+
+            integrated_field_y_df = _pd.DataFrame(
+                integrated_field_y.T, index=index, columns=columns)
+
+            if self.ui.rb_norm_2.isChecked() == 1:
+                integrated_field_df = integrated_field_y_df
+                field_comp = 'Normal'
+                color = self.normal_color
+            else:
+                integrated_field_df = integrated_field_x_df
+                field_comp = 'Skew'
+                color = self.skew_color
+
+            if self.ui.cb_avg_3.currentIndex() == 1 and len(index_list) > 1:
+                if len(index_list) <= 3:
+                    legend = True
+                else:
+                    legend = False
+                integrated_field_df.plot(
+                    legend=legend,
+                    marker='o',
+                    ax=self.ui.wt_integrated_field.canvas.ax)
+                style = ['-*m', '--k', '--k']
+            else:
+                legend = True
+                style = ['-*m', '--k', '--g']
+                if len(index_list) > 1:
+                    integrated_field_df.mean(axis=1).plot(
+                        legend=legend,
+                        label=avg_label,
+                        marker='o',
+                        color=color,
+                        yerr=integrated_field_df.std(axis=1),
+                        ax=self.ui.wt_integrated_field.canvas.ax)
+
+                else:
+                    integrated_field_df.plot(
+                        legend=legend, marker='o', color=color,
+                        ax=self.ui.wt_integrated_field.canvas.ax)
+
+            title = field_comp + ' Integrated Field'
+            self.ui.wt_integrated_field.canvas.ax.set_title(title, fontsize=_fontsize)
+            self.ui.wt_integrated_field.canvas.ax.set_xlabel(
+                'Transversal Position X [m]', fontsize=_fontsize)
+            self.ui.wt_integrated_field.canvas.ax.set_ylabel(
+                '%s Integrated Field [G.cm]' % field_comp,
+                fontsize=_fontsize)
+            self.ui.wt_integrated_field.canvas.ax.grid('on')
+
+            dpi = self.ui.wt_integrated_field.canvas.fig.dpi
+            figsize_inches = [figsize[0]/dpi, figsize[1]/dpi]
+            self.ui.wt_integrated_field.canvas.fig.set_size_inches(
+                figsize_inches, forward=True)
+            self.ui.wt_integrated_field.canvas.fig.tight_layout()
+            self.ui.wt_integrated_field.canvas.draw()
+
+            self.table_df = integrated_field_df
             self.ui.bt_table_5.setEnabled(True)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
