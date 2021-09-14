@@ -339,6 +339,7 @@ class MainWindow(_QMainWindow):
 
             self.ui.files_input_count.setText(str(len(self.files)))
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load files.', _QMessageBox.Ok)
 
@@ -357,6 +358,7 @@ class MainWindow(_QMainWindow):
             for i in range(len(files)):
                 sorted_files = _np.append(sorted_files, files[index[i]])
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             sorted_files = _np.array(files)
 
         sorted_files = [f for f in sorted_files]
@@ -388,6 +390,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -415,6 +418,7 @@ class MainWindow(_QMainWindow):
                     self.ui.files_output.setItem(i, 0, item)
                     item.setText(self.files_uploaded[i])
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure',
                 'Failed to select measurements.', _QMessageBox.Ok)
@@ -450,6 +454,7 @@ class MainWindow(_QMainWindow):
                 self.ui.database_output.setItem(i, 0, item)
                 item.setText(self.database_uploaded[i])
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure',
                 'Failed to select measurements.', _QMessageBox.Ok)
@@ -476,6 +481,7 @@ class MainWindow(_QMainWindow):
 
             self.ui.files_input_count.setText(str(len(self.files)))
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure',
                 'Failed to update file list.', _QMessageBox.Ok)
@@ -499,6 +505,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -545,6 +552,7 @@ class MainWindow(_QMainWindow):
 
             self.ui.files_output_count.setText(str(len(self.files_uploaded)))
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to remove files.', _QMessageBox.Ok)
 
@@ -563,6 +571,7 @@ class MainWindow(_QMainWindow):
             self.ui.database_output_count.setText(
                 str(len(self.database_uploaded)))
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure',
                 'Failed to remove measurements.', _QMessageBox.Ok)
@@ -604,7 +613,6 @@ class MainWindow(_QMainWindow):
                 print('{0:d}\t{1:f}\t{2:f}'.format(d.idn, mean, mean_abs))
         except Exception:
             _traceback.print_exc(file=_sys.stdout)
-            pass
 
     def _read_data_files(self):
         data = _np.array([])
@@ -640,6 +648,7 @@ class MainWindow(_QMainWindow):
                     _QMessageBox.Ok)
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load data from files.',
                 _QMessageBox.Ok)
@@ -684,6 +693,7 @@ class MainWindow(_QMainWindow):
                     _QMessageBox.Ok)
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to load data from database.',
                 _QMessageBox.Ok)
@@ -939,6 +949,7 @@ class MainWindow(_QMainWindow):
             dialog_table = _tabledialog.TableDialog(table_df=self.table_df)
             dialog_table.exec_()
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to open table.', _QMessageBox.Ok)
 
@@ -1030,6 +1041,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -1103,6 +1115,7 @@ class MainWindow(_QMainWindow):
                 self.blockSignals(False)
                 _QApplication.restoreOverrideCursor()
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -1177,6 +1190,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -1357,6 +1371,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -1496,12 +1511,13 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
                 self,
                 'Failure',
-                'Failed to plot residual field.',
+                'Failed to plot integrated field.',
                 _QMessageBox.Ok)
 
     def _plot_residual_multipoles(self, all_files=False):
@@ -1627,6 +1643,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -1761,6 +1778,7 @@ class MainWindow(_QMainWindow):
 
                 self.ui.table_all_files.setHorizontalHeaderLabels(columns)
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to update tables.', _QMessageBox.Ok)
 
@@ -1781,6 +1799,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -1831,6 +1850,7 @@ class MainWindow(_QMainWindow):
             _QApplication.restoreOverrideCursor()
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
             _QMessageBox.critical(
@@ -2358,6 +2378,7 @@ class MainWindow(_QMainWindow):
             self.ui.preview.setPixmap(pixmap)
             self.ui.preview.setScaledContents(True)
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self, 'Failure', 'Failed to update preview.', _QMessageBox.Ok)
 
@@ -2412,6 +2433,7 @@ class MainWindow(_QMainWindow):
             self.magnet_report = _pdf_report.MagnetReport(data, **args)
 
         except Exception:
+            _traceback.print_exc(file=_sys.stdout)
             _QMessageBox.critical(
                 self,
                 'Failure',

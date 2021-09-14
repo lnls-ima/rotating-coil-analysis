@@ -518,8 +518,8 @@ class MeasurementData(object):
             self._main_harmonic = 1
             self._skew_magnet = False
         else:
-            self._main_harmonic = None
-            self._skew_magnet = None
+            self._main_harmonic = 1
+            self._skew_magnet = False
 
         self._set_magnet_center_error()
         self._create_data_frames()
