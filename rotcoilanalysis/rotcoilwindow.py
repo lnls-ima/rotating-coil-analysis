@@ -64,7 +64,8 @@ _whfactor = 0.7
 _figure_width = 300
 _report_figsize = [685, 480]
 
-_default_dir = _os.path.expanduser('~')
+# _default_dir = _os.path.expanduser('~')
+_default_dir = 'C:\\Arq\\Work_At_LNLS\\eclipse-workspace\\rotating-coil-software_lnls477\\Rotating Coil v3'
 _basepath = _os.path.dirname(_os.path.abspath(__file__))
 
 
@@ -2118,7 +2119,19 @@ class MainWindow(_QMainWindow):
             color_text = self.ui.color_cmb.currentText()
             color = getattr(self, color_text)
             addstatistics = self.ui.addstatistics_chb.isChecked()
+            ymult_str = self.ui.ymult_le.text()
+            yoffset_str = self.ui.yoffset_le.text()
             yvalues_text = self.ui.yvalues_cmb.currentText()
+            
+            if len(ymult_str) == 0:
+                ymult = 1
+            else:
+                ymult = float(ymult_str)
+
+            if len(yoffset_str) == 0:
+                yoffset = 0
+            else:
+                yoffset = float(yoffset_str)
 
             yvalues = []
             if yvalues_text in self.columns_names:
@@ -2131,6 +2144,7 @@ class MainWindow(_QMainWindow):
                     yvalues.append(getattr(d, yvalues_text))
 
             xvalues = [i for i in range(len(self.data))]
+            yvalues = _np.array(yvalues)*ymult + yoffset
 
             ax.clear()
             ax.set_xticks(xvalues)
