@@ -65,7 +65,7 @@ _figure_width = 300
 _report_figsize = [685, 480]
 
 # _default_dir = _os.path.expanduser('~')
-_default_dir = 'C:\\Arq\\Work_At_LNLS\\eclipse-workspace\\rotating-coil-software_lnls477\\Rotating Coil v3'
+_default_dir = 'C:\\Arq\\Work_At_LNLS\\eclipse-workspace\\rotating-coil-software_lnls477\\rotating_coil'
 _basepath = _os.path.dirname(_os.path.abspath(__file__))
 
 
@@ -386,6 +386,7 @@ class MainWindow(_QMainWindow):
             self.ui.le_database_filename.setText(self.database)
             self.database_tab.clearDatabase()
             self.database_tab.loadDatabase(database_filename=self.database)
+            self.database_tab.scrollDownTables()
 
             self.blockSignals(False)
             _QApplication.restoreOverrideCursor()
