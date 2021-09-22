@@ -1392,6 +1392,17 @@ class MainWindow(_QMainWindow):
         if figsize is None:
             figsize = self.figsize
 
+        offsetx_str = self.ui.le_skew_intfield_offset.text()
+        offsety_str = self.ui.le_normal_intfield_offset.text()
+
+        offsetx = 0
+        offsety = 0
+        if len(offsetx_str) != 0:
+            offsetx = float(offsetx_str)
+
+        if len(offsety_str) != 0:
+            offsety = float(offsety_str)
+
         self.blockSignals(True)
         _QApplication.setOverrideCursor(_Qt.WaitCursor)
 
@@ -1442,8 +1453,8 @@ class MainWindow(_QMainWindow):
                 ibx, iby = self.data[i].calc_integrated_field(xpos)
                 integrated_field_x.append(ibx)
                 integrated_field_y.append(iby)
-            integrated_field_x = _np.array(integrated_field_x)*1e6
-            integrated_field_y = _np.array(integrated_field_y)*1e6
+            integrated_field_x = _np.array(integrated_field_x)*1e6 + offsetx
+            integrated_field_y = _np.array(integrated_field_y)*1e6 + offsety
 
             integrated_field_x_df = _pd.DataFrame(
                 integrated_field_x.T, index=index, columns=columns)

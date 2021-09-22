@@ -79,8 +79,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>694</width>
-             <height>316</height>
+             <width>1248</width>
+             <height>680</height>
             </rect>
            </property>
            <attribute name="label">
@@ -2046,6 +2046,12 @@
        <layout class="QGridLayout" name="gridLayout_20">
         <item row="0" column="0">
          <widget class="QGroupBox" name="group_box_13">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="font">
            <font>
             <pointsize>11</pointsize>
@@ -2057,12 +2063,6 @@
            <string>Normalized Residual Multipoles</string>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <property name="leftMargin">
-            <number>30</number>
-           </property>
-           <property name="rightMargin">
-            <number>30</number>
-           </property>
            <item>
             <layout class="QGridLayout" name="gridLayout_6">
              <item row="1" column="0">
@@ -2116,6 +2116,12 @@
              </item>
              <item row="2" column="5">
               <widget class="QDoubleSpinBox" name="ds_range_step">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>100</width>
@@ -2274,6 +2280,12 @@
              </item>
              <item row="0" column="1" colspan="5">
               <widget class="QWidget" name="cb_files_wg" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="font">
                 <font>
                  <weight>50</weight>
@@ -2285,7 +2297,7 @@
             </layout>
            </item>
            <item>
-            <spacer name="horizontalSpacer_10">
+            <spacer name="horizontalSpacer_22">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -2318,8 +2330,8 @@
                </property>
                <property name="font">
                 <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                 </font>
                </property>
                <property name="text">
@@ -2343,8 +2355,8 @@
                </property>
                <property name="font">
                 <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                 </font>
                </property>
                <property name="text">
@@ -2408,6 +2420,97 @@
                  <width>40</width>
                  <height>20</height>
                 </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_10">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout_31">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Normal:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="le_normal_intfield_offset">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Skew:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="le_skew_intfield_offset">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" colspan="2">
+              <widget class="QLabel" name="label_11">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Integrated Field Offset[G.cm]</string>
                </property>
               </widget>
              </item>
